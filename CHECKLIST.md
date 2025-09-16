@@ -32,7 +32,7 @@ Legend:
 
 ## 3. Type Definitions
 - [x] Implement `src/types/core.ts`
-- [ ] Implement `src/types/git.ts` (basic Git-related types if needed)
+- [x] Implement `src/types/git.ts` (basic Git-related types if needed)
 - [ ] Export all domain types from barrel (opt)
 
 ## 4. Context & CLI

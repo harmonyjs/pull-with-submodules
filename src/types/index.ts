@@ -18,4 +18,5 @@
  */
 
 // Public domain type exports
-export * from './core.js';
+export type * from './core.js';
+export type * from './git.js';
