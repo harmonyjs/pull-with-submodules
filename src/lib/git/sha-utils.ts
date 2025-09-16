@@ -22,7 +22,10 @@ const MAX_SHA_LENGTH = 40;
  * Regular expression for validating Git SHA format.
  * Accepts both full (40 char) and abbreviated (7-40 char) SHA hashes.
  */
-const SHA_REGEX = new RegExp(`^[a-f0-9]{${MIN_SHA_LENGTH},${MAX_SHA_LENGTH}}$`, "i");
+const SHA_REGEX = new RegExp(
+  `^[a-f0-9]{${MIN_SHA_LENGTH},${MAX_SHA_LENGTH}}$`,
+  "i",
+);
 
 /**
  * Validates if a string represents a valid Git SHA format.
@@ -75,7 +78,7 @@ export function asGitSha(sha: string): GitSha {
     throw new GitOperationError(`Invalid Git SHA format: ${sha}`, {
       details: {
         sha,
-        expectedFormat: `${MIN_SHA_LENGTH}-${MAX_SHA_LENGTH} hexadecimal characters`
+        expectedFormat: `${MIN_SHA_LENGTH}-${MAX_SHA_LENGTH} hexadecimal characters`,
       },
       suggestions: [
         "Ensure SHA is a valid hexadecimal hash",
