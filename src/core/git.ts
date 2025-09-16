@@ -199,7 +199,11 @@ class SimpleGitOperations implements GitOperations {
       const status = await git.status();
       const branchName = status.current;
 
-      if (branchName === null || branchName === undefined || branchName === "") {
+      if (
+        branchName === null ||
+        branchName === undefined ||
+        branchName === ""
+      ) {
         throw new GitOperationError("Cannot determine current branch", {
           suggestions: [
             "Check if repository is in detached HEAD state",
