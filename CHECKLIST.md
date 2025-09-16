@@ -25,8 +25,8 @@ Legend:
 - [x] Create `src/` root
 - [x] Create `src/types/`
 - [x] Create `src/core/`
-- [ ] Create `src/lib/`
-- [ ] Create `src/ui/`
+- [x] Create `src/lib/`
+- [x] Create `src/ui/`
 - [x] Add placeholder `src/index.ts`
 - [ ] Create `bin/` entry script linking to dist (after build) (post-build)
 
