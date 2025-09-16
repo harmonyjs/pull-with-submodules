@@ -156,7 +156,7 @@ describe("sequential", () => {
   it("should throw for undefined operation", async () => {
     const operations: Array<() => Promise<string>> = [
       async () => "result1",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       undefined as any,
       async () => "result3",
     ];

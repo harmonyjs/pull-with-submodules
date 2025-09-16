@@ -7,9 +7,9 @@ import { strictEqual, throws, ok } from "node:assert";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+ 
 const __filename = fileURLToPath(import.meta.url);
-// eslint-disable-next-line @typescript-eslint/naming-convention
+ 
 const __dirname = dirname(__filename);
 import { fileExists, isDirectory, resolveAbsolutePath } from "./core.js";
 
