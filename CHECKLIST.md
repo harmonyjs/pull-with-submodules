@@ -19,7 +19,7 @@ Legend:
 - [x] Add `tsconfig.json` with strict settings
 - [x] Add `eslint.config.mjs` baseline
 - [x] Add `.gitignore`
-- [ ] Add `.npmignore` (ensure dist & types published as needed)
+ - [x] Add `.npmignore` (covered by package.json "files" whitelist; explicit file not needed)
 
 ## 2. Directory Structure
 - [x] Create `src/` root
