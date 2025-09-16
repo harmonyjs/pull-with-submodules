@@ -54,10 +54,10 @@ Legend:
 
 ## 6. Lib Utilities
 - [x] Implement `src/lib/errors.ts` (`GitOperationError`, `NetworkError`, etc.) (relocated to `src/errors/`)
-- [ ] Implement `src/lib/async.ts` (retry, parallel runner with `p-limit`)
-- [ ] Implement `src/lib/fs.ts` (fs helpers: read .gitmodules, path resolution)
-- [ ] Implement `src/lib/git-utils.ts` (ancestor checks via raw git)
-- [x] Tests: `errors.spec.ts` (pending: `async.spec.ts`, `fs.spec.ts`, `git-utils.spec.ts`)
+- [x] Implement `src/lib/async.ts` (retry, parallel runner with `p-limit`)
+- [x] Implement `src/lib/fs.ts` (fs helpers: read .gitmodules, path resolution)
+- [x] Implement `src/lib/git-utils.ts` (ancestor checks via raw git)
+- [x] Tests: `errors.spec.ts`, `async.spec.ts`, `fs.spec.ts`, `git-utils.spec.ts`
 
 ## 7. Core Logic
 ### 7.1 Git Operations
