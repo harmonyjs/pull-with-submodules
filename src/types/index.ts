@@ -17,6 +17,5 @@
  * Currently intentionally empty – populated as types are implemented.
  */
 
-// Export object kept empty intentionally to form a valid ES module without
-// introducing dead exports. Future additions will be appended here.
-export {};
+// Public domain type exports
+export * from './core.js';

@@ -31,7 +31,7 @@ Legend:
 - [ ] Create `bin/` entry script linking to dist (after build) (post-build)
 
 ## 3. Type Definitions
-- [ ] Implement `src/types/core.ts`
+- [x] Implement `src/types/core.ts`
 - [ ] Implement `src/types/git.ts` (basic Git-related types if needed)
 - [ ] Export all domain types from barrel (opt)
 
