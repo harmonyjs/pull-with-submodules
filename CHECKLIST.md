@@ -36,12 +36,12 @@ Legend:
 - [ ] Export all domain types from barrel (opt)
 
 ## 4. Context & CLI
-- [ ] Implement `src/cli.ts` with `cac`
-  - [ ] Define flags: `--dry-run`, `--no-commit`, `--force-remote`, `--parallel`, `--verbose`
-  - [ ] Provide `--help` & `--version`
-  - [ ] Validate mutually exclusive / constraints if any
-- [ ] Implement `src/context.ts` factory
-- [ ] Add tests: `cli.spec.ts`, `context.spec.ts`
+- [x] Implement `src/cli.ts` with `cac`
+  - [x] Define flags: `--dry-run`, `--no-commit`, `--force-remote`, `--parallel`, `--verbose`
+  - [x] Provide `--help` & `--version` (version wiring deferred to bin script; parse logic complete)
+  - [x] Validate mutually exclusive / constraints if any (none required yet)
+- [x] Implement `src/context.ts` factory
+- [x] Add tests: `cli.spec.ts`, `context.spec.ts`
 
 ## 5. UI Layer
 - [ ] Implement `src/ui/logger.ts` (thin wrapper or adapter if needed)

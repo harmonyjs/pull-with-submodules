@@ -76,9 +76,7 @@
     "node_modules",
     "dist",
     "coverage",
-    "tests",
-    "**/*.test.ts",
-    "**/*.spec.ts"
+    "tests"
   ],
   "ts-node": {
     "esm": true,
