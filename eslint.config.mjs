@@ -240,7 +240,8 @@ export default defineConfig([
     },
     rules: {
       'no-restricted-properties': 'off',
-      'max-lines-per-function': 'off',
+      'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
       'max-params': 'off',
       'no-console': 'off',
       '@typescript-eslint/no-magic-numbers': 'off',
@@ -253,6 +254,10 @@ export default defineConfig([
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
     },
   },
 ]);
