@@ -24,7 +24,7 @@ Legend:
 ## 2. Directory Structure
 - [x] Create `src/` root
 - [x] Create `src/types/`
-- [ ] Create `src/core/`
+- [x] Create `src/core/`
 - [ ] Create `src/lib/`
 - [ ] Create `src/ui/`
 - [x] Add placeholder `src/index.ts`

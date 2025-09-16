@@ -1,0 +1,17 @@
+/**
+ * @fileoverview Core layer barrel file.
+ *
+ * Aggregates and re-exports core domain logic for the pull-with-submodules tool.
+ * This layer will contain pure, stateless business logic modules responsible for:
+ *  - Git primitives (git.ts)
+ *  - Submodule processing (submodules.ts)
+ *  - Commit selection strategies (strategies.ts)
+ *  - Sibling repository discovery (siblings.ts)
+ *  - Gitlink operations (gitlink.ts)
+ * Usage:
+ *  Import core functionality via this barrel instead of deep paths to keep
+ *  dependency boundaries clear and enable future internal refactors.
+ */
+
+// Intentionally empty for now – concrete modules will be added incrementally.
+export {};
