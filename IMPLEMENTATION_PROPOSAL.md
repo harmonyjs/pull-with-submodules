@@ -27,7 +27,7 @@
       - [Package Configuration](#package-configuration)
       - [TypeScript Configuration](#typescript-configuration)
     - [Module Specifications](#module-specifications)
-      - [Types Definition (types/core.d.ts)](#types-definition-typescoredts)
+      - [Types Definition (types/core.ts)](#types-definition-typescoredts)
       - [Context Factory (context.ts)](#context-factory-contextts)
       - [Core Git Operations (core/git.ts)](#core-git-operations-coregitts)
     - [Error Handling Strategy](#error-handling-strategy)
@@ -126,8 +126,8 @@
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Core Layer    │    │   Lib Layer     │    │   Types Layer   │
 │                 │    │                 │    │                 │
-│ • git.ts        │    │ • async.ts      │    │ • git.d.ts      │
-│ • submodules.ts │    │ • fs.ts         │    │ • core.d.ts     │
+│ • git.ts        │    │ • async.ts      │    │ • git.ts      │
+│ • submodules.ts │    │ • fs.ts         │    │ • core.ts     │
 │ • strategies.ts │    │ • errors.ts     │    │ • readonly      │
 │ • siblings.ts   │    │ • git-utils.ts  │    │   interfaces    │
 │ • gitlink.ts    │    │                 │    │                 │
@@ -438,7 +438,7 @@ See @tsconfig.json
 
 ### Module Specifications
 
-#### Types Definition (types/core.d.ts)
+#### Types Definition (types/core.ts)
 ```typescript
 export interface ExecutionContext {
   readonly dryRun: boolean;
@@ -820,8 +820,8 @@ pull-with-submodules/
 │   │   ├── formatters.ts           # Output formatting
 │   │   └── formatters.spec.ts      # Co-located test
 │   └── types/
-│       ├── git.d.ts                # Git-related types
-│       └── core.d.ts               # Core domain types
+│       ├── git.ts                # Git-related types
+│       └── core.ts               # Core domain types
 ├── .eslintrc.json
 ├── .prettierrc.json
 ├── .gitignore
