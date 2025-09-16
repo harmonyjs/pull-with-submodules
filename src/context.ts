@@ -7,9 +7,9 @@
  * easily fabricate contexts without invoking real CLI parsing or filesystem
  * discovery.
  */
-import { isAbsolute } from 'node:path';
-import type { ExecutionContext } from './types/core.js';
-import type { CliOptions } from './cli.js';
+import { isAbsolute } from "node:path";
+import type { ExecutionContext } from "./types/core.js";
+import type { CliOptions } from "./cli.js";
 
 /**
  * Creates an immutable execution context object.
@@ -23,9 +23,12 @@ import type { CliOptions } from './cli.js';
  * @example
  * const ctx = createContext(parseArgv(argv), '/abs/path');
  */
-export function createContext(options: CliOptions, repositoryRoot: string): ExecutionContext {
+export function createContext(
+  options: CliOptions,
+  repositoryRoot: string,
+): ExecutionContext {
   if (!isAbsolute(repositoryRoot)) {
-    throw new Error('repositoryRoot must be an absolute path');
+    throw new Error("repositoryRoot must be an absolute path");
   }
   const ctx: ExecutionContext = Object.freeze({
     dryRun: options.dryRun,

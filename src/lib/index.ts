@@ -8,6 +8,4 @@
  * Currently empty – concrete utility modules will be added incrementally.
  */
 
-// Placeholder export to satisfy ESM module semantics without introducing
-// unused symbol warnings once additional files appear.
 export {};

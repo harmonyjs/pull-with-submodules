@@ -50,7 +50,7 @@ export interface Submodule {
 }
 
 /** Source classification for a selected commit. */
-export type CommitSource = 'local' | 'remote';
+export type CommitSource = "local" | "remote";
 
 /**
  * Represents the decision made by the smart selection strategy regarding
@@ -67,7 +67,7 @@ export interface CommitSelection {
 }
 
 /** Processing outcome classification for a submodule. */
-export type SubmoduleProcessStatus = 'updated' | 'skipped' | 'failed';
+export type SubmoduleProcessStatus = "updated" | "skipped" | "failed";
 
 /**
  * Result of attempting to process (evaluate & update) a single submodule.

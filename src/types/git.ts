@@ -25,7 +25,7 @@
  * Safety: Branding is compile-time only; any string may still be cast – keep
  * construction localized to git result parsing utilities.
  */
-export type GitSha = string & { readonly Brand: 'GitSha' };
+export type GitSha = string & { readonly Brand: "GitSha" };
 
 /**
  * Narrow helper to brand a plain string as a `GitSha`.
@@ -35,7 +35,9 @@ export type GitSha = string & { readonly Brand: 'GitSha' };
  * @example
  * const head = asGitSha('6ffa2b31');
  */
-export function asGitSha(sha: string): GitSha { return sha as GitSha; /* safe: purely nominal branding */ }
+export function asGitSha(sha: string): GitSha {
+  return sha as GitSha; /* safe: purely nominal branding */
+}
 
 /**
  * Minimal representation of a Git commit required by orchestration and
@@ -102,7 +104,10 @@ export interface GitLinkUpdate {
  * ancestor of `descendant` (merge-base containment). Allows sync usage for
  * deterministic unit tests while production paths will typically be async.
  */
-export type AncestorCheckFn = (ancestor: GitSha, descendant: GitSha) => boolean | Promise<boolean>;
+export type AncestorCheckFn = (
+  ancestor: GitSha,
+  descendant: GitSha,
+) => boolean | Promise<boolean>;
 
 /**
  * Lightweight status of whether a working tree (repo or submodule) is clean.

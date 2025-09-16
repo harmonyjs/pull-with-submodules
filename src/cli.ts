@@ -7,7 +7,7 @@
  * design deliberately avoids executing parsing logic on import to keep the
  * module tree free of implicit global state and ease test isolation.
  */
-import { cac, type CAC } from 'cac';
+import { cac, type CAC } from "cac";
 
 /**
  * Parsed CLI option set consumed by the context factory. All flags are
@@ -45,14 +45,14 @@ const defaultOptions: CliOptions = Object.freeze({
  *
  * @param programName Executable / display name for help output.
  */
-export function buildCli(programName = 'pull-with-submodules'): CAC {
+export function buildCli(programName = "pull-with-submodules"): CAC {
   const cli = cac(programName);
   cli
-    .option('-d, --dry-run', 'Preview changes without applying them')
-    .option('-n, --no-commit', 'Skip auto-commit of gitlink updates')
-    .option('-r, --force-remote', 'Always prefer remote over local siblings')
-    .option('-p, --parallel', 'Process submodules in parallel (max 4)')
-    .option('-v, --verbose', 'Show detailed debug output');
+    .option("-d, --dry-run", "Preview changes without applying them")
+    .option("-n, --no-commit", "Skip auto-commit of gitlink updates")
+    .option("-r, --force-remote", "Always prefer remote over local siblings")
+    .option("-p, --parallel", "Process submodules in parallel (max 4)")
+    .option("-v, --verbose", "Show detailed debug output");
   return cli;
 }
 
@@ -73,7 +73,7 @@ export function parseArgv(argv: readonly string[]): CliOptions {
   // `cac` expects a full `process.argv`-like vector (node + script + args)
   // when a custom argv array is supplied. We prepend synthetic placeholders
   // so that user-provided flags are preserved intact.
-  const SYNTHETIC_ARGV_PREFIX = ['node', 'cli'] as const; // stable synthetic argv head
+  const SYNTHETIC_ARGV_PREFIX = ["node", "cli"] as const; // stable synthetic argv head
   const parsed = cli.parse([...SYNTHETIC_ARGV_PREFIX, ...argv]);
   const flags = parsed.options as Record<string, unknown>;
 
@@ -81,11 +81,11 @@ export function parseArgv(argv: readonly string[]): CliOptions {
   // Manual detection for the negated flag form to avoid library nuances with '--no-xxx'.
   const raw = new Set(argv);
   const result: MutableCliOptions = {
-    dryRun: Boolean(flags['dryRun']),
-    noCommit: raw.has('--no-commit') || raw.has('-n'),
-    forceRemote: Boolean(flags['forceRemote']),
-    parallel: Boolean(flags['parallel']),
-    verbose: Boolean(flags['verbose']),
+    dryRun: Boolean(flags["dryRun"]),
+    noCommit: raw.has("--no-commit") || raw.has("-n"),
+    forceRemote: Boolean(flags["forceRemote"]),
+    parallel: Boolean(flags["parallel"]),
+    verbose: Boolean(flags["verbose"]),
   };
   return Object.freeze({ ...defaultOptions, ...result });
 }
