@@ -23,7 +23,7 @@ Legend:
 
 ## 2. Directory Structure
 - [x] Create `src/` root
-- [ ] Create `src/types/`
+- [x] Create `src/types/`
 - [ ] Create `src/core/`
 - [ ] Create `src/lib/`
 - [ ] Create `src/ui/`
@@ -31,8 +31,8 @@ Legend:
 - [ ] Create `bin/` entry script linking to dist (after build) (post-build)
 
 ## 3. Type Definitions
-- [ ] Implement `src/types/core.d.ts`
-- [ ] Implement `src/types/git.d.ts` (basic Git-related types if needed)
+- [ ] Implement `src/types/core.ts`
+- [ ] Implement `src/types/git.ts` (basic Git-related types if needed)
 - [ ] Export all domain types from barrel (opt)
 
 ## 4. Context & CLI
