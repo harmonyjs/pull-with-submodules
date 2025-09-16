@@ -61,11 +61,11 @@ Legend:
 
 ## 7. Core Logic
 ### 7.1 Git Operations
-- [ ] Implement `core/git.ts`
-  - [ ] `createGit(baseDir)` factory
-  - [ ] `pullWithRebase(repoPath)` with conflict handling
-  - [ ] Expose minimal primitives (fetch, status wrappers if needed)
-  - [ ] Tests: success, rebase conflict scenario
+- [x] Implement `core/git.ts`
+  - [x] `createGit(baseDir)` factory
+  - [x] `pullWithRebase(repoPath)` with conflict handling
+  - [x] Expose minimal primitives (fetch, status wrappers if needed)
+  - [x] Tests: success, rebase conflict scenario
 
 ### 7.2 Submodules
 - [ ] Implement `core/submodules.ts`

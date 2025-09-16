@@ -13,5 +13,5 @@
  *  dependency boundaries clear and enable future internal refactors.
  */
 
-// Intentionally empty for now – concrete modules will be added incrementally.
-export {};
+// Git operations module
+export { createGit, type GitOperations } from "./git.js";

@@ -23,3 +23,5 @@ export {
   type SubmoduleEntry,
   type GitmodulesParseConfig,
 } from "./gitmodules.js";
+
+export { isValidSha, isGitSha, asGitSha } from "./sha-utils.js";
