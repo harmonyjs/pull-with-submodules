@@ -3,8 +3,4 @@
  */
 export { GitOperationError } from "./git-operation.js";
 export { NetworkError } from "./network.js";
-export {
-  isAppError,
-  type AppError,
-  type ErrorCode,
-} from "./guards.js";
+export { isAppError, type AppError, type ErrorCode } from "./guards.js";

@@ -35,8 +35,14 @@ void test("NetworkError: with all properties", () => {
   assert.equal(err.name, "NetworkError");
   assert.equal(err.message, "Connection failed");
   assert.equal(err.code, "NETWORK");
-  assert.deepEqual(err.suggestions, ["Check internet connection", "Verify repository URL"]);
-  assert.deepEqual(err.details, { url: "https://github.com/user/repo.git", timeout: 30000 });
+  assert.deepEqual(err.suggestions, [
+    "Check internet connection",
+    "Verify repository URL",
+  ]);
+  assert.deepEqual(err.details, {
+    url: "https://github.com/user/repo.git",
+    timeout: 30000,
+  });
   assert.ok(Object.isFrozen(err));
 
   const json = err.toJSON();

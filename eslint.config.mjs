@@ -45,6 +45,7 @@ const JS_FILES = ['**/*.js', '**/*.cjs'];
 const MJS_FILES = ['**/*.mjs'];
 const TS_SRC_FILES = ['src/**/*.ts'];
 const LOGGER_FILE = ['src/logger/index.ts'];
+const UI_MODULES = ['src/ui/logger.ts', 'src/ui/formatters.ts'];
 const TEST_AND_TOOL_FILES = [
   '**/*.test.ts',
   '**/*.spec.ts'
@@ -217,6 +218,15 @@ export default defineConfig([
     },
   },
 
+  // Allow console in logger and magic numbers in formatters (for time calculations)
+  {
+    files: UI_MODULES,
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-magic-numbers': 'off',
+    },
+  },
+
   // Tests/Tools: ergonomic defaults (console allowed, certain strict TS rules relaxed)
   {
     files: TEST_AND_TOOL_FILES,
@@ -231,8 +241,13 @@ export default defineConfig([
     rules: {
       'no-restricted-properties': 'off',
       'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-console': 'off',
       '@typescript-eslint/no-magic-numbers': 'off',
       '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
       'no-underscore-dangle': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

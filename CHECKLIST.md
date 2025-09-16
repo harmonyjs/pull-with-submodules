@@ -44,13 +44,13 @@ Legend:
 - [x] Add tests: `cli.spec.ts`, `context.spec.ts`
 
 ## 5. UI Layer
-- [ ] Implement `src/ui/logger.ts` (thin wrapper or adapter if needed)
-- [ ] Implement `src/ui/prompts.ts` using `@clack/prompts`
-  - [ ] Intro/outro helpers
-  - [ ] Cancellation handling
-- [ ] Implement `src/ui/formatters.ts` (summary tables, durations)
-- [ ] Add tests for UI pure functions (`logger.spec.ts`, `formatters.spec.ts`)
-- [ ] (opt) Light snapshot style tests for prompt wrappers (mocked)
+- [x] Implement `src/ui/logger.ts` (thin wrapper or adapter if needed)
+- [x] Implement `src/ui/prompts.ts` using `@clack/prompts`
+  - [x] Intro/outro helpers
+  - [x] Cancellation handling
+- [x] Implement `src/ui/formatters.ts` (summary tables, durations)
+- [x] Add tests for UI pure functions (`logger.spec.ts`, `formatters.spec.ts`)
+- [x] Light snapshot style tests for prompt wrappers (mocked)
 
 ## 6. Lib Utilities
 - [x] Implement `src/lib/errors.ts` (`GitOperationError`, `NetworkError`, etc.) (relocated to `src/errors/`)
