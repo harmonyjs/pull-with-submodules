@@ -68,12 +68,12 @@ Legend:
   - [x] Tests: success, rebase conflict scenario
 
 ### 7.2 Submodules
-- [ ] Implement `core/submodules.ts`
-  - [ ] Parse `.gitmodules`
-  - [ ] Determine branch resolution order
-  - [ ] Sync & update initialization
-  - [ ] Prepare update plan objects
-  - [ ] Tests: parsing & branch resolution logic
+- [x] Implement `core/submodules.ts`
+  - [x] Parse `.gitmodules`
+  - [x] Determine branch resolution order
+  - [x] Sync & update initialization
+  - [x] Prepare update plan objects
+  - [x] Tests: parsing & branch resolution logic
 
 ### 7.3 Strategies
 - [ ] Implement `core/strategies.ts`

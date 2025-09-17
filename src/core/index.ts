@@ -15,3 +15,15 @@
 
 // Git operations module
 export { createGit, type GitOperations } from "./git.js";
+
+// Submodule processing module
+export {
+  createSubmoduleProcessor,
+  parseSubmodules,
+  prepareUpdatePlans,
+} from "./submodules/index.js";
+export type {
+  SubmoduleProcessor,
+  SubmoduleUpdatePlan,
+  BranchResolution,
+} from "./submodules/index.js";
