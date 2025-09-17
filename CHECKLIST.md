@@ -76,10 +76,10 @@ Legend:
   - [x] Tests: parsing & branch resolution logic
 
 ### 7.3 Strategies
-- [ ] Implement `core/strategies.ts`
-  - [ ] `selectCommitSmart(localSha, remoteSha, forceRemote)`
-  - [ ] Accept injected `isAncestor` function (for testability) (opt)
-  - [ ] Tests covering all decision branches
+- [x] Implement `core/strategies.ts`
+  - [x] `selectCommitSmart(localSha, remoteSha, forceRemote)`
+  - [x] Accept injected `isAncestor` function (for testability) (opt)
+  - [x] Tests covering all decision branches
 
 ### 7.4 Siblings Discovery
 - [ ] Implement `core/siblings.ts`

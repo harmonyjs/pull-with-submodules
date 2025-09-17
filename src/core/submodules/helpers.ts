@@ -53,3 +53,13 @@ export function createCurrentShaGetter(
 export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+/**
+ * Checks if a value is a valid SHA string.
+ *
+ * @param value - Value to check
+ * @returns true if value is non-null, non-undefined, and non-empty string
+ */
+export function isValidSha(value: string | null | undefined): value is string {
+  return value !== null && value !== undefined && value !== "";
+}

@@ -1,9 +1,5 @@
 /**
  * @fileoverview Git operations module for pull-with-submodules.
- *
- * Wraps simple-git with type-safe interfaces and error handling specific to the
- * pull-with-submodules workflow. All operations respect dry-run mode and provide
- * detailed error context for troubleshooting.
  */
 
 import { simpleGit, type SimpleGit } from "simple-git";

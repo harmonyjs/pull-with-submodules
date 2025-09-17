@@ -1,15 +1,5 @@
 /**
  * @fileoverview Pure formatting functions for CLI output presentation.
- *
- * Provides human-readable formatters for durations, git hashes, file paths,
- * and summary tables. All functions are pure (no side effects) and designed
- * for consistent visual presentation across the application.
- *
- * Key features:
- * - Human-readable duration formatting (ms → "1.2s", "3m 15s")
- * - Consistent git hash display (full or abbreviated)
- * - Highlighted submodule paths for better readability
- * - Tabular summary formatting with proper alignment
  */
 
 import type { UpdateResult } from "../types/core.js";

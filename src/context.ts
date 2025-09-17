@@ -1,11 +1,5 @@
 /**
  * @fileoverview Execution context factory for `pull-with-submodules`.
- *
- * Transforms parsed CLI flags plus an externally determined repository root
- * into a strongly typed immutable `ExecutionContext`. This isolates mapping
- * logic so that downstream modules receive a stable shape and tests can
- * easily fabricate contexts without invoking real CLI parsing or filesystem
- * discovery.
  */
 import { isAbsolute } from "node:path";
 import type { ExecutionContext } from "./types/core.js";

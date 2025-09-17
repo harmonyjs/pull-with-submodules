@@ -1,17 +1,5 @@
 /**
  * @fileoverview Core domain type definitions for `pull-with-submodules`.
- *
- * These interfaces model the primary immutable data structures passed between
- * orchestration, core, lib, and UI layers. They deliberately exclude any
- * implementation details (no functions / classes) to keep the domain surface
- * stable and easily serializable for logging or future reporting features.
- *
- * Design constraints:
- * - All properties are readonly to enforce immutability at compile time.
- * - No speculative fields: only those required by the implementation proposal.
- * - Narrow string unions are used instead of loose `string` where semantics
- *   are well-defined (e.g. submodule processing status, commit source).
- * - Purely structural – no runtime side effects.
  */
 
 /**

@@ -27,3 +27,20 @@ export type {
   SubmoduleUpdatePlan,
   BranchResolution,
 } from "./submodules/index.js";
+
+// Commit selection strategies module
+export {
+  selectCommitSmart,
+} from "./submodules/strategies.js";
+export type {
+  CommitSelectionOptions,
+} from "./submodules/strategies.js";
+
+// Ancestry checking utilities
+export {
+  createGitAncestryChecker,
+  createMockAncestryChecker,
+} from "./submodules/ancestry-checker.js";
+export type {
+  AncestryChecker,
+} from "./submodules/ancestry-checker.js";
