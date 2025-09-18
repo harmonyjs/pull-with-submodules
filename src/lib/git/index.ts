@@ -16,6 +16,14 @@ export {
 } from "./core.js";
 
 export {
+  pullWithRebase,
+  fetchRemotes,
+  getCommitSha,
+  getWorkingTreeStatus,
+  type PullResult,
+} from "./operations.js";
+
+export {
   parseGitmodules,
   readGitmodules,
   type SubmoduleEntry,
@@ -28,8 +36,6 @@ export { extractRepoName } from "./url-parser.js";
 
 export { isGitRepository } from "./repository-validator.js";
 
-export { getCommitSha } from "./commit-utils.js";
 
 export { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";
 
-export { type GitOperations } from "#types/git.js";

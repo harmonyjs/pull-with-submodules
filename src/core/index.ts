@@ -13,8 +13,6 @@
  *  dependency boundaries clear and enable future internal refactors.
  */
 
-// Git operations module
-export { createGit } from "./git.js";
 
 // Submodule processing module
 export {

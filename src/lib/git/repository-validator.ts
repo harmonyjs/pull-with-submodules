@@ -8,17 +8,16 @@
 import { simpleGit } from "simple-git";
 import { isDirectory } from "#lib/fs/index.js";
 import type { RepositoryCache } from "./cache.js";
-import type { GitOperations } from "#types/git.js";
 
 /**
  * Check if a directory is a valid Git repository using git commands.
  *
  * Uses `git rev-parse --git-dir` for proper validation instead of just
- * checking for .git directory existence. Supports caching for performance.
+ * checking for .git directory existence. This approach works for all
+ * repository types including bare repositories. Supports caching for performance.
  *
  * @param repoPath - Absolute path to check
  * @param cache - Optional cache instance for validation results
- * @param gitOps - Optional GitOperations instance for better testability
  * @returns True if the directory contains a valid Git repository
  * @example
  * ```ts
@@ -29,7 +28,6 @@ import type { GitOperations } from "#types/git.js";
 export async function isGitRepository(
   repoPath: string,
   cache?: RepositoryCache,
-  gitOps?: GitOperations,
 ): Promise<boolean> {
   const cached = cache?.get(repoPath);
   if (cached !== undefined) {
@@ -41,20 +39,11 @@ export async function isGitRepository(
   // Check if the path exists and is a directory first
   if (await isDirectory(repoPath)) {
     try {
-      if (gitOps) {
-        // Use GitOperations for better testability
-        try {
-          await gitOps.getCurrentBranch(repoPath);
-          isValid = true;
-        } catch {
-          isValid = false;
-        }
-      } else {
-        // Use git rev-parse --git-dir for proper validation
-        const git = simpleGit(repoPath);
-        await git.raw(["rev-parse", "--git-dir"]);
-        isValid = true;
-      }
+      // Use git rev-parse --git-dir for proper validation
+      // This works for all repository types including bare repos
+      const git = simpleGit(repoPath);
+      await git.raw(["rev-parse", "--git-dir"]);
+      isValid = true;
     } catch {
       // Any git error means it's not a valid repository
       isValid = false;

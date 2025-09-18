@@ -1,6 +1,5 @@
 import { strict as assert } from "node:assert";
 import { test, mock } from "node:test";
-import type { GitOperations } from "#lib/git/index.js";
 import {
   findSiblingRepository,
   type SiblingDiscoveryOptions,
@@ -9,19 +8,6 @@ import { extractRepoName } from "#lib/git/url-parser.js";
 import { isGitRepository } from "#lib/git/repository-validator.js";
 import { getCommitSha } from "#lib/git/commit-utils.js";
 import { InMemoryRepositoryCache } from "#lib/git/cache.js";
-import { asGitSha } from "#lib/git/sha-utils.js";
-
-function createMockGitOps(
-  getCommitShaMock?: (repoPath: string, ref: string) => Promise<any>,
-): GitOperations {
-  return {
-    pullWithRebase: mock.fn(),
-    fetch: mock.fn(),
-    getStatus: mock.fn(),
-    getCurrentBranch: mock.fn(),
-    getCommitSha: getCommitShaMock || mock.fn(),
-  } as any;
-}
 
 // URL parser tests - verify integration
 test("extractRepoName integration", () => {
@@ -37,14 +23,8 @@ test("isGitRepository integration", async () => {
 });
 
 test("getCommitSha integration", async () => {
-  const expectedSha = asGitSha("abc123def456");
-  const mockGetCommitSha = mock.fn(() => Promise.resolve(expectedSha));
-  const gitOps = createMockGitOps(mockGetCommitSha);
-
-  const result = await getCommitSha("/test/repo", "main", gitOps);
-
-  assert.equal(result, expectedSha);
-  assert.equal(mockGetCommitSha.mock.calls.length, 1);
+  const result = await getCommitSha("/definitely/nonexistent/repo", "main");
+  assert.equal(result, null);
 });
 
 test("InMemoryRepositoryCache integration", () => {
@@ -59,14 +39,13 @@ test("InMemoryRepositoryCache integration", () => {
 });
 
 test("findSiblingRepository - returns null for nonexistent siblings", async () => {
-  const gitOps = createMockGitOps();
   const cache = new InMemoryRepositoryCache();
 
   const options: SiblingDiscoveryOptions = {
     submodulePath: "/definitely/nonexistent/workspace/main-repo/libs/my-lib",
     remoteUrl: "https://github.com/user/shared-utils.git",
     branch: "main",
-    gitOps,
+    gitConfig: { dryRun: false, verbose: false },
     cache,
   };
 
@@ -77,9 +56,6 @@ test("findSiblingRepository - returns null for nonexistent siblings", async () =
 });
 
 test("findSiblingRepository - uses cache and logger when provided", async () => {
-  const expectedSha = asGitSha("abc123def456");
-  const mockGetCommitSha = mock.fn(() => Promise.resolve(expectedSha));
-  const gitOps = createMockGitOps(mockGetCommitSha);
   const cache = new InMemoryRepositoryCache();
 
   // Mock logger
@@ -94,7 +70,7 @@ test("findSiblingRepository - uses cache and logger when provided", async () => 
     submodulePath: "/workspace/main-repo/libs/shared",
     remoteUrl: "https://github.com/user/shared-utils.git",
     branch: "main",
-    gitOps,
+    gitConfig: { dryRun: false, verbose: false },
     cache,
     logger: mockLogger,
   };
@@ -140,11 +116,6 @@ test("findSiblingRepository - path generation logic", () => {
 });
 
 test("findSiblingRepository - successful discovery scenario", async () => {
-  // Mock successful case where sibling repository exists
-  const expectedSha = asGitSha("abc123def456");
-  const mockGetCommitSha = mock.fn(() => Promise.resolve(expectedSha));
-  const gitOps = createMockGitOps(mockGetCommitSha);
-
   // Mock cache that reports repository as valid
   const cache = new InMemoryRepositoryCache();
   // Pre-populate cache to simulate found repository
@@ -161,7 +132,7 @@ test("findSiblingRepository - successful discovery scenario", async () => {
     submodulePath: "/workspace/main/libs/shared",
     remoteUrl: "https://github.com/user/shared-utils.git",
     branch: "main",
-    gitOps,
+    gitConfig: { dryRun: false, verbose: false },
     cache,
     logger: mockLogger,
   };
@@ -175,7 +146,6 @@ test("findSiblingRepository - successful discovery scenario", async () => {
 });
 
 test("findSiblingRepository - cache efficiency", async () => {
-  const gitOps = createMockGitOps();
   const cache = new InMemoryRepositoryCache();
   const mockLogger = {
     debug: mock.fn(),
@@ -188,7 +158,7 @@ test("findSiblingRepository - cache efficiency", async () => {
     submodulePath: "/workspace/main/libs/shared",
     remoteUrl: "https://github.com/user/shared-utils.git",
     branch: "main",
-    gitOps,
+    gitConfig: { dryRun: false, verbose: false },
     cache,
     logger: mockLogger,
   };
@@ -212,7 +182,6 @@ test("findSiblingRepository - cache efficiency", async () => {
 });
 
 test("findSiblingRepository - handles different URL formats", async () => {
-  const gitOps = createMockGitOps();
   const cache = new InMemoryRepositoryCache();
 
   const testCases = [
@@ -235,7 +204,7 @@ test("findSiblingRepository - handles different URL formats", async () => {
       submodulePath: "/workspace/main/libs/test",
       remoteUrl: testCase.url,
       branch: "main",
-      gitOps,
+      gitConfig: { dryRun: false, verbose: false },
       cache,
     };
 

@@ -6,6 +6,7 @@
  */
 
 import { simpleGit, type SimpleGit } from "simple-git";
+import type { Logger } from "#ui/logger.js";
 
 /**
  * Result of a git ancestry check operation.
@@ -25,6 +26,12 @@ export interface GitOperationConfig {
   readonly cwd?: string;
   /** Timeout in milliseconds for git operations */
   readonly timeout?: number;
+  /** Enable dry-run mode (log operations without executing) */
+  readonly dryRun?: boolean;
+  /** Enable verbose logging */
+  readonly verbose?: boolean;
+  /** Optional logger instance for operation logging */
+  readonly logger?: Logger;
 }
 
 const DEFAULT_GIT_TIMEOUT = 30_000;
@@ -220,3 +227,4 @@ export async function getMergeBase(
     );
   }
 }
+

@@ -22,7 +22,8 @@ import { extractRepoName } from "#lib/git/url-parser.js";
 import { isGitRepository } from "#lib/git/repository-validator.js";
 import { getCommitSha } from "#lib/git/commit-utils.js";
 import type { RepositoryCache } from "#lib/git/cache.js";
-import type { GitOperations, GitSha } from "#types/git.js";
+import type { GitSha } from "#types/git.js";
+import type { GitOperationConfig } from "#lib/git/core.js";
 import type { Logger } from "#ui/logger.js";
 
 /**
@@ -40,7 +41,7 @@ export interface SiblingRepository {
 }
 
 /**
- * Options for sibling repository discovery with dependency injection.
+ * Options for sibling repository discovery.
  */
 export interface SiblingDiscoveryOptions {
   /** Submodule repository path (containing .git/gitmodules). */
@@ -49,8 +50,8 @@ export interface SiblingDiscoveryOptions {
   readonly remoteUrl: string;
   /** Branch to resolve commit SHA for. */
   readonly branch: string;
-  /** Git operations instance for repository validation. */
-  readonly gitOps: GitOperations;
+  /** Git operation configuration (dry-run, verbose, etc.). */
+  readonly gitConfig?: GitOperationConfig;
   /** Optional cache for repository validation results. */
   readonly cache?: RepositoryCache;
   /** Optional logger for debug output. */
@@ -127,10 +128,10 @@ async function findValidCandidate(
 async function createSiblingResult(options: {
   candidate: { name: string; path: string };
   branch: string;
-  gitOps: GitOperations;
+  gitConfig?: GitOperationConfig;
   logger?: Logger;
 }): Promise<SiblingRepository> {
-  const { candidate, branch, gitOps, logger } = options;
+  const { candidate, branch, gitConfig, logger } = options;
 
   logger?.debug(
     `Found valid sibling repository: ${candidate.name} at ${candidate.path}`,
@@ -139,7 +140,7 @@ async function createSiblingResult(options: {
     `Resolving commit SHA for branch '${branch}' in ${candidate.path}`,
   );
 
-  const commitSha = await getCommitSha(candidate.path, branch, gitOps);
+  const commitSha = await getCommitSha(candidate.path, branch, gitConfig);
 
   if (commitSha) {
     logger?.debug(`Resolved ${branch} to ${commitSha} in ${candidate.name}`);
@@ -170,7 +171,7 @@ async function createSiblingResult(options: {
  *   submodulePath: '/workspace/main/libs/shared',
  *   remoteUrl: 'https://github.com/org/shared-utils.git',
  *   branch: 'main',
- *   gitOps: createGit(context),
+ *   gitConfig: { dryRun: false, verbose: true },
  *   cache,
  *   logger: createLogger(context)
  * });
@@ -179,7 +180,7 @@ async function createSiblingResult(options: {
 export async function findSiblingRepository(
   options: SiblingDiscoveryOptions,
 ): Promise<SiblingRepository | null> {
-  const { submodulePath, remoteUrl, branch, gitOps, cache, logger } = options;
+  const { submodulePath, remoteUrl, branch, gitConfig, cache, logger } = options;
 
   logger?.debug(
     `Starting sibling discovery for ${basename(submodulePath)} (${remoteUrl})`,
@@ -196,7 +197,7 @@ export async function findSiblingRepository(
   return createSiblingResult({
     candidate: validCandidate,
     branch,
-    gitOps,
+    ...(gitConfig && { gitConfig }),
     ...(logger && { logger }),
   });
 }
