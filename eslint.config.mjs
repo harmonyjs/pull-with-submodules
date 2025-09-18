@@ -94,7 +94,15 @@ const TS_SPECIFIC_RULES = {
   '@typescript-eslint/no-non-null-assertion': 'error',
   '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports', disallowTypeAnnotations: false }],
   '@typescript-eslint/consistent-type-exports': 'error',
-  '@typescript-eslint/no-restricted-imports': ['error', { paths: [], patterns: [] }],
+  '@typescript-eslint/no-restricted-imports': ['error', {
+    paths: [],
+    patterns: [
+      {
+        group: ['../*', '../**/*'],
+        message: 'Parent directory imports are not allowed. Use absolute paths with # aliases for cross-module imports (e.g., #core, #lib, #types, #ui).',
+      }
+    ]
+  }],
   '@typescript-eslint/no-magic-numbers': [
     'error',
     { ignore: [0, 1, -1, Infinity], ignoreEnums: true, ignoreNumericLiteralTypes: true },

@@ -12,7 +12,7 @@
  * - All public types must be exported through this barrel for discoverability.
  *
  * Usage Example (future):
- *   import type { ExecutionContext } from '../types';
+ *   import type { ExecutionContext } from '#types';
  *
  * Currently intentionally empty – populated as types are implemented.
  */
