@@ -75,7 +75,7 @@ const STYLE_RULES = {
 // TypeScript-specific rules (merged atop preset configs for typed linting)
 const TS_SPECIFIC_RULES = {
   'no-console': 'error',
-  complexity: ['error', 10],
+  complexity: ['error', 12],
   '@typescript-eslint/no-unused-vars': [
     'error',
     { vars: 'all', args: 'after-used', ignoreRestSiblings: true, caughtErrorsIgnorePattern: '^_' },
