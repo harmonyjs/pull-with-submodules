@@ -11,7 +11,7 @@ import {
   relative as pathRelative,
   sep as pathSep,
 } from "node:path";
-import type { ExecutionContext, Submodule } from "../../types/core.js";
+import type { ExecutionContext, Submodule } from "#types/core.js";
 
 /**
  * Enforces path consistency by converting absolute paths to relative.

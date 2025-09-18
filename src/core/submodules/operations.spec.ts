@@ -7,8 +7,8 @@
 
 import { strict as assert } from "node:assert";
 import { test, describe, mock } from "node:test";
-import type { ExecutionContext } from "../../types/core.js";
-import { GitOperationError } from "../../errors/index.js";
+import type { ExecutionContext } from "#types/core.js";
+import { GitOperationError } from "#errors/index.js";
 import { performSubmoduleSync, performSubmoduleInit } from "./operations.js";
 
 // Test constants

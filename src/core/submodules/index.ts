@@ -5,7 +5,7 @@
  * essential public types.
  */
 
-import type { ExecutionContext, Submodule } from "../../types/core.js";
+import type { ExecutionContext, Submodule } from "#types/core.js";
 import type { SubmoduleProcessor, SubmoduleUpdatePlan } from "./types.js";
 import { SubmoduleProcessorImpl } from "./processor.js";
 

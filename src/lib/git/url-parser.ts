@@ -5,7 +5,7 @@
  * supporting various formats including HTTPS, SSH, and local paths.
  */
 
-import { GitOperationError } from "../../errors/index.js";
+import { GitOperationError } from "#errors/index.js";
 
 /**
  * Git file extension suffix.

@@ -8,7 +8,7 @@
 
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
-import type { ExecutionContext } from "../types/core.js";
+import type { ExecutionContext } from "#types/core.js";
 import { createLogger } from "./logger.js";
 
 describe("logger", () => {

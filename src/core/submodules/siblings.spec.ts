@@ -1,15 +1,15 @@
 import { strict as assert } from "node:assert";
 import { test, mock } from "node:test";
-import type { GitOperations } from "../../lib/git/index.js";
+import type { GitOperations } from "#lib/git/index.js";
 import {
   findSiblingRepository,
   type SiblingDiscoveryOptions,
 } from "./siblings.js";
-import { extractRepoName } from "../../lib/git/url-parser.js";
-import { isGitRepository } from "../../lib/git/repository-validator.js";
-import { getCommitSha } from "../../lib/git/commit-utils.js";
-import { InMemoryRepositoryCache } from "../../lib/git/cache.js";
-import { asGitSha } from "../../lib/git/sha-utils.js";
+import { extractRepoName } from "#lib/git/url-parser.js";
+import { isGitRepository } from "#lib/git/repository-validator.js";
+import { getCommitSha } from "#lib/git/commit-utils.js";
+import { InMemoryRepositoryCache } from "#lib/git/cache.js";
+import { asGitSha } from "#lib/git/sha-utils.js";
 
 function createMockGitOps(
   getCommitShaMock?: (repoPath: string, ref: string) => Promise<any>,

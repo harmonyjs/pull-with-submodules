@@ -2,7 +2,7 @@
  * @fileoverview Pure formatting functions for CLI output presentation.
  */
 
-import type { UpdateResult } from "../types/core.js";
+import type { UpdateResult } from "#types/core.js";
 
 /**
  * Formats duration from milliseconds to human-readable string.

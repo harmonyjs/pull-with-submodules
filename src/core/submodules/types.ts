@@ -5,8 +5,8 @@
  * for branch resolution, update planning, and processor operations.
  */
 
-import type { Submodule } from "../../types/core.js";
-import type { GitSha } from "../../types/git.js";
+import type { Submodule } from "#types/core.js";
+import type { GitSha } from "#types/git.js";
 
 /**
  * Constants for branch resolution sources.

@@ -3,17 +3,17 @@
  */
 
 import { simpleGit, type SimpleGit } from "simple-git";
-import { GitOperationError } from "../errors/index.js";
-import type { ExecutionContext } from "../types/core.js";
+import { GitOperationError } from "#errors/index.js";
+import type { ExecutionContext } from "#types/core.js";
 import type {
   GitSha,
   GitBranch,
   WorkingTreeState,
   PullOperationResult,
   GitOperations,
-} from "../types/git.js";
-import { asGitSha } from "../lib/git/sha-utils.js";
-import { createLogger, type Logger } from "../ui/logger.js";
+} from "#types/git.js";
+import { asGitSha } from "#lib/git/sha-utils.js";
+import { createLogger, type Logger } from "#ui/logger.js";
 
 /**
  * Production implementation of GitOperations using simple-git.

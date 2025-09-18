@@ -22,6 +22,26 @@
     "url": "https://vavilov.dev"
   },
   "type": "module",
+  "imports": {
+    "#cli": "./dist/cli.js",
+    "#context": "./dist/context.js",
+    "#core": "./dist/core/index.js",
+    "#core/*": "./dist/core/*.js",
+    "#errors": "./dist/errors/index.js",
+    "#errors/*": "./dist/errors/*.js",
+    "#lib": "./dist/lib/index.js",
+    "#lib/*": "./dist/lib/*.js",
+    "#lib/async": "./dist/lib/async/index.js",
+    "#lib/async/*": "./dist/lib/async/*.js",
+    "#lib/fs": "./dist/lib/fs/index.js",
+    "#lib/fs/*": "./dist/lib/fs/*.js",
+    "#lib/git": "./dist/lib/git/index.js",
+    "#lib/git/*": "./dist/lib/git/*.js",
+    "#types": "./dist/types/index.js",
+    "#types/*": "./dist/types/*.js",
+    "#ui": "./dist/ui/index.js",
+    "#ui/*": "./dist/ui/*.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

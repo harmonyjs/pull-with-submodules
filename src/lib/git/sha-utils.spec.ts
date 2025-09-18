@@ -4,7 +4,7 @@
 
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { GitOperationError } from "../../errors/index.js";
+import { GitOperationError } from "#errors/index.js";
 import { isValidSha, isGitSha, asGitSha } from "./sha-utils.js";
 
 test("isValidSha - valid SHA formats", () => {

@@ -5,8 +5,8 @@
  * with proper error handling for Git operations.
  */
 
-import { GitOperationError } from "../../errors/index.js";
-import type { GitOperations, GitSha } from "../../types/git.js";
+import { GitOperationError } from "#errors/index.js";
+import type { GitOperations, GitSha } from "#types/git.js";
 
 /**
  * Get commit SHA for a branch in a repository.

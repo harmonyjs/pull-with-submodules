@@ -32,4 +32,4 @@ export { getCommitSha } from "./commit-utils.js";
 
 export { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";
 
-export { type GitOperations } from "../../types/git.js";
+export { type GitOperations } from "#types/git.js";

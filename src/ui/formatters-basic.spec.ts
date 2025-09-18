@@ -14,7 +14,7 @@ import {
   formatStatusIcon,
   formatStatistics,
 } from "./formatters.js";
-import type { UpdateResult, CommitSelection } from "../types/core.js";
+import type { UpdateResult, CommitSelection } from "#types/core.js";
 
 describe("formatters - basic functions", () => {
   describe("formatDuration", () => {

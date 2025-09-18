@@ -9,7 +9,7 @@
  * The strategy is pure and testable, accepting dependency injection for Git operations.
  */
 
-import type { CommitSelection } from "../../types/core.js";
+import type { CommitSelection } from "#types/core.js";
 import {
   createGitAncestryChecker,
   type AncestryChecker,

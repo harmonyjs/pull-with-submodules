@@ -5,8 +5,8 @@
 import { strict as assert } from "node:assert";
 import { test, mock } from "node:test";
 import type { SimpleGit, StatusResult } from "simple-git";
-import type { ExecutionContext } from "../types/core.js";
-import { asGitSha } from "../lib/git/sha-utils.js";
+import type { ExecutionContext } from "#types/core.js";
+import { asGitSha } from "#lib/git/sha-utils.js";
 
 // Dynamic import to test the actual implementation
 let createGit: typeof import("./git.js").createGit;

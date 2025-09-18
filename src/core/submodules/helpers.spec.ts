@@ -7,8 +7,8 @@
 
 import { strict as assert } from "node:assert";
 import { test, describe, mock } from "node:test";
-import type { Submodule } from "../../types/core.js";
-import type { SubmoduleEntry } from "../../lib/git/gitmodules.js";
+import type { Submodule } from "#types/core.js";
+import type { SubmoduleEntry } from "#lib/git/gitmodules.js";
 import {
   normalizeSubmoduleEntry,
   createCurrentShaGetter,

@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import { test, mock } from "node:test";
 import { isGitRepository } from "./repository-validator.js";
 import { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";
-import type { GitOperations } from "../../types/git.js";
+import type { GitOperations } from "#types/git.js";
 
 test("isGitRepository", async (t) => {
   await t.test("returns false for nonexistent paths", async () => {

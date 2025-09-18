@@ -5,13 +5,13 @@
  * by orchestrating path resolution, repository validation, and branch resolution.
  */
 
-import { isGitRepository } from "../../lib/git/index.js";
-import { fileExists } from "../../lib/fs/core.js";
-import type { ExecutionContext, Submodule } from "../../types/core.js";
-import type { Logger } from "../../ui/logger.js";
+import { isGitRepository } from "#lib/git/index.js";
+import { fileExists } from "#lib/fs/core.js";
+import type { ExecutionContext, Submodule } from "#types/core.js";
+import type { Logger } from "#ui/logger.js";
 import type { SubmoduleUpdatePlan, BranchResolution } from "./types.js";
 import { resolveSubmodulePaths } from "./paths.js";
-import type { GitSha } from "../../types/git.js";
+import type { GitSha } from "#types/git.js";
 
 /**
  * Coordinates all information gathering needed for a submodule update decision.

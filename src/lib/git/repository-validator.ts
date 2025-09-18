@@ -6,9 +6,9 @@
  */
 
 import { simpleGit } from "simple-git";
-import { isDirectory } from "../fs/index.js";
+import { isDirectory } from "#lib/fs/index.js";
 import type { RepositoryCache } from "./cache.js";
-import type { GitOperations } from "../../types/git.js";
+import type { GitOperations } from "#types/git.js";
 
 /**
  * Check if a directory is a valid Git repository using git commands.

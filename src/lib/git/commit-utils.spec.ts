@@ -1,9 +1,9 @@
 import { strict as assert } from "node:assert";
 import { test, mock } from "node:test";
 import { getCommitSha } from "./commit-utils.js";
-import type { GitOperations } from "../../types/git.js";
+import type { GitOperations } from "#types/git.js";
 import { asGitSha } from "./sha-utils.js";
-import { GitOperationError } from "../../errors/index.js";
+import { GitOperationError } from "#errors/index.js";
 
 function createMockGitOps(
   getCommitShaMock?: (repoPath: string, ref: string) => Promise<any>,
