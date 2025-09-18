@@ -9,7 +9,12 @@ import { strict as assert } from "node:assert";
 import { test, describe, mock } from "node:test";
 import type { ExecutionContext, Submodule } from "../../types/core.js";
 import type { GitSha } from "../../types/git.js";
-import { BRANCH_SOURCES, DEFAULT_BRANCH, type BranchResolution, type SubmoduleUpdatePlan } from "./types.js";
+import {
+  BRANCH_SOURCES,
+  DEFAULT_BRANCH,
+  type BranchResolution,
+  type SubmoduleUpdatePlan,
+} from "./types.js";
 import {
   prepareUpdatePlan,
   enrichPlanWithCurrentSha,
@@ -288,7 +293,6 @@ describe("prepareUpdatePlan - basic functionality", () => {
       assert.equal(result.isRepositoryValid, false);
     });
   });
-
 });
 
 describe("prepareUpdatePlan - branch resolution", () => {
@@ -448,7 +452,10 @@ describe("enrichPlanWithCurrentSha", () => {
 
       const mockGetCurrentSha = mock.fn(async () => TEST_SHA);
 
-      const result = await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
+      const result = await enrichPlanWithCurrentSha(
+        basePlan,
+        mockGetCurrentSha,
+      );
 
       assert.equal(result.currentSha, TEST_SHA);
       assert.equal(mockGetCurrentSha.mock.callCount(), 1);
@@ -471,7 +478,10 @@ describe("enrichPlanWithCurrentSha", () => {
 
       const mockGetCurrentSha = mock.fn(async () => undefined);
 
-      const result = await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
+      const result = await enrichPlanWithCurrentSha(
+        basePlan,
+        mockGetCurrentSha,
+      );
 
       assert.equal(result.currentSha, undefined);
       assert.equal(mockGetCurrentSha.mock.callCount(), 1);
@@ -495,7 +505,10 @@ describe("enrichPlanWithCurrentSha", () => {
 
       const mockGetCurrentSha = mock.fn(async () => TEST_SHA);
 
-      const result = await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
+      const result = await enrichPlanWithCurrentSha(
+        basePlan,
+        mockGetCurrentSha,
+      );
 
       assert.equal(result.submodule.name, TEST_SUBMODULE_NAME);
       assert.equal(result.submodule.path, TEST_SUBMODULE_PATH);
@@ -526,7 +539,10 @@ describe("enrichPlanWithCurrentSha", () => {
 
       const mockGetCurrentSha = mock.fn(async () => TEST_SHA);
 
-      const result = await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
+      const result = await enrichPlanWithCurrentSha(
+        basePlan,
+        mockGetCurrentSha,
+      );
 
       assert.equal(result.currentSha, undefined);
       assert.equal(mockGetCurrentSha.mock.callCount(), 0); // Should not be called
@@ -549,7 +565,10 @@ describe("enrichPlanWithCurrentSha", () => {
 
       const mockGetCurrentSha = mock.fn(async () => TEST_SHA);
 
-      const result = await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
+      const result = await enrichPlanWithCurrentSha(
+        basePlan,
+        mockGetCurrentSha,
+      );
 
       assert.strictEqual(result, basePlan); // Should be same object
     });
@@ -575,12 +594,9 @@ describe("enrichPlanWithCurrentSha", () => {
         throw new Error("Git operation failed");
       });
 
-      await assert.rejects(
-        async () => {
-          await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
-        },
-        /Git operation failed/,
-      );
+      await assert.rejects(async () => {
+        await enrichPlanWithCurrentSha(basePlan, mockGetCurrentSha);
+      }, /Git operation failed/);
     });
   });
 });

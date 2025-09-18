@@ -9,10 +9,7 @@ import { strict as assert } from "node:assert";
 import { test, describe } from "node:test";
 import { sep as pathSep } from "node:path";
 import type { ExecutionContext, Submodule } from "../../types/core.js";
-import {
-  resolveSubmodulePaths,
-  toGitRelativePath,
-} from "./paths.js";
+import { resolveSubmodulePaths, toGitRelativePath } from "./paths.js";
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";
@@ -56,8 +53,14 @@ describe("resolveSubmodulePaths", () => {
 
       const result = resolveSubmodulePaths(submodule, mockContext);
 
-      assert.equal(result.normalizedSubmodule.path, "vendor/third-party/deep/nested/lib");
-      assert.equal(result.absolutePath, "/test/repo/vendor/third-party/deep/nested/lib");
+      assert.equal(
+        result.normalizedSubmodule.path,
+        "vendor/third-party/deep/nested/lib",
+      );
+      assert.equal(
+        result.absolutePath,
+        "/test/repo/vendor/third-party/deep/nested/lib",
+      );
     });
 
     test("should handle single directory relative path", () => {
@@ -108,8 +111,14 @@ describe("resolveSubmodulePaths", () => {
       const result = resolveSubmodulePaths(submodule, mockContext);
 
       // Should create relative path even if it goes outside repo
-      assert.equal(result.normalizedSubmodule.path, "../../../different/repo/libs/test");
-      assert.equal(result.absolutePath, "/test/repo/../../../different/repo/libs/test");
+      assert.equal(
+        result.normalizedSubmodule.path,
+        "../../../different/repo/libs/test",
+      );
+      assert.equal(
+        result.absolutePath,
+        "/test/repo/../../../different/repo/libs/test",
+      );
     });
 
     test("should preserve other submodule properties during normalization", () => {
@@ -176,7 +185,10 @@ describe("resolveSubmodulePaths", () => {
 
       // Should create relative path to root
       assert.ok(result.normalizedSubmodule.path.includes(".."));
-      assert.equal(result.absolutePath, "/test/repo/" + result.normalizedSubmodule.path);
+      assert.equal(
+        result.absolutePath,
+        "/test/repo/" + result.normalizedSubmodule.path,
+      );
     });
 
     test("should handle paths with special characters", () => {
@@ -280,7 +292,10 @@ describe("toGitRelativePath", () => {
         const result = toGitRelativePath(repositoryRoot, absolutePath);
 
         assert.equal(result, "libs/test");
-        assert.ok(!result.includes("\\"), "Result should not contain backslashes");
+        assert.ok(
+          !result.includes("\\"),
+          "Result should not contain backslashes",
+        );
       } else {
         // Running on Unix - simulate Windows behavior
         const repositoryRoot = "/test/repo";
@@ -289,7 +304,10 @@ describe("toGitRelativePath", () => {
         const result = toGitRelativePath(repositoryRoot, absolutePath);
 
         assert.equal(result, "libs/test");
-        assert.ok(result.includes("/"), "Result should contain forward slashes");
+        assert.ok(
+          result.includes("/"),
+          "Result should contain forward slashes",
+        );
       }
     });
 
@@ -382,7 +400,10 @@ describe("toGitRelativePath", () => {
       const result = toGitRelativePath(repositoryRoot, absolutePath);
 
       // Node.js path.relative should handle this normalization
-      assert.ok(!result.includes("//"), "Result should not contain consecutive slashes");
+      assert.ok(
+        !result.includes("//"),
+        "Result should not contain consecutive slashes",
+      );
     });
   });
 });

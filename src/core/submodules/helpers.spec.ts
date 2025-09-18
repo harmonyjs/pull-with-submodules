@@ -230,7 +230,10 @@ describe("createCurrentShaGetter", () => {
   describe("basic functionality", () => {
     test("should create function that returns SHA", async () => {
       const mockOnError = mock.fn();
-      const shaGetter = createCurrentShaGetter(TEST_SUBMODULE_PATH, mockOnError);
+      const shaGetter = createCurrentShaGetter(
+        TEST_SUBMODULE_PATH,
+        mockOnError,
+      );
 
       assert.equal(typeof shaGetter, "function");
 
@@ -375,14 +378,14 @@ describe("createCurrentShaGetter", () => {
         throw new Error("Error handler error");
       };
 
-      const shaGetter = createCurrentShaGetter(invalidPath, throwingErrorHandler);
-
-      await assert.rejects(
-        async () => {
-          await shaGetter();
-        },
-        /Error handler error/,
+      const shaGetter = createCurrentShaGetter(
+        invalidPath,
+        throwingErrorHandler,
       );
+
+      await assert.rejects(async () => {
+        await shaGetter();
+      }, /Error handler error/);
     });
   });
 });

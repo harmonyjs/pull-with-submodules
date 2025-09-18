@@ -7,7 +7,7 @@
 
 import type { Submodule } from "../../types/core.js";
 import type { SubmoduleEntry } from "../../lib/git/gitmodules.js";
-import { getCommitSha } from "../../lib/git/core.js";
+import { createGit } from "../../lib/git/core.js";
 import { asGitSha } from "../../lib/git/sha-utils.js";
 import type { GitSha } from "../../types/git.js";
 
@@ -36,7 +36,9 @@ export function createCurrentShaGetter(
 ): () => Promise<GitSha | undefined> {
   return async () => {
     try {
-      const sha = await getCommitSha("HEAD", { cwd: submodulePath });
+      const git = createGit({ cwd: submodulePath });
+      const result = await git.raw("rev-parse", "--verify", "HEAD^{commit}");
+      const sha = result.trim();
       return asGitSha(sha);
     } catch (error) {
       if (onError) {

@@ -9,10 +9,7 @@ import { strict as assert } from "node:assert";
 import { test, describe, mock } from "node:test";
 import type { ExecutionContext } from "../../types/core.js";
 import { GitOperationError } from "../../errors/index.js";
-import {
-  performSubmoduleSync,
-  performSubmoduleInit,
-} from "./operations.js";
+import { performSubmoduleSync, performSubmoduleInit } from "./operations.js";
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";
@@ -49,12 +46,22 @@ describe("performSubmoduleSync", () => {
       const dryRunContext = { ...mockContext, dryRun: true };
       const mockLogger = createMockLogger();
 
-      await performSubmoduleSync(TEST_SUBMODULE_PATH, dryRunContext, mockLogger);
+      await performSubmoduleSync(
+        TEST_SUBMODULE_PATH,
+        dryRunContext,
+        mockLogger,
+      );
 
       const infoCalls = (mockLogger.info as any).mock.calls;
       assert.equal(infoCalls.length, 1);
-      assert.match(infoCalls[0]?.arguments[0] as string, /Would sync submodule/);
-      assert.match(infoCalls[0]?.arguments[0] as string, new RegExp(TEST_SUBMODULE_PATH));
+      assert.match(
+        infoCalls[0]?.arguments[0] as string,
+        /Would sync submodule/,
+      );
+      assert.match(
+        infoCalls[0]?.arguments[0] as string,
+        new RegExp(TEST_SUBMODULE_PATH),
+      );
     });
 
     test("should not perform actual git operations in dry run", async () => {
@@ -62,12 +69,19 @@ describe("performSubmoduleSync", () => {
       const mockLogger = createMockLogger();
 
       // This should not throw errors even if git operations would fail
-      await performSubmoduleSync(TEST_SUBMODULE_PATH, dryRunContext, mockLogger);
+      await performSubmoduleSync(
+        TEST_SUBMODULE_PATH,
+        dryRunContext,
+        mockLogger,
+      );
 
       // Only info log should be called, no debug logs for actual operations
       const debugCalls = (mockLogger.debug as any).mock.calls;
       assert.equal(debugCalls.length, 1); // Only initial debug log
-      assert.match(debugCalls[0]?.arguments[0] as string, /Syncing submodule at/);
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        /Syncing submodule at/,
+      );
     });
   });
 
@@ -78,10 +92,18 @@ describe("performSubmoduleSync", () => {
       // Test with actual function which will fail validation
       await assert.rejects(
         async () => {
-          await performSubmoduleSync(TEST_SUBMODULE_PATH, mockContext, mockLogger);
+          await performSubmoduleSync(
+            TEST_SUBMODULE_PATH,
+            mockContext,
+            mockLogger,
+          );
         },
         (error: Error) => {
-          assert.ok(error.message.includes("Submodule path is not a valid git repository"));
+          assert.ok(
+            error.message.includes(
+              "Submodule path is not a valid git repository",
+            ),
+          );
           return true;
         },
       );
@@ -92,10 +114,18 @@ describe("performSubmoduleSync", () => {
 
       await assert.rejects(
         async () => {
-          await performSubmoduleSync(TEST_SUBMODULE_PATH, mockContext, mockLogger);
+          await performSubmoduleSync(
+            TEST_SUBMODULE_PATH,
+            mockContext,
+            mockLogger,
+          );
         },
         (error: Error) => {
-          assert.ok(error.message.includes("Submodule path is not a valid git repository"));
+          assert.ok(
+            error.message.includes(
+              "Submodule path is not a valid git repository",
+            ),
+          );
           return true;
         },
       );
@@ -107,26 +137,37 @@ describe("performSubmoduleSync", () => {
       const mockLogger = createMockLogger();
 
       try {
-        await performSubmoduleSync(TEST_SUBMODULE_PATH, mockContext, mockLogger);
+        await performSubmoduleSync(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
       } catch {
         // Expected to fail in test environment
       }
 
       const debugCalls = (mockLogger.debug as any).mock.calls;
       assert.equal(debugCalls.length, 1);
-      assert.match(debugCalls[0]?.arguments[0] as string, /Syncing submodule at/);
-      assert.match(debugCalls[0]?.arguments[0] as string, new RegExp(TEST_SUBMODULE_PATH));
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        /Syncing submodule at/,
+      );
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        new RegExp(TEST_SUBMODULE_PATH),
+      );
     });
 
     test("should handle git command failures gracefully", async () => {
       const mockLogger = createMockLogger();
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleSync(TEST_SUBMODULE_PATH, mockContext, mockLogger);
-        },
-        Error,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleSync(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
+      }, Error);
     });
   });
 
@@ -135,24 +176,18 @@ describe("performSubmoduleSync", () => {
       const mockLogger = createMockLogger();
       const absolutePath = "/absolute/path/to/submodule";
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleSync(absolutePath, mockContext, mockLogger);
-        },
-        Error,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleSync(absolutePath, mockContext, mockLogger);
+      }, Error);
     });
 
     test("should handle relative paths correctly", async () => {
       const mockLogger = createMockLogger();
       const relativePath = "relative/submodule/path";
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleSync(relativePath, mockContext, mockLogger);
-        },
-        Error,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleSync(relativePath, mockContext, mockLogger);
+      }, Error);
     });
   });
 });
@@ -163,12 +198,22 @@ describe("performSubmoduleInit", () => {
       const dryRunContext = { ...mockContext, dryRun: true };
       const mockLogger = createMockLogger();
 
-      await performSubmoduleInit(TEST_SUBMODULE_PATH, dryRunContext, mockLogger);
+      await performSubmoduleInit(
+        TEST_SUBMODULE_PATH,
+        dryRunContext,
+        mockLogger,
+      );
 
       const infoCalls = (mockLogger.info as any).mock.calls;
       assert.equal(infoCalls.length, 1);
-      assert.match(infoCalls[0]?.arguments[0] as string, /Would initialize submodule/);
-      assert.match(infoCalls[0]?.arguments[0] as string, new RegExp(TEST_SUBMODULE_PATH));
+      assert.match(
+        infoCalls[0]?.arguments[0] as string,
+        /Would initialize submodule/,
+      );
+      assert.match(
+        infoCalls[0]?.arguments[0] as string,
+        new RegExp(TEST_SUBMODULE_PATH),
+      );
     });
 
     test("should not perform file system checks in dry run", async () => {
@@ -176,11 +221,18 @@ describe("performSubmoduleInit", () => {
       const mockLogger = createMockLogger();
 
       // Should not throw even if path doesn't exist
-      await performSubmoduleInit(TEST_SUBMODULE_PATH, dryRunContext, mockLogger);
+      await performSubmoduleInit(
+        TEST_SUBMODULE_PATH,
+        dryRunContext,
+        mockLogger,
+      );
 
       const debugCalls = (mockLogger.debug as any).mock.calls;
       assert.equal(debugCalls.length, 1); // Only initial debug log
-      assert.match(debugCalls[0]?.arguments[0] as string, /Initializing submodule at/);
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        /Initializing submodule at/,
+      );
     });
   });
 
@@ -189,12 +241,9 @@ describe("performSubmoduleInit", () => {
       const mockLogger = createMockLogger();
       const nonExistentPath = "/definitely/does/not/exist";
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(nonExistentPath, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(nonExistentPath, mockContext, mockLogger);
+      }, GitOperationError);
     });
 
     test("should detect already initialized submodules", async () => {
@@ -202,14 +251,21 @@ describe("performSubmoduleInit", () => {
 
       // Test would need mocking for actual detection
       try {
-        await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
       } catch {
         // Expected in test environment
       }
 
       const debugCalls = (mockLogger.debug as any).mock.calls;
       assert.equal(debugCalls.length, 1);
-      assert.match(debugCalls[0]?.arguments[0] as string, /Initializing submodule at/);
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        /Initializing submodule at/,
+      );
     });
   });
 
@@ -217,23 +273,25 @@ describe("performSubmoduleInit", () => {
     test("should execute both init and update commands", async () => {
       const mockLogger = createMockLogger();
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
+      }, GitOperationError);
     });
 
     test("should include comprehensive error suggestions", async () => {
       const mockLogger = createMockLogger();
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
+      }, GitOperationError);
     });
 
     test("should log debug completion message on success", async () => {
@@ -241,7 +299,11 @@ describe("performSubmoduleInit", () => {
 
       // This test would need proper mocking for success case
       try {
-        await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
       } catch {
         // Expected to fail in test environment
       }
@@ -249,7 +311,10 @@ describe("performSubmoduleInit", () => {
       // Verify initial debug log was called
       const debugCalls = (mockLogger.debug as any).mock.calls;
       assert.ok(debugCalls.length >= 1);
-      assert.match(debugCalls[0]?.arguments[0] as string, /Initializing submodule at/);
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        /Initializing submodule at/,
+      );
     });
   });
 
@@ -257,34 +322,37 @@ describe("performSubmoduleInit", () => {
     test("should wrap git errors in GitOperationError", async () => {
       const mockLogger = createMockLogger();
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
+      }, GitOperationError);
     });
 
     test("should preserve original error as cause", async () => {
       const mockLogger = createMockLogger();
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
+      }, GitOperationError);
     });
 
     test("should include contextual details in error", async () => {
       const mockLogger = createMockLogger();
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(TEST_SUBMODULE_PATH, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(
+          TEST_SUBMODULE_PATH,
+          mockContext,
+          mockLogger,
+        );
+      }, GitOperationError);
     });
   });
 
@@ -293,24 +361,18 @@ describe("performSubmoduleInit", () => {
       const mockLogger = createMockLogger();
       const emptyPath = "";
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(emptyPath, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(emptyPath, mockContext, mockLogger);
+      }, GitOperationError);
     });
 
     test("should handle submodule path with special characters", async () => {
       const mockLogger = createMockLogger();
       const specialPath = "/path/with spaces/and-dashes/sub_module";
 
-      await assert.rejects(
-        async () => {
-          await performSubmoduleInit(specialPath, mockContext, mockLogger);
-        },
-        GitOperationError,
-      );
+      await assert.rejects(async () => {
+        await performSubmoduleInit(specialPath, mockContext, mockLogger);
+      }, GitOperationError);
     });
   });
 });

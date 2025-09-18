@@ -19,7 +19,10 @@ export interface AncestryChecker {
    * @param descendant - The potential descendant commit SHA
    * @returns Promise resolving to ancestry check result
    */
-  isAncestor(ancestor: string, descendant: string): Promise<AncestryCheckResult>;
+  isAncestor(
+    ancestor: string,
+    descendant: string,
+  ): Promise<AncestryCheckResult>;
 }
 
 /**
@@ -30,7 +33,10 @@ export interface AncestryChecker {
  */
 export function createGitAncestryChecker(cwd?: string): AncestryChecker {
   return {
-    async isAncestor(ancestor: string, descendant: string): Promise<AncestryCheckResult> {
+    async isAncestor(
+      ancestor: string,
+      descendant: string,
+    ): Promise<AncestryCheckResult> {
       const config = cwd !== undefined ? { cwd } : {};
       return isAncestor(ancestor, descendant, config);
     },
@@ -44,10 +50,13 @@ export function createGitAncestryChecker(cwd?: string): AncestryChecker {
  * @returns Mock ancestry checker
  */
 export function createMockAncestryChecker(
-  mockResults: Map<string, boolean>
+  mockResults: Map<string, boolean>,
 ): AncestryChecker {
   return {
-    async isAncestor(ancestor: string, descendant: string): Promise<AncestryCheckResult> {
+    async isAncestor(
+      ancestor: string,
+      descendant: string,
+    ): Promise<AncestryCheckResult> {
       const key = `${ancestor}->${descendant}`;
       const isAncestor = mockResults.get(key) ?? false;
       return Promise.resolve({ isAncestor, details: "mock result" });

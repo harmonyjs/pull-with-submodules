@@ -5,7 +5,7 @@
  * by orchestrating path resolution, repository validation, and branch resolution.
  */
 
-import { isGitRepository } from "../../lib/git/core.js";
+import { isGitRepository } from "../../lib/git/index.js";
 import { fileExists } from "../../lib/fs/core.js";
 import type { ExecutionContext, Submodule } from "../../types/core.js";
 import type { Logger } from "../../ui/logger.js";

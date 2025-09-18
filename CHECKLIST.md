@@ -82,11 +82,11 @@ Legend:
   - [x] Tests covering all decision branches
 
 ### 7.4 Siblings Discovery
-- [ ] Implement `core/siblings.ts`
-  - [ ] Search `../<name>` pattern
-  - [ ] Validate is a git repo
-  - [ ] Resolve commit SHA for candidate branch
-  - [ ] Tests for discovery logic
+- [x] Implement `core/siblings.ts`
+  - [x] Search `../<name>` pattern
+  - [x] Validate is a git repo
+  - [x] Resolve commit SHA for candidate branch
+  - [x] Tests for discovery logic
 
 ### 7.5 Gitlink Operations
 - [ ] Implement `core/gitlink.ts`

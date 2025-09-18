@@ -14,33 +14,30 @@
  */
 
 // Git operations module
-export { createGit, type GitOperations } from "./git.js";
+export { createGit } from "./git.js";
 
 // Submodule processing module
 export {
   createSubmoduleProcessor,
   parseSubmodules,
   prepareUpdatePlans,
+  findSiblingRepository,
 } from "./submodules/index.js";
 export type {
   SubmoduleProcessor,
   SubmoduleUpdatePlan,
   BranchResolution,
+  SiblingRepository,
+  SiblingDiscoveryOptions,
 } from "./submodules/index.js";
 
 // Commit selection strategies module
-export {
-  selectCommitSmart,
-} from "./submodules/strategies.js";
-export type {
-  CommitSelectionOptions,
-} from "./submodules/strategies.js";
+export { selectCommitSmart } from "./submodules/strategies.js";
+export type { CommitSelectionOptions } from "./submodules/strategies.js";
 
 // Ancestry checking utilities
 export {
   createGitAncestryChecker,
   createMockAncestryChecker,
 } from "./submodules/ancestry-checker.js";
-export type {
-  AncestryChecker,
-} from "./submodules/ancestry-checker.js";
+export type { AncestryChecker } from "./submodules/ancestry-checker.js";

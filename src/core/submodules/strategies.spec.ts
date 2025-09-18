@@ -9,18 +9,19 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   selectCommitSmart,
-  type CommitSelectionOptions
+  type CommitSelectionOptions,
 } from "./strategies.js";
 import {
   createGitAncestryChecker,
   createMockAncestryChecker,
 } from "./ancestry-checker.js";
 
-
 /**
  * Creates default options for testing.
  */
-function createDefaultOptions(overrides: Partial<CommitSelectionOptions> = {}): CommitSelectionOptions {
+function createDefaultOptions(
+  overrides: Partial<CommitSelectionOptions> = {},
+): CommitSelectionOptions {
   return {
     forceRemote: false,
     cwd: "/mock/repo",
@@ -44,15 +45,18 @@ test("selectCommitSmart", async (t) => {
       });
     });
 
-    await subTest.test("returns null when remote is not available", async () => {
-      const result = await selectCommitSmart(
-        "local123",
-        null,
-        createDefaultOptions({ forceRemote: true }),
-      );
+    await subTest.test(
+      "returns null when remote is not available",
+      async () => {
+        const result = await selectCommitSmart(
+          "local123",
+          null,
+          createDefaultOptions({ forceRemote: true }),
+        );
 
-      assert.equal(result, null);
-    });
+        assert.equal(result, null);
+      },
+    );
 
     await subTest.test("handles undefined remote", async () => {
       const result = await selectCommitSmart(
@@ -66,58 +70,67 @@ test("selectCommitSmart", async (t) => {
   });
 
   await t.test("when both local and remote are available", async (subTest) => {
-    await subTest.test("prefers local when it contains remote changes", async () => {
-      // Test the actual function with dependency injection
-      const options = createDefaultOptions({ cwd: "/tmp/test-repo" });
+    await subTest.test(
+      "prefers local when it contains remote changes",
+      async () => {
+        // Test the actual function with dependency injection
+        const options = createDefaultOptions({ cwd: "/tmp/test-repo" });
 
-      // Since we can't easily mock git operations, we'll test with fake/empty repo
-      // The function should handle the git error gracefully and fall back to remote
-      const result = await selectCommitSmart(
-        "local123",
-        "remote456",
-        options,
-      );
+        // Since we can't easily mock git operations, we'll test with fake/empty repo
+        // The function should handle the git error gracefully and fall back to remote
+        const result = await selectCommitSmart(
+          "local123",
+          "remote456",
+          options,
+        );
 
-      // Expects fallback to remote due to git error (no valid repo)
-      assert.equal(result?.sha, "remote456");
-      assert.equal(result?.source, "remote");
-      assert.ok(
-        result?.reason.startsWith("ancestry check failed"),
-        `Expected reason to start with "ancestry check failed", got: ${result?.reason}`
-      );
-    });
+        // Expects fallback to remote due to git error (no valid repo)
+        assert.equal(result?.sha, "remote456");
+        assert.equal(result?.source, "remote");
+        assert.ok(
+          result?.reason.startsWith("ancestry check failed"),
+          `Expected reason to start with "ancestry check failed", got: ${result?.reason}`,
+        );
+      },
+    );
 
-    await subTest.test("prefers remote when histories have diverged", async () => {
-      const options = createDefaultOptions({ cwd: "/tmp/test-repo" });
+    await subTest.test(
+      "prefers remote when histories have diverged",
+      async () => {
+        const options = createDefaultOptions({ cwd: "/tmp/test-repo" });
 
-      const result = await selectCommitSmart(
-        "local123",
-        "remote456",
-        options,
-      );
+        const result = await selectCommitSmart(
+          "local123",
+          "remote456",
+          options,
+        );
 
-      // Should fallback to remote due to git error (no valid repo)
-      assert.equal(result?.sha, "remote456");
-      assert.equal(result?.source, "remote");
-      assert.ok(
-        result?.reason.startsWith("ancestry check failed"),
-        `Expected reason to start with "ancestry check failed", got: ${result?.reason}`
-      );
-    });
+        // Should fallback to remote due to git error (no valid repo)
+        assert.equal(result?.sha, "remote456");
+        assert.equal(result?.source, "remote");
+        assert.ok(
+          result?.reason.startsWith("ancestry check failed"),
+          `Expected reason to start with "ancestry check failed", got: ${result?.reason}`,
+        );
+      },
+    );
 
-    await subTest.test("falls back to remote when ancestry check fails", async () => {
-      const options = createDefaultOptions({ cwd: "/nonexistent/path" });
+    await subTest.test(
+      "falls back to remote when ancestry check fails",
+      async () => {
+        const options = createDefaultOptions({ cwd: "/nonexistent/path" });
 
-      const result = await selectCommitSmart(
-        "local123",
-        "remote456",
-        options,
-      );
+        const result = await selectCommitSmart(
+          "local123",
+          "remote456",
+          options,
+        );
 
-      assert.equal(result?.sha, "remote456");
-      assert.equal(result?.source, "remote");
-      assert.ok(result?.reason.includes("ancestry check failed"));
-    });
+        assert.equal(result?.sha, "remote456");
+        assert.equal(result?.source, "remote");
+        assert.ok(result?.reason.includes("ancestry check failed"));
+      },
+    );
   });
 
   await t.test("when only one source is available", async (subTest) => {
@@ -135,19 +148,22 @@ test("selectCommitSmart", async (t) => {
       });
     });
 
-    await subTest.test("uses remote when only remote is available", async () => {
-      const result = await selectCommitSmart(
-        null,
-        "remote456",
-        createDefaultOptions(),
-      );
+    await subTest.test(
+      "uses remote when only remote is available",
+      async () => {
+        const result = await selectCommitSmart(
+          null,
+          "remote456",
+          createDefaultOptions(),
+        );
 
-      assert.deepEqual(result, {
-        sha: "remote456",
-        source: "remote",
-        reason: "only remote source available",
-      });
-    });
+        assert.deepEqual(result, {
+          sha: "remote456",
+          source: "remote",
+          reason: "only remote source available",
+        });
+      },
+    );
 
     await subTest.test("handles undefined local properly", async () => {
       const result = await selectCommitSmart(
@@ -205,19 +221,17 @@ test("createGitAncestryChecker", async (t) => {
   });
 });
 
-
 test("selectCommitSmart with mocked ancestry", async (t) => {
   await t.test("prefers local when it contains remote", async () => {
     // Setup mock: remote456 is ancestor of local123
     const mockChecker = createMockAncestryChecker(
-      new Map([["remote456->local123", true]])
+      new Map([["remote456->local123", true]]),
     );
 
-    const result = await selectCommitSmart(
-      "local123",
-      "remote456",
-      { forceRemote: false, ancestryChecker: mockChecker }
-    );
+    const result = await selectCommitSmart("local123", "remote456", {
+      forceRemote: false,
+      ancestryChecker: mockChecker,
+    });
 
     assert.equal(result?.sha, "local123");
     assert.equal(result?.source, "local");
@@ -226,14 +240,13 @@ test("selectCommitSmart with mocked ancestry", async (t) => {
 
   await t.test("prefers remote when histories diverged", async () => {
     const mockChecker = createMockAncestryChecker(
-      new Map([["remote456->local123", false]])
+      new Map([["remote456->local123", false]]),
     );
 
-    const result = await selectCommitSmart(
-      "local123",
-      "remote456",
-      { forceRemote: false, ancestryChecker: mockChecker }
-    );
+    const result = await selectCommitSmart("local123", "remote456", {
+      forceRemote: false,
+      ancestryChecker: mockChecker,
+    });
 
     assert.equal(result?.sha, "remote456");
     assert.equal(result?.source, "remote");

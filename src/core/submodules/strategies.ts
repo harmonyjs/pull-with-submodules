@@ -10,7 +10,10 @@
  */
 
 import type { CommitSelection } from "../../types/core.js";
-import { createGitAncestryChecker, type AncestryChecker } from "./ancestry-checker.js";
+import {
+  createGitAncestryChecker,
+  type AncestryChecker,
+} from "./ancestry-checker.js";
 import { isValidSha } from "./helpers.js";
 
 /**
@@ -24,7 +27,6 @@ export interface CommitSelectionOptions {
   /** Optional custom ancestry checker for testing */
   readonly ancestryChecker?: AncestryChecker;
 }
-
 
 function handleForcedRemote(remoteSha: string | null): CommitSelection | null {
   if (isValidSha(remoteSha)) {
@@ -43,7 +45,10 @@ async function handleBothAvailable(
   ancestryChecker: AncestryChecker,
 ): Promise<CommitSelection> {
   try {
-    const ancestryResult = await ancestryChecker.isAncestor(remoteSha, localSha);
+    const ancestryResult = await ancestryChecker.isAncestor(
+      remoteSha,
+      localSha,
+    );
 
     if (ancestryResult.isAncestor) {
       return {
@@ -123,4 +128,3 @@ export async function selectCommitSmart(
   // Single source or no sources available
   return handleSingleSource(localSha, remoteSha);
 }
-

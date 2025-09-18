@@ -137,7 +137,9 @@ describe("resolveBranch", () => {
       assert.equal(result.source, BRANCH_SOURCES.EXPLICIT);
     });
   });
+});
 
+describe("resolveBranch - branch detection", () => {
   describe("branch detection from existing repository", () => {
     test("should detect current branch when repository exists", async () => {
       const submodule: Submodule = {
@@ -182,7 +184,9 @@ describe("resolveBranch", () => {
       assert.equal(result.source, BRANCH_SOURCES.FALLBACK);
     });
   });
+});
 
+describe("resolveBranch - fallback scenarios", () => {
   describe("fallback scenarios", () => {
     test("should use default branch when no branch is specified", async () => {
       const submodule: Submodule = {
@@ -212,10 +216,15 @@ describe("resolveBranch", () => {
 
       const debugCalls = (mockLogger.debug as any).mock.calls;
       assert.ok(debugCalls.length >= 1);
-      assert.match(debugCalls[0]?.arguments[0] as string, /Resolving branch for submodule/);
+      assert.match(
+        debugCalls[0]?.arguments[0] as string,
+        /Resolving branch for submodule/,
+      );
     });
   });
+});
 
+describe("resolveBranch - edge cases", () => {
   describe("edge cases and validation", () => {
     test("should handle submodule with undefined branch property", async () => {
       const submodule: Submodule = {

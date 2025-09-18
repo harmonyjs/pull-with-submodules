@@ -20,6 +20,10 @@ export type {
 // Re-export constants
 export { BRANCH_SOURCES, DEFAULT_BRANCH } from "./types.js";
 
+// Re-export sibling discovery functionality
+export { findSiblingRepository } from "./siblings.js";
+export type { SiblingRepository, SiblingDiscoveryOptions } from "./siblings.js";
+
 /**
  * Creates a configured SubmoduleProcessor instance.
  *
