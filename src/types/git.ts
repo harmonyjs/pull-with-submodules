@@ -98,3 +98,59 @@ export interface PullOperationResult {
   /** Remote name that was pulled from (if any). */
   readonly remote: string | null;
 }
+
+/**
+ * Git operations interface for dependency injection and testing.
+ *
+ * This interface abstracts Git operations to enable:
+ * - Dependency injection in production
+ * - Easy mocking for unit tests
+ * - Consistent error handling across the application
+ */
+export interface GitOperations {
+  /**
+   * Pull with rebase from the currently tracked remote branch.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @returns Pull result with detailed status
+   * @throws {GitOperationError} When pull fails or conflicts occur
+   */
+  pullWithRebase(repoPath: string): Promise<PullOperationResult>;
+
+  /**
+   * Fetch all remotes without merging.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @returns Promise that resolves when fetch completes
+   * @throws {GitOperationError} When fetch fails
+   */
+  fetch(repoPath: string): Promise<void>;
+
+  /**
+   * Get the current working tree status.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @returns Working tree state indicating if clean
+   * @throws {GitOperationError} When status check fails
+   */
+  getStatus(repoPath: string): Promise<WorkingTreeState>;
+
+  /**
+   * Get the current branch name.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @returns Current branch information
+   * @throws {GitOperationError} When branch cannot be determined
+   */
+  getCurrentBranch(repoPath: string): Promise<GitBranch>;
+
+  /**
+   * Get commit SHA for a given reference.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @param ref - Git reference (branch, tag, SHA)
+   * @returns Commit SHA
+   * @throws {GitOperationError} When reference cannot be resolved
+   */
+  getCommitSha(repoPath: string, ref: string): Promise<GitSha>;
+}

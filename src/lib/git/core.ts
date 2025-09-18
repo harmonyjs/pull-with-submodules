@@ -112,50 +112,6 @@ export async function isAncestor(
 }
 
 /**
- * Resolves a Git reference (branch, tag, or partial SHA) to a full commit SHA.
- *
- * @param reference - Git reference to resolve (branch name, tag, or SHA)
- * @param config - Git operation configuration
- * @returns Promise resolving to the full commit SHA
- * @throws Error if reference cannot be resolved
- *
- * @example
- * ```typescript
- * const sha = await getCommitSha('main');
- * console.log(`main branch points to: ${sha}`);
- *
- * const tagSha = await getCommitSha('v1.0.0');
- * console.log(`Tag v1.0.0 points to: ${tagSha}`);
- * ```
- */
-export async function getCommitSha(
-  reference: string,
-  config: GitOperationConfig = {},
-): Promise<string> {
-  const git = createGit(config);
-
-  try {
-    const result = await git.raw(
-      "rev-parse",
-      "--verify",
-      `${reference}^{commit}`,
-    );
-    const sha = result.trim();
-
-    if (!/^[a-f0-9]{40}$/i.test(sha)) {
-      throw new Error(`Invalid SHA format returned: ${sha}`);
-    }
-
-    return sha;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Failed to resolve reference '${reference}': ${errorMessage}`,
-    );
-  }
-}
-
-/**
  * Gets the current branch name of the repository.
  *
  * @param config - Git operation configuration
@@ -261,47 +217,6 @@ export async function getMergeBase(
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Failed to find merge base of '${commit1}' and '${commit2}': ${errorMessage}`,
-    );
-  }
-}
-
-/**
- * Checks if a repository exists at the specified path.
- *
- * @param repoPath - Path to check for git repository
- * @returns Promise resolving to true if path contains a git repository
- * @throws Error if path access fails due to permissions or other filesystem issues
- *
- * @example
- * ```typescript
- * try {
- *   const isRepo = await isGitRepository('./submodule');
- *   if (isRepo) {
- *     // Process git repository
- *   }
- * } catch (error) {
- *   console.error('Failed to check repository:', error.message);
- * }
- * ```
- */
-export async function isGitRepository(repoPath: string): Promise<boolean> {
-  const git = createGit({ cwd: repoPath });
-
-  try {
-    await git.raw("rev-parse", "--git-dir");
-    return true;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    if (
-      errorMessage.includes("not a git repository") ||
-      errorMessage.includes("fatal: not a git repository")
-    ) {
-      return false;
-    }
-
-    throw new Error(
-      `Failed to check git repository at '${repoPath}': ${errorMessage}`,
     );
   }
 }

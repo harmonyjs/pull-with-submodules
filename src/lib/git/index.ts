@@ -8,11 +8,9 @@
 export {
   createGit,
   isAncestor,
-  getCommitSha,
   getBranchName,
   isWorkingDirectoryClean,
   getMergeBase,
-  isGitRepository,
   type AncestryCheckResult,
   type GitOperationConfig,
 } from "./core.js";
@@ -25,3 +23,13 @@ export {
 } from "./gitmodules.js";
 
 export { isValidSha, isGitSha, asGitSha } from "./sha-utils.js";
+
+export { extractRepoName } from "./url-parser.js";
+
+export { isGitRepository } from "./repository-validator.js";
+
+export { getCommitSha } from "./commit-utils.js";
+
+export { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";
+
+export { type GitOperations } from "../../types/git.js";

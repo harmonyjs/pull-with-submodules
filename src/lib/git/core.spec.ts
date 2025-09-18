@@ -72,22 +72,6 @@ describe("git-utils", () => {
     });
   });
 
-  describe("isGitRepository", () => {
-    it("should return true for current directory (git repo)", async () => {
-      // Current test directory should be a git repository
-      const { isGitRepository } = await import("./core.js");
-      const isRepo = await isGitRepository(".");
-      strictEqual(isRepo, true);
-    });
-
-    it("should return false for non-git directory", async () => {
-      const { isGitRepository } = await import("./core.js");
-      // Use a system directory that definitely isn't a git repo
-      const isRepo = await isGitRepository("/tmp");
-      strictEqual(isRepo, false);
-    });
-  });
-
   describe("getBranchName", () => {
     it("should get current branch name", async () => {
       const { getBranchName } = await import("./core.js");
@@ -103,42 +87,14 @@ describe("git-utils", () => {
     });
   });
 
-  describe("getCommitSha", () => {
-    it("should resolve HEAD to a valid SHA", async () => {
-      const { getCommitSha } = await import("./core.js");
-      try {
-        const sha = await getCommitSha("HEAD", { cwd: "." });
-        ok(typeof sha === "string");
-        ok(/^[a-f0-9]{40}$/i.test(sha)); // Valid 40-character hex SHA
-      } catch (error) {
-        // May fail if not in a git repo or no commits
-        ok(error instanceof Error);
-      }
-    });
-
-    it("should throw for invalid reference", async () => {
-      const { getCommitSha } = await import("./core.js");
-      try {
-        await getCommitSha("invalid-ref-12345", { cwd: "." });
-        // Should not reach here
-        ok(false, "Expected error for invalid reference");
-      } catch (error) {
-        ok(error instanceof Error);
-        ok(error.message.includes("Failed to resolve reference"));
-      }
-    });
-  });
-
   describe("module exports", () => {
     it("should export all expected functions", async () => {
       const module = await import("./core.js");
       ok(typeof module.createGit === "function");
       ok(typeof module.isAncestor === "function");
-      ok(typeof module.getCommitSha === "function");
       ok(typeof module.getBranchName === "function");
       ok(typeof module.isWorkingDirectoryClean === "function");
       ok(typeof module.getMergeBase === "function");
-      ok(typeof module.isGitRepository === "function");
     });
   });
 });
