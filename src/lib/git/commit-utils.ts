@@ -34,10 +34,10 @@ export async function getCommitSha(
 ): Promise<GitSha | null> {
   const gitConfig: GitOperationConfig = {
     cwd: repoPath,
-    timeout: config?.timeout,
-    dryRun: config?.dryRun,
-    verbose: config?.verbose,
-    logger: config?.logger,
+    ...(config?.timeout !== undefined && { timeout: config.timeout }),
+    ...(config?.dryRun !== undefined && { dryRun: config.dryRun }),
+    ...(config?.verbose !== undefined && { verbose: config.verbose }),
+    ...(config?.logger !== undefined && { logger: config.logger }),
   };
   return getCoreCommitSha(branch, gitConfig);
 }

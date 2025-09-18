@@ -89,11 +89,11 @@ Legend:
   - [x] Tests for discovery logic
 
 ### 7.5 Gitlink Operations
-- [ ] Implement `core/gitlink.ts`
-  - [ ] Add/Stage submodule path
-  - [ ] Commit message format: `chore(submodule): bump <path> to <branch> @ <sha>`
-  - [ ] Respect `dryRun` and `noCommit`
-  - [ ] Tests: commit invoked / skipped
+- [x] Implement `core/gitlink.ts`
+  - [x] Add/Stage submodule path
+  - [x] Commit message format: `chore(submodule): bump <path> to <branch> @ <sha>`
+  - [x] Respect `dryRun` and `noCommit`
+  - [x] Tests: commit invoked / skipped
 
 ## 8. Orchestration (`index.ts`)
 - [ ] Implement environment validation (git exists, node version >= requirement)
