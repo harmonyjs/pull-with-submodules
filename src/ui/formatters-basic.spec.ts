@@ -62,18 +62,19 @@ describe("formatters - basic functions", () => {
   });
 
   describe("formatSubmodulePath", () => {
-    void it("adds folder emoji prefix", () => {
-      assert.equal(formatSubmodulePath("libs/common"), "📁 libs/common");
-      assert.equal(formatSubmodulePath("apps/frontend"), "📁 apps/frontend");
-      assert.equal(formatSubmodulePath("src"), "📁 src");
+    void it("returns path without modification", () => {
+      assert.equal(formatSubmodulePath("libs/common"), "libs/common");
+      assert.equal(formatSubmodulePath("apps/frontend"), "apps/frontend");
+      assert.equal(formatSubmodulePath("src"), "src");
     });
   });
 
   describe("formatStatusIcon", () => {
     void it("returns correct icons for each status", () => {
-      assert.equal(formatStatusIcon("updated"), "✅");
-      assert.equal(formatStatusIcon("skipped"), "⏭️");
-      assert.equal(formatStatusIcon("failed"), "❌");
+      assert.equal(formatStatusIcon("updated"), "+");
+      assert.equal(formatStatusIcon("up-to-date"), "=");
+      assert.equal(formatStatusIcon("skipped"), "-");
+      assert.equal(formatStatusIcon("failed"), "x");
     });
   });
 

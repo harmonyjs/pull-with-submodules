@@ -18,6 +18,8 @@ export {
   confirm,
   spinner,
   note,
+  multilineNote,
+  summaryNote,
   handleCancellation,
 } from "./prompts.js";
 
@@ -33,3 +35,16 @@ export {
 
 // Completion module exports
 export { showCompletionMessage } from "./completion.js";
+
+// Color utilities exports
+export {
+  status,
+  symbols,
+  backgrounds,
+  styles,
+  colorizeStatus,
+  getStatusSymbol,
+} from "./colors.js";
+
+// Task log exports
+export { createTaskLog, withTaskLog, type TaskLog, type TaskLogConfig } from "./task-log.js";

@@ -3,6 +3,7 @@
  */
 
 import type { UpdateResult } from "#types/core";
+import table from "text-table";
 
 /**
  * Formats duration from milliseconds to human-readable string.
@@ -61,131 +62,12 @@ export function formatGitHash(sha: string, short: boolean = false): string {
  * @param path Submodule path relative to repository root.
  * @returns Formatted path string with visual emphasis.
  * @example
- * formatSubmodulePath("libs/common") // "📁 libs/common"
+ * formatSubmodulePath("libs/common") // "libs/common"
  */
 export function formatSubmodulePath(path: string): string {
-  return `📁 ${path}`;
+  return path;
 }
 
-/**
- * Calculates optimal column widths for the summary table.
- *
- * @param results Array of submodule update results.
- * @returns Column width configuration.
- */
-function calculateColumnWidths(results: UpdateResult[]): {
-  pathWidth: number;
-  statusWidth: number;
-  sourceWidth: number;
-  shaWidth: number;
-  durationWidth: number;
-  totalWidth: number;
-} {
-  const pathWidth = Math.max(4, ...results.map((r) => r.submodule.path.length));
-  const statusWidth = Math.max(6, ...results.map((r) => r.status.length));
-  const sourceWidth = 8; // "remote" or "local" or "-"
-  const shaWidth = 9; // 7 chars + "..." or "-"
-  const durationWidth = 10; // "999.9s" or similar
-
-  const totalWidth =
-    pathWidth + statusWidth + sourceWidth + shaWidth + durationWidth + 13; // 13 for separators
-
-  return {
-    pathWidth,
-    statusWidth,
-    sourceWidth,
-    shaWidth,
-    durationWidth,
-    totalWidth,
-  };
-}
-
-/**
- * Creates horizontal border line for table.
- *
- * @param widths Column width configuration.
- * @param borderType Type of border (top, middle, data-separator).
- * @returns Border line string.
- */
-function createBorderLine(
-  widths: ReturnType<typeof calculateColumnWidths>,
-  borderType: "top" | "middle" | "data-separator",
-): string {
-  const { pathWidth, statusWidth, sourceWidth, shaWidth, durationWidth } =
-    widths;
-
-  if (borderType === "top") {
-    return (
-      "├" +
-      "─".repeat(pathWidth + 1) +
-      "┬" +
-      "─".repeat(statusWidth + 1) +
-      "┬" +
-      "─".repeat(sourceWidth + 1) +
-      "┬" +
-      "─".repeat(shaWidth + 1) +
-      "┬" +
-      "─".repeat(durationWidth + 1) +
-      "┤"
-    );
-  }
-
-  return (
-    "├" +
-    "─".repeat(pathWidth + 1) +
-    "┼" +
-    "─".repeat(statusWidth + 1) +
-    "┼" +
-    "─".repeat(sourceWidth + 1) +
-    "┼" +
-    "─".repeat(shaWidth + 1) +
-    "┼" +
-    "─".repeat(durationWidth + 1) +
-    "┤"
-  );
-}
-
-/**
- * Creates table header lines with borders and column headers.
- *
- * @param widths Column width configuration.
- * @returns Array of header lines.
- */
-function createTableHeader(
-  widths: ReturnType<typeof calculateColumnWidths>,
-): string[] {
-  const {
-    pathWidth,
-    statusWidth,
-    sourceWidth,
-    shaWidth,
-    durationWidth,
-    totalWidth,
-  } = widths;
-
-  const lines: string[] = [];
-  lines.push("┌" + "─".repeat(totalWidth - 2) + "┐");
-  lines.push("│" + " Submodule Update Summary".padEnd(totalWidth - 2) + "│");
-  lines.push(createBorderLine(widths, "top"));
-
-  // Header row
-  const header =
-    "│ " +
-    "Path".padEnd(pathWidth) +
-    " │ " +
-    "Status".padEnd(statusWidth) +
-    " │ " +
-    "Source".padEnd(sourceWidth) +
-    " │ " +
-    "SHA".padEnd(shaWidth) +
-    " │ " +
-    "Duration".padEnd(durationWidth) +
-    " │";
-  lines.push(header);
-  lines.push(createBorderLine(widths, "data-separator"));
-
-  return lines;
-}
 
 /**
  * Creates a formatted summary table from update results.
@@ -201,67 +83,60 @@ export function formatSummaryTable(results: UpdateResult[]): string {
     return "No submodules processed.";
   }
 
-  const widths = calculateColumnWidths(results);
-  const lines = createTableHeader(widths);
-  const { pathWidth, statusWidth, sourceWidth, shaWidth, durationWidth } =
-    widths;
+  // Prepare table data with header
+  const tableData: string[][] = [
+    ["Path", "Status", "Source", "SHA", "Duration"]
+  ];
 
-  // Data rows
+  // Add data rows without colors for proper alignment
   for (const result of results) {
-    const path = result.submodule.path.padEnd(pathWidth);
-    const status = result.status.padEnd(statusWidth);
-    const source = (result.selection?.source ?? "-").padEnd(sourceWidth);
-    const sha = (
-      result.selection ? formatGitHash(result.selection.sha, true) : "-"
-    ).padEnd(shaWidth);
-    const duration = formatDuration(result.duration).padEnd(durationWidth);
+    const statusIcon = formatStatusIcon(result.status);
+    const statusText = result.status;
+    const statusWithSymbol = `${statusIcon} ${statusText}`;
 
-    const row = `│ ${path} │ ${status} │ ${source} │ ${sha} │ ${duration} │`;
-    lines.push(row);
+    const source = result.selection?.source ?? "-";
+    const sha = result.selection ? formatGitHash(result.selection.sha, true) : "-";
+    const duration = formatDuration(result.duration);
+
+    tableData.push([
+      result.submodule.path,
+      statusWithSymbol,
+      source,
+      sha,
+      duration
+    ]);
   }
 
-  // Footer
-  lines.push(
-    "└" +
-      "─".repeat(pathWidth + 1) +
-      "┴" +
-      "─".repeat(statusWidth + 1) +
-      "┴" +
-      "─".repeat(sourceWidth + 1) +
-      "┴" +
-      "─".repeat(shaWidth + 1) +
-      "┴" +
-      "─".repeat(durationWidth + 1) +
-      "┘",
-  );
-
-  return lines.join("\n");
+  // Create borderless table with proper alignment
+  return table(tableData, {
+    align: ['l', 'l', 'l', 'l', 'r'] // left-align most columns, right-align duration
+  });
 }
 
 /**
  * Formats a status icon based on submodule processing result.
  *
  * @param status Submodule processing status.
- * @returns Emoji icon representing the status.
+ * @returns Text icon representing the status.
  * @example
- * formatStatusIcon("updated") // "✅"
- * formatStatusIcon("up-to-date") // "✔️"
- * formatStatusIcon("failed") // "❌"
+ * formatStatusIcon("updated") // "+"
+ * formatStatusIcon("up-to-date") // "="
+ * formatStatusIcon("failed") // "x"
  */
 export function formatStatusIcon(
   status: "updated" | "up-to-date" | "skipped" | "failed",
 ): string {
   switch (status) {
     case "updated":
-      return "✅";
+      return "+";
     case "up-to-date":
-      return "✔️";
+      return "=";
     case "skipped":
-      return "⏭️";
+      return "-";
     case "failed":
-      return "❌";
+      return "x";
     default:
-      return "❓";
+      return "?";
   }
 }
 
