@@ -245,14 +245,17 @@ export function formatSummaryTable(results: UpdateResult[]): string {
  * @returns Emoji icon representing the status.
  * @example
  * formatStatusIcon("updated") // "✅"
+ * formatStatusIcon("up-to-date") // "✔️"
  * formatStatusIcon("failed") // "❌"
  */
 export function formatStatusIcon(
-  status: "updated" | "skipped" | "failed",
+  status: "updated" | "up-to-date" | "skipped" | "failed",
 ): string {
   switch (status) {
     case "updated":
       return "✅";
+    case "up-to-date":
+      return "✔️";
     case "skipped":
       return "⏭️";
     case "failed":
@@ -268,21 +271,27 @@ export function formatStatusIcon(
  * @param results Array of submodule update results.
  * @returns Formatted statistics string.
  * @example
- * formatStatistics(results) // "3 updated, 1 skipped, 1 failed (total: 5)"
+ * formatStatistics(results) // "3 updated, 1 up-to-date, 1 skipped, 1 failed (total: 6)"
  */
 export function formatStatistics(results: UpdateResult[]): string {
   const counts = {
     updated: 0,
+    upToDate: 0,
     skipped: 0,
     failed: 0,
   };
 
   for (const result of results) {
-    counts[result.status]++;
+    if (result.status === "up-to-date") {
+      counts.upToDate++;
+    } else {
+      counts[result.status]++;
+    }
   }
 
   const parts: string[] = [];
   if (counts.updated > 0) parts.push(`${counts.updated} updated`);
+  if (counts.upToDate > 0) parts.push(`${counts.upToDate} up-to-date`);
   if (counts.skipped > 0) parts.push(`${counts.skipped} skipped`);
   if (counts.failed > 0) parts.push(`${counts.failed} failed`);
 
