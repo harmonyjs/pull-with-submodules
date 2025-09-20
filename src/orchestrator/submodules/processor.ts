@@ -17,7 +17,7 @@ import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
  */
 export async function processSubmoduleWithErrorHandling(
   submodule: Submodule,
-  context: ExecutionContext
+  context: ExecutionContext,
 ): Promise<UpdateResult> {
   const startTime = Date.now();
 
@@ -25,15 +25,8 @@ export async function processSubmoduleWithErrorHandling(
     const processor = createSubmoduleProcessor(context);
     const plan = await processor.prepareUpdatePlan(submodule);
 
-    // TODO: Implement executeUpdatePlan(plan) -> UpdateResult
-    // This should:
-    // 1. Fetch remote commits for plan.branch
-    // 2. Discover local sibling repository
-    // 3. Use selectCommitSmart to choose between local/remote
-    // 4. Apply the selected commit to submodule working tree
-    // 5. Return proper UpdateResult with selection and status
-    throw new Error(`Submodule execution not yet implemented for: ${plan.submodule.name}. ` +
-      `Plan prepared for branch '${plan.branch.branch}' but execution logic is missing.`);
+    // Execute the update plan
+    return await processor.executeUpdatePlan(plan);
   } catch (error) {
     return {
       submodule,

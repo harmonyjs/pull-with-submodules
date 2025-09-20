@@ -10,8 +10,11 @@ import { createLogger } from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
 
 import type { StashResult } from "#orchestrator/stash";
-import { applyGitlinkCommits, restoreStashSafely } from "./helpers.js";
-import { handleUncommittedChanges, pullMainRepository } from "./pull-operations.js";
+import { restoreStashSafely } from "./helpers.js";
+import {
+  handleUncommittedChanges,
+  pullMainRepository,
+} from "./pull-operations.js";
 import { handleWorkflowError } from "./error-handler.js";
 import type { WorkflowResult } from "./types.js";
 
@@ -27,7 +30,7 @@ export type { WorkflowResult } from "./types.js";
  */
 export async function executeMainWorkflow(
   context: ExecutionContext,
-  submoduleResults: readonly UpdateResult[] = []
+  submoduleResults: readonly UpdateResult[] = [],
 ): Promise<WorkflowResult> {
   const startTime = Date.now();
   const errors: Error[] = [];
@@ -42,7 +45,7 @@ export async function executeMainWorkflow(
 
   let stash: StashResult | null = null;
   let mainRepositoryUpdated = false;
-  let gitlinkCommits = 0;
+  const gitlinkCommits = 0;
 
   try {
     // Step 1: Handle uncommitted changes
@@ -51,10 +54,8 @@ export async function executeMainWorkflow(
     // Step 2: Pull main repository
     mainRepositoryUpdated = await pullMainRepository(gitConfig);
 
-    // Step 3: Apply gitlink commits for submodule updates
-    if (!context.noCommit) {
-      gitlinkCommits = await applyGitlinkCommits(submoduleResults, gitConfig);
-    }
+    // Step 3: Gitlink commits will be applied later after submodule processing
+    // (in the main orchestrator)
 
     // Step 4: Restore stash if created
     if (stash !== null && stash.created === true) {
@@ -67,8 +68,8 @@ export async function executeMainWorkflow(
     return {
       mainRepositoryUpdated,
       stash,
-      submodulesProcessed: submoduleResults.length,
-      gitlinkCommits,
+      submodulesProcessed: 0, // Submodules will be processed later
+      gitlinkCommits: 0, // Gitlink commits will be applied later
       duration,
       errors,
     };

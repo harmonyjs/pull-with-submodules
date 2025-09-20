@@ -19,7 +19,7 @@ import type { SubmoduleProcessingSummary } from "./index.js";
  * @returns Promise resolving to list of submodules
  */
 export async function parseSubmodulesWithProgress(
-  context: ExecutionContext
+  context: ExecutionContext,
 ): Promise<readonly Submodule[]> {
   const s = spinner();
   s.start("Parsing .gitmodules file");
@@ -43,11 +43,11 @@ export async function parseSubmodulesWithProgress(
  */
 export function calculateProcessingSummary(
   results: readonly UpdateResult[],
-  startTime: number
+  startTime: number,
 ): SubmoduleProcessingSummary {
-  const updated = results.filter(r => r.status === "updated").length;
-  const skipped = results.filter(r => r.status === "skipped").length;
-  const failed = results.filter(r => r.status === "failed").length;
+  const updated = results.filter((r) => r.status === "updated").length;
+  const skipped = results.filter((r) => r.status === "skipped").length;
+  const failed = results.filter((r) => r.status === "failed").length;
 
   return {
     totalSubmodules: results.length,

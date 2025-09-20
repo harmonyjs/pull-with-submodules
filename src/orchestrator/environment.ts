@@ -40,7 +40,7 @@ export interface EnvironmentValidation {
  * @throws GitOperationError when environment is invalid or repository not found
  */
 export async function validateEnvironment(
-  currentWorkingDirectory: string = process.cwd()
+  currentWorkingDirectory: string = process.cwd(),
 ): Promise<EnvironmentValidation> {
   // Validate Node.js version
   const nodeVersion = process.version.slice(1); // Remove 'v' prefix
@@ -49,8 +49,10 @@ export async function validateEnvironment(
       `Node.js ${MIN_VERSIONS.node}+ required, found ${nodeVersion}`,
       {
         cause: new Error("Insufficient Node.js version"),
-        suggestions: [`Please upgrade to Node.js ${MIN_VERSIONS.node} or later`],
-      }
+        suggestions: [
+          `Please upgrade to Node.js ${MIN_VERSIONS.node} or later`,
+        ],
+      },
     );
   }
 
@@ -62,7 +64,7 @@ export async function validateEnvironment(
       {
         cause: new Error("Insufficient Git version"),
         suggestions: [`Please upgrade to Git ${MIN_VERSIONS.git} or later`],
-      }
+      },
     );
   }
 
@@ -93,13 +95,10 @@ async function getGitVersion(): Promise<string> {
 
     return match[1];
   } catch (error) {
-    throw new GitOperationError(
-      "Git version detection failed",
-      {
-        cause: error as Error,
-        suggestions: ["Ensure Git is installed and accessible in PATH"],
-      }
-    );
+    throw new GitOperationError("Git version detection failed", {
+      cause: error as Error,
+      suggestions: ["Ensure Git is installed and accessible in PATH"],
+    });
   }
 }
 
@@ -112,15 +111,21 @@ async function getGitVersion(): Promise<string> {
  */
 async function findRepositoryRoot(startingDirectory: string): Promise<string> {
   // Find .git directory - specify type: 'directory' to find directories
-  const gitDir = findUpSync(".git", { cwd: startingDirectory, type: "directory" });
+  const gitDir = findUpSync(".git", {
+    cwd: startingDirectory,
+    type: "directory",
+  });
 
   if (gitDir === undefined) {
     throw new GitOperationError(
       "Not a git repository (or any of the parent directories)",
       {
         cause: new Error("Repository detection failed"),
-        suggestions: ["Initialize git repository with 'git init'", "Navigate to a git repository directory"],
-      }
+        suggestions: [
+          "Initialize git repository with 'git init'",
+          "Navigate to a git repository directory",
+        ],
+      },
     );
   }
 
@@ -132,8 +137,11 @@ async function findRepositoryRoot(startingDirectory: string): Promise<string> {
       "Directory contains .git but is not a valid repository",
       {
         cause: new Error("Repository validation failed"),
-        suggestions: ["Check repository integrity", "Reinitialize repository if corrupted"],
-      }
+        suggestions: [
+          "Check repository integrity",
+          "Reinitialize repository if corrupted",
+        ],
+      },
     );
   }
 
@@ -151,7 +159,11 @@ function isVersionSufficient(current: string, required: string): boolean {
   const currentParts = current.split(".").map(Number);
   const requiredParts = required.split(".").map(Number);
 
-  for (let i = 0; i < Math.max(currentParts.length, requiredParts.length); i++) {
+  for (
+    let i = 0;
+    i < Math.max(currentParts.length, requiredParts.length);
+    i++
+  ) {
     const currentPart = currentParts[i];
     const requiredPart = requiredParts[i];
 
