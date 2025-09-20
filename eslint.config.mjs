@@ -100,6 +100,10 @@ const TS_SPECIFIC_RULES = {
       {
         group: ['../*', '../**/*'],
         message: 'Parent directory imports are not allowed. Use absolute paths with # aliases for cross-module imports (e.g., #core, #lib, #types, #ui).',
+      },
+      {
+        regex: '^#[^/]+/.*\\.js$',
+        message: 'Do not use .js extension with # aliases. The extension is automatically added by package.json imports mapping. Use: "#lib/git/sha-utils" instead of "#lib/git/sha-utils.js"',
       }
     ]
   }],
