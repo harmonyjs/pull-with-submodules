@@ -9,14 +9,32 @@ import { join } from "node:path";
 import { readGitmodules } from "#lib/git/gitmodules";
 import { fileExists } from "#lib/fs/core";
 import { GitOperationError } from "#errors/index";
-import type { ExecutionContext, Submodule } from "#types/core";
+import type {
+  ExecutionContext,
+  Submodule,
+  UpdateResult,
+  CommitSelection,
+} from "#types/core";
 import { createLogger, type Logger } from "#ui/logger";
+import { getCommitSha, fetchRemotes } from "#lib/git/operations";
+import { selectCommitSmart } from "./strategies.js";
+import { findSiblingRepository } from "./siblings.js";
+import {
+  createSkippedResult,
+  createUpdatedResult,
+  createFailedResult,
+} from "./result-utils.js";
 import {
   type BranchResolution,
   type SubmoduleUpdatePlan,
   type SubmoduleProcessor,
 } from "./types.js";
-import { performSubmoduleSync, performSubmoduleInit } from "./operations.js";
+import {
+  performSubmoduleSync,
+  performSubmoduleInit,
+  performSubmoduleUpdate,
+  type SubmoduleUpdateParams,
+} from "./operations.js";
 import { resolveBranch } from "./branch-resolver.js";
 import {
   prepareUpdatePlan,
@@ -27,7 +45,11 @@ import {
   createCurrentShaGetter,
   getErrorMessage,
 } from "./helpers.js";
-import { resolveSubmodulePaths } from "./paths.js";
+import {
+  validateAndLogPaths,
+  logPlanDetails,
+  createPathCache,
+} from "./processor-helpers.js";
 
 /**
  * Implementation of SubmoduleProcessor.
@@ -35,10 +57,7 @@ import { resolveSubmodulePaths } from "./paths.js";
 export class SubmoduleProcessorImpl implements SubmoduleProcessor {
   private readonly logger: Logger;
   private readonly context: ExecutionContext;
-  private readonly pathCache = new WeakMap<
-    Submodule,
-    { absolutePath: string; normalizedSubmodule: Submodule }
-  >();
+  private readonly pathCache = createPathCache();
 
   constructor(context: ExecutionContext) {
     this.logger = createLogger(context);
@@ -96,9 +115,9 @@ export class SubmoduleProcessorImpl implements SubmoduleProcessor {
   }
 
   async prepareUpdatePlan(submodule: Submodule): Promise<SubmoduleUpdatePlan> {
-    this.validateAndLogPaths(submodule);
+    validateAndLogPaths(submodule, this.logger);
 
-    const { absolutePath } = this.getCachedPaths(submodule);
+    const { absolutePath } = this.pathCache.get(submodule, this.context);
 
     const basePlan = await prepareUpdatePlan({
       submodule,
@@ -114,43 +133,103 @@ export class SubmoduleProcessorImpl implements SubmoduleProcessor {
     });
     const finalPlan = await enrichPlanWithCurrentSha(basePlan, getCurrentSha);
 
-    this.logPlanDetails(finalPlan);
+    logPlanDetails(finalPlan, this.logger);
 
     return finalPlan;
   }
 
-  private getCachedPaths(submodule: Submodule): {
-    absolutePath: string;
-    normalizedSubmodule: Submodule;
-  } {
-    let cached = this.pathCache.get(submodule);
-    if (!cached) {
-      cached = resolveSubmodulePaths(submodule, this.context);
-      this.pathCache.set(submodule, cached);
+  async executeUpdatePlan(plan: SubmoduleUpdatePlan): Promise<UpdateResult> {
+    const startTime = Date.now();
+
+    try {
+      const { absolutePath } = this.pathCache.get(plan.submodule, this.context);
+
+      await this.prepareSubmodule(plan, absolutePath);
+      const selection = await this.selectTargetCommit(plan, absolutePath);
+
+      if (!selection) {
+        return createSkippedResult(plan.submodule, startTime);
+      }
+
+      if (this.isUpdateNeeded(plan, selection)) {
+        await this.applySubmoduleUpdate(plan, selection, absolutePath);
+        return createUpdatedResult(plan.submodule, selection, startTime);
+      } else {
+        return createSkippedResult(plan.submodule, startTime, selection);
+      }
+    } catch (error) {
+      return createFailedResult(plan.submodule, startTime, error);
     }
-    return cached;
   }
 
-  private validateAndLogPaths(submodule: Submodule): void {
-    if (submodule.path.startsWith("/")) {
-      this.logger.warn(
-        `Submodule '${submodule.name}' has absolute path; this will be normalized to relative`,
-      );
+  private async prepareSubmodule(
+    plan: SubmoduleUpdatePlan,
+    absolutePath: string,
+  ): Promise<void> {
+    if (plan.needsInit) {
+      await this.initializeSubmodule(absolutePath);
     }
-  }
-
-  private logPlanDetails(plan: SubmoduleUpdatePlan): void {
-    this.logger.debug(`Update plan prepared for ${plan.submodule.name}:`, {
-      branch: plan.branch.branch,
-      source: plan.branch.source,
-      needsInit: plan.needsInit,
-      hasCurrentSha: Boolean(plan.currentSha),
+    await this.syncSubmodule(absolutePath);
+    await fetchRemotes({
+      cwd: absolutePath,
+      dryRun: this.context.dryRun,
+      logger: this.logger,
     });
+  }
 
-    if (plan.currentSha) {
-      this.logger.debug(
-        `Current SHA for ${plan.submodule.name}: ${plan.currentSha}`,
-      );
+  private async selectTargetCommit(
+    plan: SubmoduleUpdatePlan,
+    absolutePath: string,
+  ): Promise<CommitSelection | null> {
+    const remoteBranch = `origin/${plan.branch.branch}`;
+    const remoteSha = await getCommitSha(remoteBranch, { cwd: absolutePath });
+
+    let sibling = null;
+    if (plan.submodule.url !== undefined && plan.submodule.url !== "") {
+      sibling = await findSiblingRepository({
+        submodulePath: absolutePath,
+        remoteUrl: plan.submodule.url,
+        branch: plan.branch.branch,
+        gitConfig: {
+          cwd: this.context.repositoryRoot,
+          dryRun: this.context.dryRun,
+          logger: this.logger,
+        },
+        logger: this.logger,
+      });
     }
+
+    return selectCommitSmart(sibling?.commitSha || null, remoteSha, {
+      forceRemote: this.context.forceRemote,
+      cwd: absolutePath,
+    });
+  }
+
+  private isUpdateNeeded(
+    plan: SubmoduleUpdatePlan,
+    selection: CommitSelection,
+  ): boolean {
+    if (!plan.currentSha || plan.currentSha !== selection.sha) {
+      return true;
+    }
+    this.logger.debug(
+      `Submodule ${plan.submodule.name} already at target SHA ${selection.sha}`,
+    );
+    return false;
+  }
+
+  private async applySubmoduleUpdate(
+    plan: SubmoduleUpdatePlan,
+    selection: CommitSelection,
+    absolutePath: string,
+  ): Promise<void> {
+    const updateParams: SubmoduleUpdateParams = {
+      submodulePath: absolutePath,
+      targetSha: selection.sha,
+      branchName: plan.branch.branch,
+      context: this.context,
+      logger: this.logger,
+    };
+    await performSubmoduleUpdate(updateParams);
   }
 }

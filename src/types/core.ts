@@ -33,6 +33,8 @@ export interface Submodule {
   readonly name: string;
   /** Filesystem path to the submodule relative to the repository root. */
   readonly path: string;
+  /** Remote URL of the submodule repository (if available). */
+  readonly url?: string;
   /** Optional explicit tracking branch if present in configuration. */
   readonly branch?: string;
 }

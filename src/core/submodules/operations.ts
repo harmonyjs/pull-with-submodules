@@ -119,3 +119,112 @@ export async function performSubmoduleInit(
     );
   }
 }
+
+/**
+ * Updates submodule working tree to a specific commit SHA.
+ */
+export async function performSubmoduleUpdate(
+  updateParams: SubmoduleUpdateParams,
+): Promise<void> {
+  const { submodulePath, targetSha, branchName, context, logger } =
+    updateParams;
+
+  logger.debug(`Updating submodule at ${submodulePath} to ${targetSha}`);
+
+  if (context.dryRun) {
+    logger.info(`Would update submodule at ${submodulePath} to ${targetSha}`);
+    return;
+  }
+
+  await validateSubmoduleRepository(submodulePath, targetSha);
+  await updateSubmoduleToCommit({
+    submodulePath,
+    targetSha,
+    branchName,
+    logger,
+  });
+}
+
+/**
+ * Parameters for submodule update operation.
+ */
+export interface SubmoduleUpdateParams {
+  readonly submodulePath: string;
+  readonly targetSha: string;
+  readonly branchName: string;
+  readonly context: ExecutionContext;
+  readonly logger: Logger;
+}
+
+/**
+ * Parameters for updateSubmoduleToCommit function.
+ */
+interface SubmoduleCommitParams {
+  readonly submodulePath: string;
+  readonly targetSha: string;
+  readonly branchName: string;
+  readonly logger: Logger;
+}
+
+/**
+ * Validates that the submodule path is a valid git repository.
+ */
+async function validateSubmoduleRepository(
+  submodulePath: string,
+  targetSha: string,
+): Promise<void> {
+  const isRepo = await isGitRepository(submodulePath);
+  if (!isRepo) {
+    throw new GitOperationError(
+      `Submodule path is not a valid git repository: ${submodulePath}`,
+      {
+        details: { submodulePath, targetSha },
+        suggestions: [
+          "Initialize the submodule first",
+          "Check if the path exists and contains a .git directory",
+        ],
+      },
+    );
+  }
+}
+
+/**
+ * Updates submodule to specific commit using git operations.
+ */
+async function updateSubmoduleToCommit(
+  params: SubmoduleCommitParams,
+): Promise<void> {
+  const { submodulePath, targetSha, branchName, logger } = params;
+  try {
+    const git = createGit({ cwd: submodulePath });
+
+    // First try to checkout to branch and merge the SHA (fast-forward only)
+    try {
+      await git.checkout([branchName]);
+      await git.merge([targetSha, "--ff-only"]);
+      logger.debug(
+        `Successfully updated ${submodulePath} to ${branchName} @ ${targetSha}`,
+      );
+    } catch (_ffError) {
+      // Fall back to detached HEAD checkout
+      logger.debug(
+        `Fast-forward merge failed for ${submodulePath}, using detached HEAD`,
+      );
+      await git.checkout([targetSha, "--detach"]);
+      logger.debug(`Updated ${submodulePath} to detached HEAD @ ${targetSha}`);
+    }
+  } catch (error) {
+    throw new GitOperationError(
+      `Failed to update submodule at ${submodulePath} to ${targetSha}`,
+      {
+        cause: error,
+        details: { submodulePath, targetSha, branchName },
+        suggestions: [
+          "Check if the commit SHA exists in the repository",
+          "Ensure the submodule repository is in a clean state",
+          "Verify network connectivity for fetching",
+        ],
+      },
+    );
+  }
+}
