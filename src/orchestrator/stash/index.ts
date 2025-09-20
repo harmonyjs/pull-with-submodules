@@ -7,6 +7,7 @@
 
 import { createGit, type GitOperationConfig } from "#lib/git";
 import { GitOperationError } from "#errors";
+import { createTaskLog } from "#ui/task-log";
 
 import { validateStashReference, handleStashRestoreError } from "./helpers.js";
 
@@ -55,9 +56,6 @@ export async function getWorkingTreeStatus(
     const untrackedFiles = status.not_added.length;
     const modifiedPaths = [...status.modified, ...status.staged];
 
-    config.logger?.debug(
-      `Working tree status: ${modifiedFiles} modified, ${untrackedFiles} untracked`,
-    );
 
     return {
       clean: status.files.length === 0,
@@ -74,6 +72,29 @@ export async function getWorkingTreeStatus(
 }
 
 /**
+ * Validates stash message.
+ */
+function validateStashMessage(message: string): void {
+  if (message.trim() === "") {
+    throw new GitOperationError("Stash message cannot be empty", {
+      cause: new Error("Invalid stash message"),
+      suggestions: ["Provide a descriptive message for the stash"],
+    });
+  }
+}
+
+/**
+ * Handles dry-run stash creation.
+ */
+function handleDryRunStash(message: string): StashResult {
+  return {
+    stashRef: "stash@{0}",
+    created: true,
+    message,
+  };
+}
+
+/**
  * Creates a stash with uncommitted changes.
  *
  * @param message - Stash message
@@ -85,42 +106,36 @@ export async function createStash(
   message: string,
   config: GitOperationConfig = {},
 ): Promise<StashResult> {
-  if (message.trim() === "") {
-    throw new GitOperationError("Stash message cannot be empty", {
-      cause: new Error("Invalid stash message"),
-      suggestions: ["Provide a descriptive message for the stash"],
-    });
-  }
-
+  validateStashMessage(message);
   config.logger?.debug(`Creating stash with message: "${message}"`);
 
   if (config.dryRun === true) {
     config.logger?.info(`Create stash: "${message}" (dry-run)`);
+    return handleDryRunStash(message);
+  }
+
+  const status = await getWorkingTreeStatus(config);
+  if (status.clean) {
+    config.logger?.debug("No changes to stash");
     return {
-      stashRef: "stash@{0}",
-      created: true,
-      message,
+      stashRef: "",
+      created: false,
+      message: "No changes to stash",
     };
   }
 
   const git = createGit(config);
+  const taskLog = createTaskLog({
+    title: "Creating stash for uncommitted changes",
+    verbose: config.verbose ?? false
+  });
 
   try {
-    // Check if there are changes to stash
-    const status = await getWorkingTreeStatus(config);
-    if (status.clean) {
-      config.logger?.debug("No changes to stash");
-      return {
-        stashRef: "",
-        created: false,
-        message: "No changes to stash",
-      };
-    }
-
-    // Create stash with message
+    taskLog.message(`Stashing changes: ${message}`);
     await git.stash(["push", "-m", message]);
+    taskLog.success("Stash created successfully");
 
-    config.logger?.debug(`Stash created successfully: "${message}"`);
+    config.logger?.verbose(`Stash created successfully: "${message}"`);
 
     return {
       stashRef: "stash@{0}",
@@ -160,11 +175,18 @@ export async function restoreStash(
   }
 
   const git = createGit(config);
+  const taskLog = createTaskLog({
+    title: "Restoring stashed changes",
+    verbose: config.verbose ?? false
+  });
 
   try {
+    taskLog.message(`Restoring stash: ${stashRef}`);
     await git.stash(["pop", stashRef]);
-    config.logger?.debug(`Stash restored successfully: ${stashRef}`);
+    taskLog.success("Stash restored successfully");
+    config.logger?.verbose(`Stash restored successfully: ${stashRef}`);
   } catch (error) {
+    taskLog.error("Failed to restore stash");
     handleStashRestoreError(error, stashRef);
   }
 }
