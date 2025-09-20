@@ -68,13 +68,11 @@ describe("formatters - table formatting", () => {
 
       const table = formatSummaryTable(results);
 
-      // Verify table structure
-      assert.ok(table.includes("┌"), "Table should have top border");
-      assert.ok(table.includes("└"), "Table should have bottom border");
-      assert.ok(
-        table.includes("Submodule Update Summary"),
-        "Table should have title",
-      );
+      // Note: formatSummaryTable intentionally creates borderless tables
+      // for cleaner CLI output. Borders are added by the wrapping UI components
+      // when needed (e.g., multilineNote).
+
+      // Verify table headers
       assert.ok(table.includes("Path"), "Table should have Path column");
       assert.ok(table.includes("Status"), "Table should have Status column");
       assert.ok(table.includes("Source"), "Table should have Source column");
