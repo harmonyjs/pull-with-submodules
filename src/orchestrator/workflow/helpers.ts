@@ -5,7 +5,7 @@
  * and error handling used by the main workflow coordinator.
  */
 
-import { stageFiles, createCommit } from "#lib/git/operations";
+import { stageFiles, createCommit } from "#lib/git/git-utils";
 import { GitOperationError } from "#errors";
 import type { UpdateResult } from "#types/core";
 import type { GitOperationConfig } from "#lib/git";

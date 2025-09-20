@@ -5,7 +5,7 @@
  * with proper dry-run support and consistent message formatting.
  */
 
-import { stageFiles, createCommit } from "#lib/git/operations";
+import { stageFiles, createCommit } from "#lib/git/git-utils";
 import { createGit, type GitOperationConfig } from "#lib/git/core";
 import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils";
 import type { Submodule } from "#types/core";
