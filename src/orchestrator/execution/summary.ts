@@ -12,43 +12,100 @@ import { MILLISECONDS_PER_SECOND } from "#orchestrator";
 import type { ExecutionResult } from "./index.js";
 
 /**
- * Creates successful execution result from component results.
- *
- * @param options - Component results and metadata
- * @returns Formatted execution result
+ * Options for creating execution result.
  */
-export function createSuccessResult(options: {
-  environment: { gitVersion: string; nodeVersion: string; repositoryRoot: string };
-  submoduleResult: { totalSubmodules: number; updated: number; skipped: number; failed: number; duration: number };
-  workflowResult: { mainRepositoryUpdated: boolean; stash?: { created: boolean } | null; gitlinkCommits: number; duration: number };
+interface CreateResultOptions {
+  environment: {
+    gitVersion: string;
+    nodeVersion: string;
+    repositoryRoot: string;
+  };
+  submoduleResult: {
+    totalSubmodules: number;
+    updated: number;
+    skipped: number;
+    failed: number;
+    duration: number;
+  };
+  workflowResult: {
+    mainRepositoryUpdated: boolean;
+    stash?: { created: boolean } | null;
+    gitlinkCommits: number;
+    duration: number;
+  };
   totalDuration: number;
   errors: readonly Error[];
-}): ExecutionResult {
-  const { environment, submoduleResult, workflowResult, totalDuration, errors } = options;
-  const success = errors.length === 0 && submoduleResult.failed === 0;
+}
+
+/**
+ * Creates successful execution result from component results.
+ */
+export function createSuccessResult(
+  options: CreateResultOptions,
+): ExecutionResult {
+  const success =
+    options.errors.length === 0 && options.submoduleResult.failed === 0;
 
   return {
-    environment: {
-      gitVersion: environment.gitVersion,
-      nodeVersion: environment.nodeVersion,
-      repositoryRoot: environment.repositoryRoot,
-    },
-    submodules: {
-      totalSubmodules: submoduleResult.totalSubmodules,
-      updated: submoduleResult.updated,
-      skipped: submoduleResult.skipped,
-      failed: submoduleResult.failed,
-      duration: submoduleResult.duration,
-    },
-    workflow: {
-      mainRepositoryUpdated: workflowResult.mainRepositoryUpdated,
-      stashCreated: workflowResult.stash?.created ?? false,
-      gitlinkCommits: workflowResult.gitlinkCommits,
-      duration: workflowResult.duration,
-    },
-    totalDuration,
+    environment: createEnvironmentResult(options.environment),
+    submodules: createSubmoduleResult(options.submoduleResult),
+    workflow: createWorkflowResult(options.workflowResult),
+    totalDuration: options.totalDuration,
     success,
-    errors,
+    errors: options.errors,
+  };
+}
+
+/**
+ * Creates environment result section.
+ */
+function createEnvironmentResult(env: CreateResultOptions["environment"]): {
+  gitVersion: string;
+  nodeVersion: string;
+  repositoryRoot: string;
+} {
+  return {
+    gitVersion: env.gitVersion,
+    nodeVersion: env.nodeVersion,
+    repositoryRoot: env.repositoryRoot,
+  };
+}
+
+/**
+ * Creates submodule result section.
+ */
+function createSubmoduleResult(sub: CreateResultOptions["submoduleResult"]): {
+  totalSubmodules: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+  duration: number;
+} {
+  return {
+    totalSubmodules: sub.totalSubmodules,
+    updated: sub.updated,
+    skipped: sub.skipped,
+    failed: sub.failed,
+    duration: sub.duration,
+  };
+}
+
+/**
+ * Creates workflow result section.
+ */
+function createWorkflowResult(
+  workflow: CreateResultOptions["workflowResult"],
+): {
+  mainRepositoryUpdated: boolean;
+  stashCreated: boolean;
+  gitlinkCommits: number;
+  duration: number;
+} {
+  return {
+    mainRepositoryUpdated: workflow.mainRepositoryUpdated,
+    stashCreated: workflow.stash?.created ?? false,
+    gitlinkCommits: workflow.gitlinkCommits,
+    duration: workflow.duration,
   };
 }
 
@@ -62,7 +119,7 @@ export function createSuccessResult(options: {
 export function showExecutionSummary(
   result: ExecutionResult,
   submoduleResults: readonly UpdateResult[],
-  context: ExecutionContext
+  context: ExecutionContext,
 ): void {
   const logger = createLogger(context);
 
@@ -79,7 +136,9 @@ export function showExecutionSummary(
     `Skipped: ${result.submodules.skipped}`,
     result.submodules.failed > 0 ? `Failed: ${result.submodules.failed}` : null,
     `Time: ${(result.totalDuration / MILLISECONDS_PER_SECOND).toFixed(1)}s`,
-  ].filter(Boolean).join(" │ ");
+  ]
+    .filter(Boolean)
+    .join(" │ ");
 
   logger.info(stats);
 

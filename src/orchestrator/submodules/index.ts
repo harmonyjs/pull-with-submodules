@@ -5,7 +5,7 @@
  * using the core submodule processor with proper error handling and progress reporting.
  */
 
-import { createParallelRunner } from "#lib/async";
+import { createParallelRunner, type ParallelResult } from "#lib/async";
 import { createLogger } from "#ui";
 import { GitOperationError } from "#errors";
 import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
@@ -15,7 +15,7 @@ import { MAX_PARALLEL_SUBMODULES } from "#orchestrator";
 import {
   parseSubmodulesWithProgress,
   calculateProcessingSummary,
-  getStatusText
+  getStatusText,
 } from "./processing-utils.js";
 import { processSubmoduleWithErrorHandling } from "./processor.js";
 
@@ -45,7 +45,7 @@ export interface SubmoduleProcessingSummary {
  * @throws GitOperationError if submodule parsing or processing fails
  */
 export async function processSubmodules(
-  context: ExecutionContext
+  context: ExecutionContext,
 ): Promise<SubmoduleProcessingSummary> {
   const startTime = Date.now();
   const logger = createLogger(context);
@@ -76,20 +76,18 @@ export async function processSubmodules(
     // Calculate summary statistics
     const summary = calculateProcessingSummary(results, startTime);
 
-    logger.debug(`Submodule processing completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`);
+    logger.debug(
+      `Submodule processing completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
+    );
 
     return summary;
   } catch (error) {
-    throw new GitOperationError(
-      "Submodule processing failed",
-      {
-        cause: error as Error,
-        suggestions: ["Check .gitmodules file", "Verify submodule paths exist"],
-      }
-    );
+    throw new GitOperationError("Submodule processing failed", {
+      cause: error as Error,
+      suggestions: ["Check .gitmodules file", "Verify submodule paths exist"],
+    });
   }
 }
-
 
 /**
  * Processes submodules sequentially.
@@ -100,7 +98,7 @@ export async function processSubmodules(
  */
 async function processSubmodulesSequentially(
   submodules: readonly Submodule[],
-  context: ExecutionContext
+  context: ExecutionContext,
 ): Promise<readonly UpdateResult[]> {
   const logger = createLogger(context);
 
@@ -123,7 +121,9 @@ async function processSubmodulesSequentially(
     s.stop(`[${i + 1}/${submodules.length}] ${submodule.path} ${statusText}`);
 
     if (result.status === "failed") {
-      logger.error(`Failed to process ${submodule.path}: ${result.error?.message ?? "Unknown error"}`);
+      logger.error(
+        `Failed to process ${submodule.path}: ${result.error?.message ?? "Unknown error"}`,
+      );
     }
   }
 
@@ -132,56 +132,27 @@ async function processSubmodulesSequentially(
 
 /**
  * Processes submodules in parallel with concurrency limit.
- *
- * @param submodules - List of submodules to process
- * @param context - Execution context
- * @returns Promise resolving to processing results
  */
 async function processSubmodulesInParallel(
   submodules: readonly Submodule[],
-  context: ExecutionContext
+  context: ExecutionContext,
 ): Promise<readonly UpdateResult[]> {
   const logger = createLogger(context);
-
-  logger.debug(`Processing ${submodules.length} submodules in parallel (max 4 concurrent)`);
-
   const s = spinner();
+
+  logger.debug(
+    `Processing ${submodules.length} submodules in parallel (max 4 concurrent)`,
+  );
+
   s.start(`Processing ${submodules.length} submodules in parallel`);
 
   try {
-    const runParallel = createParallelRunner<UpdateResult>(MAX_PARALLEL_SUBMODULES);
+    const results = await runParallelSubmoduleProcessing(submodules, context);
+    const summary = summarizeParallelResults(results);
 
-    const processingFunctions = submodules.map(submodule => (): Promise<UpdateResult> =>
-      processSubmoduleWithErrorHandling(submodule, context)
+    s.stop(
+      `Completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
     );
-
-    const parallelResults = await runParallel(processingFunctions);
-
-    // Extract actual results from parallel wrapper
-    const results = parallelResults.map((result, index) => {
-      if (result.success) {
-        return result.value;
-      } else {
-        // Convert failed parallel result to UpdateResult
-        const submodule = submodules[index];
-        if (submodule === undefined) {
-          throw new Error(`Submodule at index ${index} is undefined during parallel processing`);
-        }
-        return {
-          submodule,
-          selection: null,
-          status: "failed" as const,
-          duration: result.duration,
-          error: result.error,
-        };
-      }
-    });
-
-    const updated = results.filter((r: UpdateResult) => r.status === "updated").length;
-    const skipped = results.filter((r: UpdateResult) => r.status === "skipped").length;
-    const failed = results.filter((r: UpdateResult) => r.status === "failed").length;
-
-    s.stop(`Completed: ${updated} updated, ${skipped} skipped, ${failed} failed`);
 
     return results;
   } catch (error) {
@@ -190,4 +161,66 @@ async function processSubmodulesInParallel(
   }
 }
 
+/**
+ * Runs parallel processing for submodules.
+ */
+async function runParallelSubmoduleProcessing(
+  submodules: readonly Submodule[],
+  context: ExecutionContext,
+): Promise<UpdateResult[]> {
+  const runParallel = createParallelRunner<UpdateResult>(
+    MAX_PARALLEL_SUBMODULES,
+  );
 
+  const processingFunctions = submodules.map(
+    (submodule) => (): Promise<UpdateResult> =>
+      processSubmoduleWithErrorHandling(submodule, context),
+  );
+
+  const parallelResults = await runParallel(processingFunctions);
+  return convertParallelResultsToUpdateResults(parallelResults, submodules);
+}
+
+/**
+ * Converts parallel results to update results.
+ */
+function convertParallelResultsToUpdateResults(
+  parallelResults: ParallelResult<UpdateResult>[],
+  submodules: readonly Submodule[],
+): UpdateResult[] {
+  return parallelResults.map((result, index) => {
+    if (result.success) {
+      return result.value;
+    }
+
+    const submodule = submodules[index];
+    if (submodule === undefined) {
+      throw new Error(
+        `Submodule at index ${index} is undefined during parallel processing`,
+      );
+    }
+
+    return {
+      submodule,
+      selection: null,
+      status: "failed" as const,
+      duration: result.duration,
+      error: result.error,
+    };
+  });
+}
+
+/**
+ * Summarizes parallel processing results.
+ */
+function summarizeParallelResults(results: readonly UpdateResult[]): {
+  updated: number;
+  skipped: number;
+  failed: number;
+} {
+  return {
+    updated: results.filter((r) => r.status === "updated").length,
+    skipped: results.filter((r) => r.status === "skipped").length,
+    failed: results.filter((r) => r.status === "failed").length,
+  };
+}
