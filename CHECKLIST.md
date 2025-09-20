@@ -28,7 +28,7 @@ Legend:
 - [x] Create `src/lib/`
 - [x] Create `src/ui/`
 - [x] Add placeholder `src/index.ts`
-- [ ] Create `bin/` entry script linking to dist (after build) (post-build)
+- [x] Create `bin/` entry script linking to dist (after build) (post-build)
 
 ## 3. Type Definitions
 - [x] Implement `src/types/core.ts`
@@ -96,40 +96,40 @@ Legend:
   - [x] Tests: commit invoked / skipped
 
 ## 8. Orchestration (`index.ts`)
-- [ ] Implement environment validation (git exists, node version >= requirement)
-- [ ] Detect repository root
-- [ ] Evaluate working tree cleanliness
-- [ ] Stash logic (push/pop) when needed & not dry-run
-- [ ] Pull main repository with rebase
-- [ ] Load and process submodules
-  - [ ] Sequential and parallel modes
-  - [ ] Collect per-submodule results (timings, status)
-- [ ] Apply gitlink commits if changes
-- [ ] Render summary report
-- [ ] Restore stash (if created)
-- [ ] Structured error handling & exit codes
+- [x] Implement environment validation (git exists, node version >= requirement)
+- [x] Detect repository root
+- [x] Evaluate working tree cleanliness
+- [x] Stash logic (push/pop) when needed & not dry-run
+- [x] Pull main repository with rebase
+- [x] Load and process submodules
+  - [x] Sequential and parallel modes
+  - [x] Collect per-submodule results (timings, status)
+- [x] Apply gitlink commits if changes
+- [x] Render summary report
+- [x] Restore stash (if created)
+- [x] Structured error handling & exit codes
 - [ ] Tests (unit-level for orchestrator pure helpers; integration deferred)
 
 ## 9. Error Handling & Resilience
-- [ ] Centralize error classes usage
-- [ ] Implement retry for network-like fetch operations (if simulated)
-- [ ] Ensure rebase conflicts abort properly and surface actionable message
-- [ ] Ensure partial submodule failures do not abort full run
-- [ ] Provide aggregated error summary
+- [x] Centralize error classes usage
+- [x] Implement retry for network-like fetch operations (if simulated)
+- [x] Ensure rebase conflicts abort properly and surface actionable message
+- [x] Ensure partial submodule failures do not abort full run
+- [x] Provide aggregated error summary
 
 ## 10. Performance Considerations
-- [ ] Constrain concurrency to 4 (p-limit)
-- [ ] Ensure no unbounded promise arrays retained
-- [ ] Measure basic timing (Date.now wrappers)
+- [x] Constrain concurrency to 4 (p-limit)
+- [x] Ensure no unbounded promise arrays retained
+- [x] Measure basic timing (Date.now wrappers)
 - [ ] (opt) Lazy load heavy modules if any
 
 ## 11. Logging & Verbosity
-- [ ] Verbose flag gates detailed git commands
-- [ ] Dry-run clearly prefixes actions (e.g., `DRY-RUN:`)
-- [ ] Consistent emoji / symbol usage (opt)
+- [x] Verbose flag gates detailed git commands
+- [x] Dry-run clearly prefixes actions (e.g., `DRY-RUN:`)
+- [x] Consistent emoji / symbol usage (opt)
 
 ## 12. Testing Strategy Implementation
-- [ ] Configure test script: `"test": "tsx --test \"src/**/*.spec.ts\""`
+- [x] Configure test script: `"test": "tsx --test \"src/**/*.spec.ts\""`
 - [ ] Add coverage tool (opt in v0.1.0) (nyc or c8) (opt)
 - [ ] Write unit tests for all pure modules
 - [ ] Mock simple-git in core tests
@@ -152,9 +152,9 @@ Legend:
 - [ ] Add CHANGELOG.md (Keep a Changelog format) (opt for 0.1.0)
 
 ## 15. Binary Packaging
-- [ ] Add `bin/pull-with-submodules` with shebang
-- [ ] Ensure `package.json` `bin` field maps correctly
-- [ ] Build step outputs to `dist/`
+- [x] Add `bin/pull-with-submodules` with shebang
+- [x] Ensure `package.json` `bin` field maps correctly
+- [x] Build step outputs to `dist/`
 - [ ] Validate ESM compatibility
 - [ ] Run `npm pack` sanity check
 
@@ -187,7 +187,7 @@ Legend:
 ---
 
 ## Quick Progress Snapshot (update manually)
-- Core Modules: [ ]
+- Core Modules: [x]
 - Tests: [ ]
 - Docs: [ ]
 - Release Ready: [ ]

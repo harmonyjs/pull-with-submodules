@@ -10,6 +10,11 @@ export { parseArgv, buildCli, getCliOptionsFromProcess } from "./cli.js";
 export { createContext } from "./context.js";
 export type { CliOptions } from "./cli.js";
 export type { ExecutionContext } from "./types/core.js";
+
+// Main orchestrator API
+export { executeComplete } from "./orchestrator/index.js";
+export type { ExecutionResult } from "./orchestrator/index.js";
+
 // Errors public API
 export {
   GitOperationError,
