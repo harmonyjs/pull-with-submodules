@@ -69,6 +69,23 @@ export function createUpdatedResult(params: {
 }
 
 /**
+ * Creates an up-to-date result for a submodule.
+ */
+export function createUpToDateResult(params: {
+  submodule: Submodule;
+  selection: CommitSelection;
+  startTime: number;
+  context?: ExecutionContext;
+}): UpdateResult {
+  return {
+    submodule: params.submodule,
+    selection: params.selection,
+    status: "up-to-date",
+    duration: calculateDuration(params.startTime, params.context),
+  };
+}
+
+/**
  * Creates a failed result for a submodule.
  */
 export function createFailedResult(params: {
