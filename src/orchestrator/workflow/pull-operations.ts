@@ -94,14 +94,17 @@ export async function pullMainRepository(
     const result = await pullWithRebase(gitConfig);
 
     if (result.changes > 0) {
-      s.stop(
-        `Updated ${result.changes} files with ${result.insertions} insertions, ${result.deletions} deletions`,
-      );
+      if (gitConfig.dryRun === true) {
+        s.stop(`Would pull ${result.changes} new commits from origin`);
+      } else {
+        s.stop(
+          `Updated ${result.changes} files with ${result.insertions} insertions, ${result.deletions} deletions`,
+        );
+      }
       return true;
     } else {
-      // In dry-run mode, check if we're actually behind origin
       if (gitConfig.dryRun === true) {
-        s.stop("Repository status checked (dry-run)");
+        s.stop("Repository is already up-to-date with origin");
       } else {
         s.stop("Repository is up to date");
       }
