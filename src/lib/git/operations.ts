@@ -24,6 +24,45 @@ export interface PullResult {
 }
 
 /**
+ * Handles dry-run mode for pull operations by checking repository status.
+ */
+async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult> {
+  config.logger?.info("Pull with rebase (dry-run)");
+
+  const git = createGit(config);
+  try {
+    await git.fetch(["--prune", "origin"]);
+    const status = await git.status();
+
+    if (status.behind > 0) {
+      config.logger?.info(`Would pull ${status.behind} new commits from origin`);
+      return {
+        changes: status.behind,
+        insertions: 0,
+        deletions: 0,
+        files: [],
+      };
+    } else {
+      config.logger?.info("Repository is already up-to-date with origin");
+      return {
+        changes: 0,
+        insertions: 0,
+        deletions: 0,
+        files: [],
+      };
+    }
+  } catch (error) {
+    config.logger?.warn(`Could not check repository status: ${error instanceof Error ? error.message : String(error)}`);
+    return {
+      changes: 0,
+      insertions: 0,
+      deletions: 0,
+      files: [],
+    };
+  }
+}
+
+/**
  * Pull with rebase from remote repository.
  *
  * @param config - Git operation configuration
@@ -42,13 +81,7 @@ export async function pullWithRebase(
   config.logger?.debug(`pull --rebase in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
-    config.logger?.info("Pull with rebase (dry-run)");
-    return {
-      changes: 0,
-      insertions: 0,
-      deletions: 0,
-      files: [],
-    };
+    return handleDryRunPull(config);
   }
 
   const git = createGit(config);
