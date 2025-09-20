@@ -111,8 +111,8 @@ async function getGitVersion(): Promise<string> {
  * @throws GitOperationError when repository is not found or invalid
  */
 async function findRepositoryRoot(startingDirectory: string): Promise<string> {
-  // Find .git directory
-  const gitDir = findUpSync(".git", { cwd: startingDirectory });
+  // Find .git directory - specify type: 'directory' to find directories
+  const gitDir = findUpSync(".git", { cwd: startingDirectory, type: "directory" });
 
   if (gitDir === undefined) {
     throw new GitOperationError(
