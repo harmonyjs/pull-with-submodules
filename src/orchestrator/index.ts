@@ -5,7 +5,7 @@
  * environment validation, submodule processing, and main repository operations.
  */
 
-import { intro, createLogger } from "#ui";
+import { intro, createLogger, showCompletionMessage } from "#ui";
 import type { ExecutionContext } from "#types/core";
 
 import {
@@ -88,6 +88,8 @@ export async function executeComplete(
     });
 
     showExecutionSummary(result, submoduleResult.results, context);
+    showCompletionMessage(result);
+
     return result;
   } catch (error) {
     return handleExecutionError({ error, errors, context, startTime });
