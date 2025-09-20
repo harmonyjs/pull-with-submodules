@@ -2,16 +2,16 @@
  * @fileoverview Minimal logging adapter with execution context integration.
  *
  * Provides level-based logging (debug, info, warn, error) with conditional
- * verbose output and dry-run prefixing. Designed as a thin wrapper around
- * console methods for consistent formatting across the application.
+ * verbose output. Designed as a thin wrapper around @clack/prompts log methods for
+ * consistent TUI formatting across the application.
  *
  * Key features:
  * - Respects ExecutionContext verbose flag for debug output
- * - Automatic "DRY-RUN:" prefixing in dry-run mode
- * - Type-safe log levels with consistent formatting
- * - Zero external dependencies (uses native console)
+ * - Uses @clack/prompts for consistent visual styling
+ * - Type-safe log levels with standardized formatting
  */
 
+import { log } from "@clack/prompts";
 import type { ExecutionContext } from "#types/core";
 
 /**
@@ -57,48 +57,50 @@ export interface Logger {
 }
 
 /**
- * Console-based logger implementation with execution context integration.
+ * Clack-based logger implementation with execution context integration.
  */
-class ConsoleLogger implements Logger {
+class ClackLogger implements Logger {
   constructor(private readonly context: ExecutionContext) {}
 
   debug(message: string, ...args: unknown[]): void {
     if (!this.context.verbose) return;
-    const prefixed = this.addPrefixes("🔍", message);
-    console.debug(prefixed, ...args);
+
+    // Format message with arguments if provided
+    const formattedMessage = args.length > 0
+      ? `${message} ${args.map(String).join(' ')}`
+      : message;
+
+    log.step(formattedMessage);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   info(message: string, ...args: unknown[]): void {
-    const prefixed = this.addPrefixes("ℹ️", message);
-    console.info(prefixed, ...args);
+    // Format message with arguments if provided
+    const formattedMessage = args.length > 0
+      ? `${message} ${args.map(String).join(' ')}`
+      : message;
+
+    log.info(formattedMessage);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   warn(message: string, ...args: unknown[]): void {
-    const prefixed = this.addPrefixes("⚠️", message);
-    console.warn(prefixed, ...args);
+    // Format message with arguments if provided
+    const formattedMessage = args.length > 0
+      ? `${message} ${args.map(String).join(' ')}`
+      : message;
+
+    log.warn(formattedMessage);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   error(message: string, ...args: unknown[]): void {
-    const prefixed = this.addPrefixes("❌", message);
-    console.error(prefixed, ...args);
-  }
+    // Format message with arguments if provided
+    const formattedMessage = args.length > 0
+      ? `${message} ${args.map(String).join(' ')}`
+      : message;
 
-  /**
-   * Applies dry-run and level prefixes to the message.
-   *
-   * @param levelIcon Emoji icon for the log level.
-   * @param message Original message to prefix.
-   * @returns Prefixed message string.
-   */
-  private addPrefixes(levelIcon: string, message: string): string {
-    const parts = [levelIcon];
-
-    if (this.context.dryRun) {
-      parts.push("DRY-RUN:");
-    }
-
-    parts.push(message);
-    return parts.join(" ");
+    log.error(formattedMessage);
   }
 }
 
@@ -113,5 +115,5 @@ class ConsoleLogger implements Logger {
  * logger.debug("Detailed debug info only shown when verbose=true");
  */
 export function createLogger(context: ExecutionContext): Logger {
-  return new ConsoleLogger(context);
+  return new ClackLogger(context);
 }

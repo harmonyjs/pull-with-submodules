@@ -69,7 +69,7 @@ export function showExecutionSummary(
   // Show submodule summary table if there were any submodules
   if (result.submodules.totalSubmodules > 0) {
     const summaryTable = formatSummaryTable([...submoduleResults]);
-    logger.info("\\n" + summaryTable);
+    logger.info(summaryTable);
   }
 
   // Show final statistics
@@ -81,15 +81,15 @@ export function showExecutionSummary(
     `Time: ${(result.totalDuration / MILLISECONDS_PER_SECOND).toFixed(1)}s`,
   ].filter(Boolean).join(" │ ");
 
-  logger.info(`\\n${stats}`);
+  logger.info(stats);
 
   // Show gitlink commits if any were created
   if (result.workflow.gitlinkCommits > 0) {
-    logger.info(`\\nCreated ${result.workflow.gitlinkCommits} gitlink commit(s)`);
+    logger.info(`Created ${result.workflow.gitlinkCommits} gitlink commit(s)`);
   }
 
   // Show dry-run notice
   if (context.dryRun) {
-    logger.info("\\n⚠ Dry-run mode: No actual changes were made");
+    logger.info("⚠ Dry-run mode: No actual changes were made");
   }
 }
