@@ -15,6 +15,16 @@ import { log } from "@clack/prompts";
 import type { ExecutionContext } from "#types/core";
 
 /**
+ * Interface for log implementation (for testing).
+ */
+export interface LogImplementation {
+  step(message: string): void;
+  info(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
+
+/**
  * Log level enumeration for type safety and filtering.
  */
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -60,47 +70,43 @@ export interface Logger {
  * Clack-based logger implementation with execution context integration.
  */
 class ClackLogger implements Logger {
-  constructor(private readonly context: ExecutionContext) {}
+  constructor(
+    private readonly context: ExecutionContext,
+    private readonly logImpl: LogImplementation = log,
+  ) {}
 
   debug(message: string, ...args: unknown[]): void {
     if (!this.context.verbose) return;
 
     // Format message with arguments if provided
-    const formattedMessage = args.length > 0
-      ? `${message} ${args.map(String).join(' ')}`
-      : message;
+    const formattedMessage =
+      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
 
-    log.step(formattedMessage);
+    this.logImpl.step(formattedMessage);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   info(message: string, ...args: unknown[]): void {
     // Format message with arguments if provided
-    const formattedMessage = args.length > 0
-      ? `${message} ${args.map(String).join(' ')}`
-      : message;
+    const formattedMessage =
+      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
 
-    log.info(formattedMessage);
+    this.logImpl.info(formattedMessage);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   warn(message: string, ...args: unknown[]): void {
     // Format message with arguments if provided
-    const formattedMessage = args.length > 0
-      ? `${message} ${args.map(String).join(' ')}`
-      : message;
+    const formattedMessage =
+      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
 
-    log.warn(formattedMessage);
+    this.logImpl.warn(formattedMessage);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   error(message: string, ...args: unknown[]): void {
     // Format message with arguments if provided
-    const formattedMessage = args.length > 0
-      ? `${message} ${args.map(String).join(' ')}`
-      : message;
+    const formattedMessage =
+      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
 
-    log.error(formattedMessage);
+    this.logImpl.error(formattedMessage);
   }
 }
 
@@ -114,6 +120,9 @@ class ClackLogger implements Logger {
  * logger.info("Starting submodule processing");
  * logger.debug("Detailed debug info only shown when verbose=true");
  */
-export function createLogger(context: ExecutionContext): Logger {
-  return new ClackLogger(context);
+export function createLogger(
+  context: ExecutionContext,
+  logImpl?: LogImplementation,
+): Logger {
+  return new ClackLogger(context, logImpl);
 }
