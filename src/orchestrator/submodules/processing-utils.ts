@@ -69,8 +69,10 @@ export function getStatusText(result: UpdateResult): string {
   switch (result.status) {
     case "updated":
       return `✔ Updated to ${result.selection?.source ?? "unknown"} @ ${result.selection?.sha.slice(0, SHORT_SHA_LENGTH) ?? "unknown"}`;
-    case "skipped":
+    case "up-to-date":
       return "○ Already up-to-date";
+    case "skipped":
+      return "○ Skipped";
     case "failed":
       return `✗ Failed: ${result.error?.message ?? "unknown error"}`;
     default:
