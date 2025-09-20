@@ -9,6 +9,7 @@ import { fetchRemotes } from "#lib/git/operations";
 import {
   createSkippedResult,
   createUpdatedResult,
+  createUpToDateResult,
   createFailedResult,
 } from "#core/submodules/result-utils";
 import {
@@ -90,10 +91,10 @@ export class SubmoduleUpdateExecutor {
           context: this.context,
         });
       } else {
-        return createSkippedResult({
+        return createUpToDateResult({
           submodule: plan.submodule,
-          startTime,
           selection,
+          startTime,
           context: this.context,
         });
       }
