@@ -23,7 +23,7 @@ export async function prepareUpdatePlan(params: {
   resolveBranch: (submodule: Submodule) => Promise<BranchResolution>;
 }): Promise<SubmoduleUpdatePlan> {
   const { submodule, context, logger, resolveBranch } = params;
-  logger.debug(`Preparing update plan for submodule ${submodule.name}`);
+  logger.verbose(`Preparing update plan for submodule ${submodule.name}`);
 
   const { absolutePath, normalizedSubmodule } = resolveSubmodulePaths(
     submodule,

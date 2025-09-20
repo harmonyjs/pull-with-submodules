@@ -21,7 +21,7 @@ export async function performSubmoduleSync(
   context: ExecutionContext,
   logger: Logger,
 ): Promise<void> {
-  logger.debug(`Syncing submodule at ${submodulePath}`);
+  logger.verbose(`Syncing submodule at ${submodulePath}`);
 
   if (context.dryRun) {
     logger.info(`Sync submodule at ${submodulePath} (dry-run)`);
@@ -51,7 +51,7 @@ export async function performSubmoduleSync(
     );
 
     await git.subModule(["sync", relativePath]);
-    logger.debug(`Submodule sync completed for ${submodulePath}`);
+    logger.verbose(`Submodule sync completed for ${submodulePath}`);
   } catch (error) {
     throw new GitOperationError(
       `Failed to sync submodule at ${submodulePath}`,
@@ -76,7 +76,7 @@ export async function performSubmoduleInit(
   context: ExecutionContext,
   logger: Logger,
 ): Promise<void> {
-  logger.debug(`Initializing submodule at ${submodulePath}`);
+  logger.verbose(`Initializing submodule at ${submodulePath}`);
 
   if (context.dryRun) {
     logger.info(`Initialize submodule at ${submodulePath} (dry-run)`);
@@ -87,7 +87,7 @@ export async function performSubmoduleInit(
   if (pathExists) {
     const isRepo = await isGitRepository(submodulePath);
     if (isRepo) {
-      logger.debug(`Submodule already initialized at ${submodulePath}`);
+      logger.verbose(`Submodule already initialized at ${submodulePath}`);
       return;
     }
   }
@@ -102,7 +102,7 @@ export async function performSubmoduleInit(
     await git.subModule(["init", relativePath]);
     await git.subModule(["update", relativePath]);
 
-    logger.debug(`Submodule initialization completed for ${submodulePath}`);
+    logger.verbose(`Submodule initialization completed for ${submodulePath}`);
   } catch (error) {
     throw new GitOperationError(
       `Failed to initialize submodule at ${submodulePath}`,
@@ -129,7 +129,7 @@ export async function performSubmoduleUpdate(
   const { submodulePath, targetSha, branchName, context, logger } =
     updateParams;
 
-  logger.debug(`Updating submodule at ${submodulePath} to ${targetSha}`);
+  logger.verbose(`Updating submodule at ${submodulePath} to ${targetSha}`);
 
   if (context.dryRun) {
     logger.info(
@@ -204,16 +204,16 @@ async function updateSubmoduleToCommit(
     try {
       await git.checkout([branchName]);
       await git.merge([targetSha, "--ff-only"]);
-      logger.debug(
+      logger.verbose(
         `Successfully updated ${submodulePath} to ${branchName} @ ${targetSha}`,
       );
     } catch (_ffError) {
       // Fall back to detached HEAD checkout
-      logger.debug(
+      logger.verbose(
         `Fast-forward merge failed for ${submodulePath}, using detached HEAD`,
       );
       await git.checkout([targetSha, "--detach"]);
-      logger.debug(`Updated ${submodulePath} to detached HEAD @ ${targetSha}`);
+      logger.verbose(`Updated ${submodulePath} to detached HEAD @ ${targetSha}`);
     }
   } catch (error) {
     throw new GitOperationError(

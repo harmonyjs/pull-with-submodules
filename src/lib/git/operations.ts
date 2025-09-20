@@ -8,6 +8,7 @@
 import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
 import type { GitSha } from "#types/git";
+import { createTaskLog } from "#ui/task-log";
 
 /**
  * Result of a pull operation.
@@ -27,15 +28,21 @@ export interface PullResult {
  * Handles dry-run mode for pull operations by checking repository status.
  */
 async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult> {
-  config.logger?.info("Pull with rebase (dry-run)");
+  const taskLog = createTaskLog({
+    title: "Checking repository status (dry-run)",
+    verbose: config.verbose ?? false
+  });
 
   const git = createGit(config);
   try {
+    taskLog.message("Fetching from origin...");
     await git.fetch(["--prune", "origin"]);
+
+    taskLog.message("Checking status...");
     const status = await git.status();
 
     if (status.behind > 0) {
-      config.logger?.info(`Would pull ${status.behind} new commits from origin`);
+      taskLog.success(`Would pull ${status.behind} new commits from origin`);
       return {
         changes: status.behind,
         insertions: 0,
@@ -43,7 +50,6 @@ async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult>
         files: [],
       };
     } else {
-      config.logger?.info("Repository is already up-to-date with origin");
       return {
         changes: 0,
         insertions: 0,
@@ -52,7 +58,8 @@ async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult>
       };
     }
   } catch (error) {
-    config.logger?.warn(`Could not check repository status: ${error instanceof Error ? error.message : String(error)}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    taskLog.warning(`Could not check repository status: ${errorMessage}`);
     return {
       changes: 0,
       insertions: 0,
@@ -78,21 +85,32 @@ async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult>
 export async function pullWithRebase(
   config: GitOperationConfig = {},
 ): Promise<PullResult> {
-  config.logger?.debug(`pull --rebase in ${config.cwd ?? process.cwd()}`);
+  config.logger?.verbose(`pull --rebase in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
     return handleDryRunPull(config);
   }
 
+  const taskLog = createTaskLog({
+    title: "Pulling main repository with rebase",
+    verbose: config.verbose ?? false
+  });
+
   const git = createGit(config);
 
   try {
+    taskLog.message("Executing git pull --rebase...");
     const result = await git.pull(["--rebase"]);
 
-    config.logger?.debug(`Pull completed: ${result.summary.changes} changes`);
+    const changes = result.summary.changes;
+    if (changes > 0) {
+      taskLog.success(`Pull completed: ${changes} changes`);
+    }
+
+    config.logger?.verbose(`Pull completed: ${changes} changes`);
 
     return {
-      changes: result.summary.changes,
+      changes,
       insertions: result.summary.insertions,
       deletions: result.summary.deletions,
       files: result.files,
@@ -101,9 +119,11 @@ export async function pullWithRebase(
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     if (errorMessage.includes("conflict")) {
+      taskLog.error("Rebase conflicts detected");
       throw new Error(`Rebase conflicts detected: ${errorMessage}`);
     }
 
+    taskLog.error(`Pull failed: ${errorMessage}`);
     throw new Error(`Pull with rebase failed: ${errorMessage}`);
   }
 }
@@ -123,20 +143,28 @@ export async function pullWithRebase(
 export async function fetchRemotes(
   config: GitOperationConfig = {},
 ): Promise<void> {
-  config.logger?.debug(`fetch in ${config.cwd ?? process.cwd()}`);
+  config.logger?.verbose(`fetch in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
     config.logger?.info("Fetch remotes (dry-run)");
     return;
   }
 
+  const taskLog = createTaskLog({
+    title: "Fetching from remotes",
+    verbose: config.verbose ?? false
+  });
+
   const git = createGit(config);
 
   try {
+    taskLog.message("Fetching from all remotes...");
     await git.fetch();
-    config.logger?.debug("Fetch completed");
+    taskLog.success("Fetch completed");
+    config.logger?.verbose("Fetch completed");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    taskLog.error(`Fetch failed: ${errorMessage}`);
     throw new Error(`Fetch failed: ${errorMessage}`);
   }
 }

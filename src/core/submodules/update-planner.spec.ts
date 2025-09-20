@@ -29,6 +29,7 @@ const TEST_SHA: GitSha = "abc123def456" as GitSha;
 // Mock logger interface
 interface MockLogger {
   debug: (message: string, data?: any) => void;
+  verbose: (message: string, data?: any) => void;
   info: (message: string) => void;
   warn: (message: string) => void;
   error: (message: string) => void;
@@ -46,6 +47,7 @@ const mockContext: ExecutionContext = {
 
 const createMockLogger = (): MockLogger => ({
   debug: mock.fn(),
+  verbose: mock.fn(),
   info: mock.fn(),
   warn: mock.fn(),
   error: mock.fn(),

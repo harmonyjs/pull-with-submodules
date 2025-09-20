@@ -27,7 +27,7 @@ export async function resolveBranch(
   context: ExecutionContext,
   logger: Logger,
 ): Promise<BranchResolution> {
-  logger.debug(`Resolving branch for submodule ${submodule.name}`);
+  logger.verbose(`Resolving branch for submodule ${submodule.name}`);
 
   if (submodule.branch !== undefined && submodule.branch.trim().length > 0) {
     return {
@@ -43,7 +43,7 @@ export async function resolveBranch(
     const isRepo = await isGitRepository(submodulePath);
     if (isRepo) {
       const currentBranch = await getBranchName({ cwd: submodulePath });
-      logger.debug(
+      logger.verbose(
         `Detected current branch '${currentBranch}' in submodule ${submodule.name}`,
       );
 
@@ -59,7 +59,7 @@ export async function resolveBranch(
     );
   }
 
-  logger.debug(
+  logger.verbose(
     `Using fallback branch '${DEFAULT_BRANCH}' for submodule ${submodule.name}`,
   );
   return {

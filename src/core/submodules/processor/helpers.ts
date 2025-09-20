@@ -31,7 +31,7 @@ export function logPlanDetails(
   plan: SubmoduleUpdatePlan,
   logger: Logger,
 ): void {
-  logger.debug(`Update plan prepared for ${plan.submodule.name}:`, {
+  logger.verbose(`Update plan prepared for ${plan.submodule.name}:`, {
     branch: plan.branch.branch,
     source: plan.branch.source,
     needsInit: plan.needsInit,
@@ -39,7 +39,7 @@ export function logPlanDetails(
   });
 
   if (plan.currentSha) {
-    logger.debug(`Current SHA for ${plan.submodule.name}: ${plan.currentSha}`);
+    logger.verbose(`Current SHA for ${plan.submodule.name}: ${plan.currentSha}`);
   }
 }
 

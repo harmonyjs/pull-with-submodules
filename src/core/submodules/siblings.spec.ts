@@ -60,7 +60,7 @@ test("findSiblingRepository - uses cache and logger when provided", async () => 
 
   // Mock logger
   const mockLogger = {
-    debug: mock.fn(),
+    debug: mock(), verbose: mock.fn().fn(),
     info: mock.fn(),
     warn: mock.fn(),
     error: mock.fn(),
@@ -97,7 +97,7 @@ test("findSiblingRepository - path generation logic", () => {
 
   // Mock the filesystem operations to control behavior
   const mockLogger = {
-    debug: mock.fn(),
+    debug: mock(), verbose: mock.fn().fn(),
     info: mock.fn(),
     warn: mock.fn(),
     error: mock.fn(),
@@ -122,7 +122,7 @@ test("findSiblingRepository - successful discovery scenario", async () => {
   cache.set("/workspace/shared-utils", true);
 
   const mockLogger = {
-    debug: mock.fn(),
+    debug: mock(), verbose: mock.fn().fn(),
     info: mock.fn(),
     warn: mock.fn(),
     error: mock.fn(),
@@ -148,7 +148,7 @@ test("findSiblingRepository - successful discovery scenario", async () => {
 test("findSiblingRepository - cache efficiency", async () => {
   const cache = new InMemoryRepositoryCache();
   const mockLogger = {
-    debug: mock.fn(),
+    debug: mock(), verbose: mock.fn().fn(),
     info: mock.fn(),
     warn: mock.fn(),
     error: mock.fn(),

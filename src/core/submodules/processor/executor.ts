@@ -136,7 +136,7 @@ export class SubmoduleUpdateExecutor {
     if (!plan.currentSha || plan.currentSha !== selection.sha) {
       return true;
     }
-    this.logger.debug(
+    this.logger.verbose(
       `Submodule ${plan.submodule.name} already at target SHA ${selection.sha}`,
     );
     return false;

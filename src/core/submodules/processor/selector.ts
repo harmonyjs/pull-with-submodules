@@ -43,7 +43,7 @@ export class SubmoduleCommitSelector {
 
     let sibling = null;
     if (plan.submodule.url !== undefined && plan.submodule.url !== "") {
-      this.logger.debug(`Searching for local sibling repository for ${plan.submodule.name}`);
+      this.logger.verbose(`Searching for local sibling repository for ${plan.submodule.name}`);
       sibling = await findSiblingRepository({
         submodulePath: absolutePath,
         remoteUrl: plan.submodule.url,
@@ -57,14 +57,14 @@ export class SubmoduleCommitSelector {
       });
 
       if (sibling !== null && sibling.isValid === true && sibling.commitSha !== null) {
-        this.logger.debug(`Found local sibling: ${sibling.name} at ${sibling.path} with SHA ${sibling.commitSha}`);
+        this.logger.verbose(`Found local sibling: ${sibling.name} at ${sibling.path} with SHA ${sibling.commitSha}`);
       } else if (sibling !== null && sibling.isValid === true) {
-        this.logger.debug(`Found local sibling: ${sibling.name} at ${sibling.path} but no valid SHA for branch ${plan.branch.branch}`);
+        this.logger.verbose(`Found local sibling: ${sibling.name} at ${sibling.path} but no valid SHA for branch ${plan.branch.branch}`);
       } else {
-        this.logger.debug(`No valid local sibling found for ${plan.submodule.name}`);
+        this.logger.verbose(`No valid local sibling found for ${plan.submodule.name}`);
       }
     } else {
-      this.logger.debug(`No URL configured for submodule ${plan.submodule.name}, skipping sibling search`);
+      this.logger.verbose(`No URL configured for submodule ${plan.submodule.name}, skipping sibling search`);
     }
 
     const selection = await selectCommitSmart(sibling?.commitSha || null, remoteSha, {
@@ -73,9 +73,9 @@ export class SubmoduleCommitSelector {
     });
 
     if (selection) {
-      this.logger.debug(`Selected commit ${selection.sha} from ${selection.source}: ${selection.reason}`);
+      this.logger.verbose(`Selected commit ${selection.sha} from ${selection.source}: ${selection.reason}`);
     } else {
-      this.logger.debug(`No commit selected for ${plan.submodule.name}`);
+      this.logger.verbose(`No commit selected for ${plan.submodule.name}`);
     }
 
     return selection;

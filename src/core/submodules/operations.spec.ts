@@ -34,7 +34,7 @@ const mockContext: ExecutionContext = {
 };
 
 const createMockLogger = (): MockLogger => ({
-  debug: mock.fn(),
+  debug: mock(), verbose: mock.fn().fn(),
   info: mock.fn(),
   warn: mock.fn(),
   error: mock.fn(),

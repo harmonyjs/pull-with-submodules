@@ -60,13 +60,13 @@ export class SubmoduleProcessorImpl implements SubmoduleProcessor {
   }
 
   async parseSubmodules(repoPath: string): Promise<Submodule[]> {
-    this.logger.debug(`Parsing .gitmodules in ${repoPath}`);
+    this.logger.verbose(`Parsing .gitmodules in ${repoPath}`);
 
     const gitmodulesPath = join(repoPath, ".gitmodules");
     const exists = await fileExists(gitmodulesPath);
 
     if (!exists) {
-      this.logger.debug("No .gitmodules file found, returning empty array");
+      this.logger.verbose("No .gitmodules file found, returning empty array");
       return [];
     }
 
@@ -76,7 +76,7 @@ export class SubmoduleProcessorImpl implements SubmoduleProcessor {
         baseDir: repoPath,
       });
 
-      this.logger.debug(
+      this.logger.verbose(
         `Parsed ${entries.length} submodule(s) from .gitmodules`,
       );
 
