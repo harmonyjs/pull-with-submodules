@@ -8,7 +8,7 @@
 import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
 import type { GitSha } from "#types/git";
-import { createTaskLog } from "#ui/task-log";
+import { createTaskLog, type TaskLog } from "#ui/task-log";
 
 /**
  * Result of a pull operation.
@@ -22,6 +22,45 @@ export interface PullResult {
   readonly deletions: number;
   /** List of changed files */
   readonly files: readonly string[];
+}
+
+/**
+ * Processes repository status and returns appropriate pull result.
+ */
+function processRepositoryStatus(status: { ahead: number; behind: number }, taskLog: TaskLog): PullResult {
+  if (status.behind > 0 && status.ahead > 0) {
+    taskLog.success(`Repository has diverged: ${status.ahead} local commits, ${status.behind} remote commits`);
+    return {
+      changes: status.behind,
+      insertions: 0,
+      deletions: 0,
+      files: [],
+    };
+  } else if (status.behind > 0) {
+    taskLog.success(`Would pull ${status.behind} new commits from origin`);
+    return {
+      changes: status.behind,
+      insertions: 0,
+      deletions: 0,
+      files: [],
+    };
+  } else if (status.ahead > 0) {
+    taskLog.success(`Repository is ahead by ${status.ahead} commits (push needed)`);
+    return {
+      changes: 0,
+      insertions: 0,
+      deletions: 0,
+      files: [],
+    };
+  } else {
+    taskLog.success("Repository is already up-to-date with origin");
+    return {
+      changes: 0,
+      insertions: 0,
+      deletions: 0,
+      files: [],
+    };
+  }
 }
 
 /**
@@ -41,22 +80,7 @@ async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult>
     taskLog.message("Checking status...");
     const status = await git.status();
 
-    if (status.behind > 0) {
-      taskLog.success(`Would pull ${status.behind} new commits from origin`);
-      return {
-        changes: status.behind,
-        insertions: 0,
-        deletions: 0,
-        files: [],
-      };
-    } else {
-      return {
-        changes: 0,
-        insertions: 0,
-        deletions: 0,
-        files: [],
-      };
-    }
+    return processRepositoryStatus(status, taskLog);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     taskLog.warning(`Could not check repository status: ${errorMessage}`);
@@ -229,89 +253,4 @@ export async function getWorkingTreeStatus(
   }
 }
 
-/**
- * Stage files to the index (git add).
- *
- * @param paths - File paths to stage
- * @param config - Git operation configuration
- * @returns Promise that resolves when staging completes
- * @throws Error if staging fails
- *
- * @example
- * ```typescript
- * await stageFiles(['path/to/file'], { cwd: '/path/to/repo' });
- * ```
- */
-export async function stageFiles(
-  paths: readonly string[],
-  config: GitOperationConfig = {},
-): Promise<void> {
-  if (paths.length === 0) {
-    config.logger?.debug("No files to stage");
-    return;
-  }
 
-  const pathList = paths.join(", ");
-  config.logger?.debug(
-    `staging files: ${pathList} in ${config.cwd ?? process.cwd()}`,
-  );
-
-  if (config.dryRun === true) {
-    config.logger?.info(`Stage files: ${pathList} (dry-run)`);
-    return;
-  }
-
-  const git = createGit(config);
-
-  try {
-    await git.add(paths as string[]);
-    config.logger?.debug(`Staged ${paths.length} file(s)`);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to stage files [${pathList}]: ${errorMessage}`);
-  }
-}
-
-/**
- * Create a commit with the specified message.
- *
- * @param message - Commit message
- * @param config - Git operation configuration
- * @returns Promise resolving to the created commit SHA
- * @throws Error if commit creation fails
- *
- * @example
- * ```typescript
- * const sha = await createCommit('feat: add new feature', { cwd: '/path/to/repo' });
- * ```
- */
-export async function createCommit(
-  message: string,
-  config: GitOperationConfig = {},
-): Promise<GitSha> {
-  if (message.trim() === "") {
-    throw new Error("Commit message cannot be empty");
-  }
-
-  config.logger?.debug(
-    `creating commit: "${message}" in ${config.cwd ?? process.cwd()}`,
-  );
-
-  if (config.dryRun === true) {
-    config.logger?.info(`Create commit: "${message}" (dry-run)`);
-    // Return a mock SHA for dry-run mode
-    return asGitSha("0000000000000000000000000000000000000000");
-  }
-
-  const git = createGit(config);
-
-  try {
-    const result = await git.commit(message);
-    const sha = result.commit;
-    config.logger?.debug(`Created commit ${sha}`);
-    return asGitSha(sha);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to create commit: ${errorMessage}`);
-  }
-}
