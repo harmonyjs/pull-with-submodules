@@ -24,7 +24,7 @@ export async function performSubmoduleSync(
   logger.debug(`Syncing submodule at ${submodulePath}`);
 
   if (context.dryRun) {
-    logger.info(`Would sync submodule at ${submodulePath}`);
+    logger.info(`Sync submodule at ${submodulePath} (dry-run)`);
     return;
   }
 
@@ -79,7 +79,7 @@ export async function performSubmoduleInit(
   logger.debug(`Initializing submodule at ${submodulePath}`);
 
   if (context.dryRun) {
-    logger.info(`Would initialize submodule at ${submodulePath}`);
+    logger.info(`Initialize submodule at ${submodulePath} (dry-run)`);
     return;
   }
 
@@ -132,7 +132,9 @@ export async function performSubmoduleUpdate(
   logger.debug(`Updating submodule at ${submodulePath} to ${targetSha}`);
 
   if (context.dryRun) {
-    logger.info(`Would update submodule at ${submodulePath} to ${targetSha}`);
+    logger.info(
+      `Update submodule at ${submodulePath} to ${targetSha} (dry-run)`,
+    );
     return;
   }
 

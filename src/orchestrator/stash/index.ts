@@ -95,7 +95,7 @@ export async function createStash(
   config.logger?.debug(`Creating stash with message: "${message}"`);
 
   if (config.dryRun === true) {
-    config.logger?.info(`Would create stash: "${message}"`);
+    config.logger?.info(`Create stash: "${message}" (dry-run)`);
     return {
       stashRef: "stash@{0}",
       created: true,
@@ -155,7 +155,7 @@ export async function restoreStash(
   config.logger?.debug(`Restoring stash: ${stashRef}`);
 
   if (config.dryRun === true) {
-    config.logger?.info(`Would restore stash: ${stashRef}`);
+    config.logger?.info(`Restore stash: ${stashRef} (dry-run)`);
     return;
   }
 

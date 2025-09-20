@@ -85,7 +85,7 @@ export async function restoreStashSafely(
 
   // In dry-run mode, the stash creation was simulated, so restoration should also be simulated
   if (gitConfig.dryRun === true) {
-    gitConfig.logger?.info(`Would restore stash: ${stash.stashRef}`);
+    gitConfig.logger?.info(`Restore stash: ${stash.stashRef} (dry-run)`);
     return;
   }
 

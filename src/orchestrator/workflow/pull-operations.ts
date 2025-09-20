@@ -42,7 +42,7 @@ export async function handleUncommittedChanges(
 
     // In dry-run mode, just report what would happen
     if (gitConfig.dryRun === true) {
-      gitConfig.logger?.info("Would stash uncommitted changes");
+      gitConfig.logger?.info("Stash uncommitted changes (dry-run)");
       return {
         stashRef: "stash@{0}",
         created: true,
@@ -99,7 +99,12 @@ export async function pullMainRepository(
       );
       return true;
     } else {
-      s.stop("Repository is up to date");
+      // In dry-run mode, check if we're actually behind origin
+      if (gitConfig.dryRun === true) {
+        s.stop("Repository status checked (dry-run)");
+      } else {
+        s.stop("Repository is up to date");
+      }
       return false;
     }
   } catch (error) {

@@ -42,7 +42,7 @@ export async function pullWithRebase(
   config.logger?.debug(`pull --rebase in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
-    config.logger?.info("Would pull with rebase");
+    config.logger?.info("Pull with rebase (dry-run)");
     return {
       changes: 0,
       insertions: 0,
@@ -93,7 +93,7 @@ export async function fetchRemotes(
   config.logger?.debug(`fetch in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
-    config.logger?.info("Would fetch remotes");
+    config.logger?.info("Fetch remotes (dry-run)");
     return;
   }
 
@@ -196,7 +196,7 @@ export async function stageFiles(
   );
 
   if (config.dryRun === true) {
-    config.logger?.info(`Would stage files: ${pathList}`);
+    config.logger?.info(`Stage files: ${pathList} (dry-run)`);
     return;
   }
 
@@ -237,7 +237,7 @@ export async function createCommit(
   );
 
   if (config.dryRun === true) {
-    config.logger?.info(`Would create commit: "${message}"`);
+    config.logger?.info(`Create commit: "${message}" (dry-run)`);
     // Return a mock SHA for dry-run mode
     return asGitSha("0000000000000000000000000000000000000000");
   }
