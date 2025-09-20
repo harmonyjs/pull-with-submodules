@@ -6,9 +6,9 @@
  */
 
 import { parseSubmodules } from "#core";
-import type { ExecutionContext, UpdateResult, Submodule } from "#types/core.js";
+import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
 import { spinner } from "@clack/prompts";
-import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils.js";
+import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils";
 
 import type { SubmoduleProcessingSummary } from "./index.js";
 

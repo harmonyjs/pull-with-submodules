@@ -7,7 +7,7 @@
 
 import { outro, createLogger } from "#ui";
 import { GitOperationError } from "#errors";
-import type { ExecutionContext } from "#types/core.js";
+import type { ExecutionContext } from "#types/core";
 
 import type { ExecutionResult } from "./index.js";
 

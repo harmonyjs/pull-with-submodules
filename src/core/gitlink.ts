@@ -5,11 +5,11 @@
  * with proper dry-run support and consistent message formatting.
  */
 
-import { stageFiles, createCommit } from "#lib/git/operations.js";
-import { createGit, type GitOperationConfig } from "#lib/git/core.js";
-import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils.js";
-import type { Submodule } from "#types/core.js";
-import type { GitSha } from "#types/git.js";
+import { stageFiles, createCommit } from "#lib/git/operations";
+import { createGit, type GitOperationConfig } from "#lib/git/core";
+import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils";
+import type { Submodule } from "#types/core";
+import type { GitSha } from "#types/git";
 
 /**
  * Result of a gitlink operation.

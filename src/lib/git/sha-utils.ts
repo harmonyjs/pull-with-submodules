@@ -5,8 +5,8 @@
  * validation and type conversion with proper error handling.
  */
 
-import { GitOperationError } from "#errors/index.js";
-import type { GitSha } from "#types/git.js";
+import { GitOperationError } from "#errors/index";
+import type { GitSha } from "#types/git";
 
 /**
  * Minimum length for a valid Git SHA hash.

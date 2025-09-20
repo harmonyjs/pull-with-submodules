@@ -7,7 +7,7 @@ import {
   commitGitlink,
   type GitlinkCommitParams,
 } from "./gitlink.js";
-import type { Submodule } from "#types/core.js";
+import type { Submodule } from "#types/core";
 
 test("formatGitlinkMessage", async (t) => {
   await t.test("formats message with short SHA", () => {

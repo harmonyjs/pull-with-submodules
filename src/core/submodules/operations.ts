@@ -5,12 +5,12 @@
  * separated from the main processor for better modularity.
  */
 
-import { createGit } from "#lib/git/core.js";
-import { isGitRepository } from "#lib/git/index.js";
-import { fileExists } from "#lib/fs/core.js";
-import { GitOperationError } from "#errors/index.js";
-import type { ExecutionContext } from "#types/core.js";
-import type { Logger } from "#ui/logger.js";
+import { createGit } from "#lib/git/core";
+import { isGitRepository } from "#lib/git/index";
+import { fileExists } from "#lib/fs/core";
+import { GitOperationError } from "#errors/index";
+import type { ExecutionContext } from "#types/core";
+import type { Logger } from "#ui/logger";
 import { toGitRelativePath } from "./paths.js";
 
 /**

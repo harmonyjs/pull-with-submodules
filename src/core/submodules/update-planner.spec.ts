@@ -7,8 +7,8 @@
 
 import { strict as assert } from "node:assert";
 import { test, describe, mock } from "node:test";
-import type { ExecutionContext, Submodule } from "#types/core.js";
-import type { GitSha } from "#types/git.js";
+import type { ExecutionContext, Submodule } from "#types/core";
+import type { GitSha } from "#types/git";
 import {
   BRANCH_SOURCES,
   DEFAULT_BRANCH,

@@ -7,7 +7,7 @@
 
 import { strict as assert } from "node:assert";
 import { test, describe } from "node:test";
-import type { ExecutionContext, Submodule } from "#types/core.js";
+import type { ExecutionContext, Submodule } from "#types/core";
 import {
   BRANCH_SOURCES,
   DEFAULT_BRANCH,

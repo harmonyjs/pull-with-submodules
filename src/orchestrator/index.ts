@@ -6,7 +6,7 @@
  */
 
 import { intro, createLogger } from "#ui";
-import type { ExecutionContext, UpdateResult } from "#types/core.js";
+import type { ExecutionContext, UpdateResult } from "#types/core";
 
 import { validateEnvironment } from "./environment.js";
 import { processSubmodules } from "./submodules/index.js";

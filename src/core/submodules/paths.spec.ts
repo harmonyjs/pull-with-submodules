@@ -8,7 +8,7 @@
 import { strict as assert } from "node:assert";
 import { test, describe } from "node:test";
 import { sep as pathSep } from "node:path";
-import type { ExecutionContext, Submodule } from "#types/core.js";
+import type { ExecutionContext, Submodule } from "#types/core";
 import { resolveSubmodulePaths, toGitRelativePath } from "./paths.js";
 
 // Test constants

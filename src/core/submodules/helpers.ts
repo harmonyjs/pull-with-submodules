@@ -5,11 +5,11 @@
  * and shared utilities used across the submodule processing system.
  */
 
-import type { Submodule } from "#types/core.js";
-import type { SubmoduleEntry } from "#lib/git/gitmodules.js";
-import { createGit } from "#lib/git/core.js";
-import { asGitSha } from "#lib/git/sha-utils.js";
-import type { GitSha } from "#types/git.js";
+import type { Submodule } from "#types/core";
+import type { SubmoduleEntry } from "#lib/git/gitmodules";
+import { createGit } from "#lib/git/core";
+import { asGitSha } from "#lib/git/sha-utils";
+import type { GitSha } from "#types/git";
 
 /**
  * Normalizes submodule entry from .gitmodules to domain model.

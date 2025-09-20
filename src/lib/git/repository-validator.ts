@@ -6,7 +6,7 @@
  */
 
 import { simpleGit } from "simple-git";
-import { isDirectory } from "#lib/fs/index.js";
+import { isDirectory } from "#lib/fs/index";
 import type { RepositoryCache } from "./cache.js";
 
 /**

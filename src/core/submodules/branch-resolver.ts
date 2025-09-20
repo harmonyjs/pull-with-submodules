@@ -5,10 +5,10 @@
  */
 
 import { join } from "node:path";
-import { getBranchName } from "#lib/git/core.js";
-import { isGitRepository } from "#lib/git/index.js";
-import type { ExecutionContext, Submodule } from "#types/core.js";
-import type { Logger } from "#ui/logger.js";
+import { getBranchName } from "#lib/git/core";
+import { isGitRepository } from "#lib/git/index";
+import type { ExecutionContext, Submodule } from "#types/core";
+import type { Logger } from "#ui/logger";
 import {
   BRANCH_SOURCES,
   DEFAULT_BRANCH,

@@ -6,7 +6,7 @@
  */
 
 import { createSubmoduleProcessor } from "#core";
-import type { ExecutionContext, UpdateResult, Submodule } from "#types/core.js";
+import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
 
 /**
  * Processes a single submodule with comprehensive error handling.

@@ -18,13 +18,13 @@
  */
 
 import { dirname, join, basename } from "node:path";
-import { extractRepoName } from "#lib/git/url-parser.js";
-import { isGitRepository } from "#lib/git/repository-validator.js";
-import { getCommitSha } from "#lib/git/commit-utils.js";
-import type { RepositoryCache } from "#lib/git/cache.js";
-import type { GitSha } from "#types/git.js";
-import type { GitOperationConfig } from "#lib/git/core.js";
-import type { Logger } from "#ui/logger.js";
+import { extractRepoName } from "#lib/git/url-parser";
+import { isGitRepository } from "#lib/git/repository-validator";
+import { getCommitSha } from "#lib/git/commit-utils";
+import type { RepositoryCache } from "#lib/git/cache";
+import type { GitSha } from "#types/git";
+import type { GitOperationConfig } from "#lib/git/core";
+import type { Logger } from "#ui/logger";
 
 /**
  * Describes a discovered sibling repository and its state.

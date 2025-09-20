@@ -8,7 +8,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import debug from "debug";
-import { fileExists, resolveAbsolutePath } from "#lib/fs/core.js";
+import { fileExists, resolveAbsolutePath } from "#lib/fs/core";
 
 const gitmodulesDebug = debug("pull-with-submodules:gitmodules");
 

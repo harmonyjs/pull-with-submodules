@@ -12,7 +12,7 @@
  * - Zero external dependencies (uses native console)
  */
 
-import type { ExecutionContext } from "#types/core.js";
+import type { ExecutionContext } from "#types/core";
 
 /**
  * Log level enumeration for type safety and filtering.

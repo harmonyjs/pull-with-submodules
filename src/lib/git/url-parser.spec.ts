@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { extractRepoName } from "./url-parser.js";
-import { GitOperationError } from "#errors/index.js";
+import { GitOperationError } from "#errors/index";
 
 test("extractRepoName - GitHub HTTPS URLs", () => {
   assert.equal(extractRepoName("https://github.com/user/repo.git"), "repo");

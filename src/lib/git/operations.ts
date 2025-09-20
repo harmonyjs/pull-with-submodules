@@ -7,7 +7,7 @@
 
 import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
-import type { GitSha } from "#types/git.js";
+import type { GitSha } from "#types/git";
 
 /**
  * Result of a pull operation.

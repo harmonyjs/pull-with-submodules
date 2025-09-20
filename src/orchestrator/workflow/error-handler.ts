@@ -9,7 +9,7 @@
  * the primary error reporting.
  */
 
-import type { ExecutionContext, UpdateResult } from "#types/core.js";
+import type { ExecutionContext, UpdateResult } from "#types/core";
 import type { GitOperationConfig } from "#lib/git";
 
 import { restoreStashSafely } from "./helpers.js";

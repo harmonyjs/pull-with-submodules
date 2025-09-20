@@ -12,7 +12,7 @@ import type {
   UpdateResult,
   Submodule,
   CommitSelection,
-} from "#types/core.js";
+} from "#types/core";
 
 describe("formatters - table formatting", () => {
   const createSubmodule = (name: string, path: string): Submodule => ({

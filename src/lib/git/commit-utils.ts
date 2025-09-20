@@ -7,7 +7,7 @@
 
 import { getCommitSha as getCoreCommitSha } from "./operations.js";
 import type { GitOperationConfig } from "./core.js";
-import type { GitSha } from "#types/git.js";
+import type { GitSha } from "#types/git";
 
 /**
  * Get commit SHA for a branch in a repository.

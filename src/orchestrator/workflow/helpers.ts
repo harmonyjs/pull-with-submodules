@@ -5,14 +5,14 @@
  * and error handling used by the main workflow coordinator.
  */
 
-import { stageFiles, createCommit } from "#lib/git/operations.js";
+import { stageFiles, createCommit } from "#lib/git/operations";
 import { GitOperationError } from "#errors";
-import type { UpdateResult } from "#types/core.js";
+import type { UpdateResult } from "#types/core";
 import type { GitOperationConfig } from "#lib/git";
 import { spinner } from "@clack/prompts";
 
 import { restoreStash, type StashResult } from "#orchestrator/stash";
-import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils.js";
+import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils";
 
 /**
  * Applies gitlink commits for updated submodules.

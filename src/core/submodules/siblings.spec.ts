@@ -4,10 +4,10 @@ import {
   findSiblingRepository,
   type SiblingDiscoveryOptions,
 } from "./siblings.js";
-import { extractRepoName } from "#lib/git/url-parser.js";
-import { isGitRepository } from "#lib/git/repository-validator.js";
-import { getCommitSha } from "#lib/git/commit-utils.js";
-import { InMemoryRepositoryCache } from "#lib/git/cache.js";
+import { extractRepoName } from "#lib/git/url-parser";
+import { isGitRepository } from "#lib/git/repository-validator";
+import { getCommitSha } from "#lib/git/commit-utils";
+import { InMemoryRepositoryCache } from "#lib/git/cache";
 
 // URL parser tests - verify integration
 test("extractRepoName integration", () => {

@@ -6,11 +6,11 @@
  */
 
 import { join } from "node:path";
-import { readGitmodules } from "#lib/git/gitmodules.js";
-import { fileExists } from "#lib/fs/core.js";
-import { GitOperationError } from "#errors/index.js";
-import type { ExecutionContext, Submodule } from "#types/core.js";
-import { createLogger, type Logger } from "#ui/logger.js";
+import { readGitmodules } from "#lib/git/gitmodules";
+import { fileExists } from "#lib/fs/core";
+import { GitOperationError } from "#errors/index";
+import type { ExecutionContext, Submodule } from "#types/core";
+import { createLogger, type Logger } from "#ui/logger";
 import {
   type BranchResolution,
   type SubmoduleUpdatePlan,

@@ -6,7 +6,7 @@
  */
 
 import { formatSummaryTable, createLogger } from "#ui";
-import type { ExecutionContext, UpdateResult } from "#types/core.js";
+import type { ExecutionContext, UpdateResult } from "#types/core";
 
 import { MILLISECONDS_PER_SECOND } from "#orchestrator";
 import type { ExecutionResult } from "./index.js";

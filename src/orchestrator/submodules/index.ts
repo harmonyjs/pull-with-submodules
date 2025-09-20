@@ -8,7 +8,7 @@
 import { createParallelRunner } from "#lib/async";
 import { createLogger } from "#ui";
 import { GitOperationError } from "#errors";
-import type { ExecutionContext, UpdateResult, Submodule } from "#types/core.js";
+import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
 import { spinner } from "@clack/prompts";
 
 import { MAX_PARALLEL_SUBMODULES } from "#orchestrator";

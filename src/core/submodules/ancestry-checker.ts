@@ -5,7 +5,7 @@
  * enabling dependency injection and testability.
  */
 
-import { isAncestor, type AncestryCheckResult } from "#lib/git/core.js";
+import { isAncestor, type AncestryCheckResult } from "#lib/git/core";
 
 /**
  * Dependency injection interface for ancestry checking.

@@ -6,7 +6,7 @@
  */
 
 import { simpleGit, type SimpleGit } from "simple-git";
-import type { Logger } from "#ui/logger.js";
+import type { Logger } from "#ui/logger";
 
 /**
  * Result of a git ancestry check operation.
