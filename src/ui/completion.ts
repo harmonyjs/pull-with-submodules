@@ -20,8 +20,8 @@ import type { ExecutionResult } from "#orchestrator/index";
 export function showCompletionMessage(result: ExecutionResult): void {
   if (result.success) {
     const seconds = (result.totalDuration / MILLISECONDS_PER_SECOND).toFixed(1);
-    outro(`✨ Done in ${seconds}s`);
+    outro(`Done in ${seconds}s`);
   } else {
-    outro("❌ Completed with errors");
+    outro("Completed with errors");
   }
 }

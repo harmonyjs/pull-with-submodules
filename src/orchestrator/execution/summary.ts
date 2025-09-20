@@ -5,7 +5,7 @@
  * summary information to users.
  */
 
-import { formatSummaryTable, createLogger } from "#ui";
+import { formatSummaryTable, createLogger, multilineNote, summaryNote } from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
 
 import { MILLISECONDS_PER_SECOND } from "#orchestrator/constants";
@@ -126,10 +126,10 @@ export function showExecutionSummary(
   // Show submodule summary table if there were any submodules
   if (result.submodules.totalSubmodules > 0) {
     const summaryTable = formatSummaryTable([...submoduleResults]);
-    logger.info(summaryTable);
+    multilineNote(summaryTable, "Submodule Update Summary");
   }
 
-  // Show final statistics
+  // Show final statistics in a summary note
   const stats = [
     `Total: ${result.submodules.totalSubmodules} submodules`,
     `Updated: ${result.submodules.updated}`,
@@ -140,7 +140,7 @@ export function showExecutionSummary(
     .filter(Boolean)
     .join(" │ ");
 
-  logger.info(stats);
+  summaryNote(stats);
 
   // Show gitlink commits if any were created
   if (result.workflow.gitlinkCommits > 0) {
@@ -149,6 +149,6 @@ export function showExecutionSummary(
 
   // Show dry-run notice
   if (context.dryRun) {
-    logger.info("⚠ Dry-run mode: No actual changes were made");
+    logger.warn("Dry-run mode: No actual changes were made");
   }
 }

@@ -34,11 +34,11 @@ export async function handleUncommittedChanges(
     const status = await getWorkingTreeStatus(gitConfig);
 
     if (status.clean) {
-      s.stop("Working tree is clean");
+      s.stop("Working tree is clean (0 modified, 0 untracked)");
       return null;
     }
 
-    s.stop(`Found ${status.modifiedFiles} modified files`);
+    s.stop(`Working tree has changes (${status.modifiedFiles} modified, ${status.untrackedFiles} untracked)`);
 
     // In dry-run mode, just report what would happen
     if (gitConfig.dryRun === true) {

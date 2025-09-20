@@ -50,14 +50,14 @@ export async function processSubmodules(
   const startTime = Date.now();
   const logger = createLogger(context);
 
-  logger.debug("Starting submodule processing");
+  logger.verbose("Starting submodule processing");
 
   try {
     // Parse .gitmodules file
     const submodules = await parseSubmodulesWithProgress(context);
 
     if (submodules.length === 0) {
-      logger.debug("No submodules found in repository");
+      logger.verbose("No submodules found in repository");
       return {
         totalSubmodules: 0,
         updated: 0,
@@ -76,7 +76,7 @@ export async function processSubmodules(
     // Calculate summary statistics
     const summary = calculateProcessingSummary(results, startTime);
 
-    logger.debug(
+    logger.verbose(
       `Submodule processing completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
     );
 
@@ -104,7 +104,7 @@ async function processSubmodulesSequentially(
 
   const results: UpdateResult[] = [];
 
-  logger.debug(`Processing ${submodules.length} submodules sequentially`);
+  logger.verbose(`Processing ${submodules.length} submodules sequentially`);
 
   for (let i = 0; i < submodules.length; i++) {
     const submodule = submodules[i];
@@ -112,13 +112,13 @@ async function processSubmodulesSequentially(
       throw new Error(`Submodule at index ${i} is undefined`);
     }
     const s = spinner();
-    s.start(`[${i + 1}/${submodules.length}] Processing ${submodule.path}`);
+    s.start(`[${i + 1}/${submodules.length}] Processing submodule: ${submodule.path}`);
 
     const result = await processSubmoduleWithErrorHandling(submodule, context);
     results.push(result);
 
     const statusText = getStatusText(result);
-    s.stop(`[${i + 1}/${submodules.length}] ${submodule.path} ${statusText}`);
+    s.stop(`[${i + 1}/${submodules.length}] ${submodule.path} - ${statusText}`);
 
     if (result.status === "failed") {
       logger.error(
@@ -140,7 +140,7 @@ async function processSubmodulesInParallel(
   const logger = createLogger(context);
   const s = spinner();
 
-  logger.debug(
+  logger.verbose(
     `Processing ${submodules.length} submodules in parallel (max 4 concurrent)`,
   );
 

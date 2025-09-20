@@ -14,10 +14,11 @@
  */
 
 import * as clack from "@clack/prompts";
+import { backgrounds } from "./colors.js";
 
 /**
  * Standard application introduction message.
- * Shows the application name and purpose at startup.
+ * Shows the application name and purpose at startup with styled background.
  *
  * @example
  * intro();
@@ -25,7 +26,8 @@ import * as clack from "@clack/prompts";
  * outro("All submodules updated successfully!");
  */
 export function intro(): void {
-  clack.intro("🔄 pull-with-submodules");
+  const styledTitle = backgrounds.title(" pull-with-submodules ");
+  clack.intro(styledTitle);
 }
 
 /**
@@ -91,10 +93,10 @@ export async function spinner<T>(
 
   try {
     const result = await operation();
-    s.stop("✅ Done");
+    s.stop("Done");
     return result;
   } catch (error) {
-    s.stop("❌ Failed");
+    s.stop("Failed");
     throw error;
   }
 }
@@ -115,11 +117,37 @@ export function note(
   clack.note(
     message,
     type === "info"
-      ? "ℹ️  Info"
+      ? "Info"
       : type === "warning"
-        ? "⚠️  Warning"
-        : "❌ Error",
+        ? "Warning"
+        : "Error",
   );
+}
+
+/**
+ * Displays multiline content in a nicely formatted note box.
+ * Perfect for showing tables, summaries, or structured information.
+ *
+ * @param content Multiline content to display
+ * @param title Optional title for the note
+ * @example
+ * multilineNote(tableOutput, "Submodule Summary");
+ * multilineNote(errorDetails, "Error Details");
+ */
+export function multilineNote(content: string, title?: string): void {
+  clack.note(content, title);
+}
+
+/**
+ * Displays a summary note with enhanced formatting.
+ *
+ * @param content Summary content to display
+ * @param title Optional title (defaults to "Summary")
+ * @example
+ * summaryNote("3 updated, 1 skipped, 0 failed");
+ */
+export function summaryNote(content: string, title: string = "Summary"): void {
+  clack.note(content, title);
 }
 
 /**

@@ -41,7 +41,7 @@ export async function executeMainWorkflow(
     logger,
   };
 
-  logger.debug("Starting main workflow execution");
+  logger.verbose("Starting main workflow execution");
 
   let stash: StashResult | null = null;
   let mainRepositoryUpdated = false;
@@ -63,7 +63,7 @@ export async function executeMainWorkflow(
     }
 
     const duration = Date.now() - startTime;
-    logger.debug(`Main workflow completed in ${duration}ms`);
+    logger.verbose(`Main workflow completed in ${duration}ms`);
 
     return {
       mainRepositoryUpdated,

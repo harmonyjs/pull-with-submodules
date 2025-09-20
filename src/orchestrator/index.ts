@@ -114,9 +114,9 @@ async function validateExecutionEnvironment(
   context: ExecutionContext,
 ): Promise<EnvironmentValidation> {
   const logger = createLogger(context);
-  logger.debug("Starting environment validation");
+  logger.verbose("Starting environment validation");
   const environment = await validateEnvironment(context.repositoryRoot);
-  logger.debug(
+  logger.verbose(
     `Environment validated: Git ${environment.gitVersion}, Node ${environment.nodeVersion}`,
   );
   return environment;
@@ -130,7 +130,7 @@ async function applyGitlinkCommitsIfNeeded(
   submoduleResult: SubmoduleProcessingSummary,
 ): Promise<number> {
   const logger = createLogger(context);
-  logger.debug("Applying gitlink commits for submodule updates");
+  logger.verbose("Applying gitlink commits for submodule updates");
 
   if (context.noCommit) {
     return 0;

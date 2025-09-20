@@ -68,13 +68,13 @@ export function calculateProcessingSummary(
 export function getStatusText(result: UpdateResult): string {
   switch (result.status) {
     case "updated":
-      return `✔ Updated to ${result.selection?.source ?? "unknown"} @ ${result.selection?.sha.slice(0, SHORT_SHA_LENGTH) ?? "unknown"}`;
+      return `+ Updated to ${result.selection?.source ?? "unknown"} @ ${result.selection?.sha.slice(0, SHORT_SHA_LENGTH) ?? "unknown"}`;
     case "up-to-date":
-      return "○ Already up-to-date";
+      return "= Already up-to-date";
     case "skipped":
-      return "○ Skipped";
+      return "- Skipped";
     case "failed":
-      return `✗ Failed: ${result.error?.message ?? "unknown error"}`;
+      return `x Failed: ${result.error?.message ?? "unknown error"}`;
     default:
       return "? Unknown status";
   }
