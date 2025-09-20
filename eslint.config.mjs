@@ -41,8 +41,8 @@ import nodePlugin from 'eslint-plugin-n';
 // - TS_SRC_FILES: TypeScript code intended for typed linting (requires tsconfig)
 // - TEST_AND_TOOL_FILES: tests and small utilities with relaxed constraints
 const NODE_GLOBALS = { ...globals.node };
-const JS_FILES = ['**/*.js', '**/*.cjs'];
-const MJS_FILES = ['**/*.mjs'];
+const JS_FILES = ['**/*.js', '**/*.cjs', '!bin/**/*.js'];
+const MJS_FILES = ['**/*.mjs', 'bin/**/*.js'];
 const TS_SRC_FILES = ['src/**/*.ts'];
 const LOGGER_FILE = ['src/logger/index.ts'];
 const UI_MODULES = ['src/ui/logger.ts', 'src/ui/formatters.ts'];
