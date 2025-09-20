@@ -7,7 +7,7 @@
 
 import type { ExecutionContext, Submodule } from "#types/core";
 import type { SubmoduleProcessor, SubmoduleUpdatePlan } from "./types.js";
-import { SubmoduleProcessorImpl } from "./processor.js";
+import { SubmoduleProcessorImpl } from "./processor/index.js";
 
 // Re-export essential public types
 export type {

@@ -12,10 +12,10 @@ import {
   BRANCH_SOURCES,
   DEFAULT_BRANCH,
   type BranchResolution,
-} from "./types.js";
-import { resolveBranch } from "./branch-resolver.js";
-import { SubmoduleProcessorImpl } from "./processor.js";
-import { normalizeSubmoduleEntry } from "./helpers.js";
+} from "#core/submodules/types";
+import { resolveBranch } from "#core/submodules/branch-resolver";
+import { SubmoduleProcessorImpl } from "./implementation.js";
+import { normalizeSubmoduleEntry } from "#core/submodules/helpers";
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";

@@ -6,9 +6,9 @@
  */
 
 import type { Submodule, ExecutionContext } from "#types/core";
-import type { SubmoduleUpdatePlan } from "./types.js";
+import type { SubmoduleUpdatePlan } from "#core/submodules/types";
 import type { Logger } from "#ui/logger";
-import { resolveSubmodulePaths } from "./paths.js";
+import { resolveSubmodulePaths } from "#core/submodules/paths";
 
 /**
  * Validates and logs warnings about submodule paths.
@@ -68,12 +68,14 @@ export function createPathCache(): {
       absolutePath: string;
       normalizedSubmodule: Submodule;
     } {
-      let cached = cache.get(submodule);
-      if (!cached) {
-        cached = resolveSubmodulePaths(submodule, context);
-        cache.set(submodule, cached);
+      const cached = cache.get(submodule);
+      if (cached) {
+        return cached;
       }
-      return cached;
+
+      const resolved = resolveSubmodulePaths(submodule, context);
+      cache.set(submodule, resolved);
+      return resolved;
     },
   };
 }
