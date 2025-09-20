@@ -76,6 +76,30 @@ export interface Logger {
 }
 
 /**
+ * Formats arguments for logging, properly serializing objects while preserving primitives.
+ */
+function formatLogArgs(args: unknown[]): string {
+  return args
+    .map((arg) => {
+      if (arg === null || arg === undefined) {
+        return String(arg);
+      }
+      if (typeof arg === "object") {
+        return JSON.stringify(arg, null, 2);
+      }
+      if (typeof arg === "string") {
+        return arg;
+      }
+      if (typeof arg === "number" || typeof arg === "boolean") {
+        return String(arg);
+      }
+      // Fallback for other types (symbol, function, etc.) - serialize as JSON for consistency
+      return JSON.stringify(arg);
+    })
+    .join(" ");
+}
+
+/**
  * Clack-based logger implementation with execution context integration.
  */
 class ClackLogger implements Logger {
@@ -89,7 +113,7 @@ class ClackLogger implements Logger {
 
     // Format message with arguments if provided
     const formattedMessage =
-      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
+      args.length > 0 ? `${message} ${formatLogArgs(args)}` : message;
 
     this.logImpl.step(formattedMessage);
   }
@@ -99,7 +123,7 @@ class ClackLogger implements Logger {
 
     // Format message with arguments if provided
     const formattedMessage =
-      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
+      args.length > 0 ? `${message} ${formatLogArgs(args)}` : message;
 
     // Use grey styling for verbose logs to distinguish them visually
     const styledMessage = status.verbose(formattedMessage);
@@ -111,7 +135,7 @@ class ClackLogger implements Logger {
   info(message: string, ...args: unknown[]): void {
     // Format message with arguments if provided
     const formattedMessage =
-      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
+      args.length > 0 ? `${message} ${formatLogArgs(args)}` : message;
 
     this.logImpl.info(formattedMessage);
   }
@@ -119,7 +143,7 @@ class ClackLogger implements Logger {
   warn(message: string, ...args: unknown[]): void {
     // Format message with arguments if provided
     const formattedMessage =
-      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
+      args.length > 0 ? `${message} ${formatLogArgs(args)}` : message;
 
     this.logImpl.warn(formattedMessage);
   }
@@ -127,7 +151,7 @@ class ClackLogger implements Logger {
   error(message: string, ...args: unknown[]): void {
     // Format message with arguments if provided
     const formattedMessage =
-      args.length > 0 ? `${message} ${args.map(String).join(" ")}` : message;
+      args.length > 0 ? `${message} ${formatLogArgs(args)}` : message;
 
     this.logImpl.error(formattedMessage);
   }

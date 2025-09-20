@@ -198,7 +198,7 @@ describe("logger", () => {
       assert.equal(mockCalls.info.length, 1);
       assert.equal(
         mockCalls.info[0]?.[0],
-        "test [object Object] 1,2,3 null undefined",
+        "test {\n  \"foo\": \"bar\"\n} [\n  1,\n  2,\n  3\n] null undefined",
       );
     });
   });
