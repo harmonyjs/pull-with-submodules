@@ -88,11 +88,13 @@
     "find-up-simple": "^1.0.1",
     "p-limit": "^7.1.1",
     "picocolors": "^1.1.1",
-    "simple-git": "^3.28.0"
+    "simple-git": "^3.28.0",
+    "text-table": "0.2.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
     "@types/node": "^24.5.0",
+    "@types/text-table": "0.2.5",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
     "@vitest/coverage-v8": "^3.2.4",
