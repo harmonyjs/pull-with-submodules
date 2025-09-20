@@ -8,7 +8,7 @@
 import { formatSummaryTable, createLogger } from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
 
-import { MILLISECONDS_PER_SECOND } from "#orchestrator";
+import { MILLISECONDS_PER_SECOND } from "#orchestrator/constants";
 import type { ExecutionResult } from "./index.js";
 
 /**

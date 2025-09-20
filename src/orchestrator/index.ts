@@ -167,7 +167,4 @@ function buildFinalResult(options: {
 }
 
 // Re-export constants for internal orchestrator use
-export {
-  MAX_PARALLEL_SUBMODULES,
-  MILLISECONDS_PER_SECOND,
-} from "./constants.js";
+export { MAX_PARALLEL_SUBMODULES } from "./constants.js";

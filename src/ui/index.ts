@@ -30,3 +30,6 @@ export {
   formatStatusIcon,
   formatStatistics,
 } from "./formatters.js";
+
+// Completion module exports
+export { showCompletionMessage } from "./completion.js";
