@@ -60,6 +60,11 @@ export async function executeComplete(context: ExecutionContext): Promise<Execut
   // Show intro
   intro();
 
+  // Announce dry-run mode if enabled
+  if (context.dryRun) {
+    logger.info("Running in DRY-RUN mode - no changes will be made");
+  }
+
   try {
     // Step 1: Validate environment
     logger.debug("Starting environment validation");
