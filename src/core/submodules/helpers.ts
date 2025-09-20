@@ -18,6 +18,7 @@ export function normalizeSubmoduleEntry(entry: SubmoduleEntry): Submodule {
   const result: Submodule = {
     name: entry.name,
     path: entry.path,
+    url: entry.url,
   };
 
   if (entry.branch !== undefined) {
