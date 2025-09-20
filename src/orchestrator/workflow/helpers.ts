@@ -23,10 +23,10 @@ import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils";
  */
 export async function applyGitlinkCommits(
   submoduleResults: readonly UpdateResult[],
-  gitConfig: GitOperationConfig
+  gitConfig: GitOperationConfig,
 ): Promise<number> {
-  const updatedSubmodules = submoduleResults.filter(result =>
-    result.status === "updated" && result.selection !== null
+  const updatedSubmodules = submoduleResults.filter(
+    (result) => result.status === "updated" && result.selection !== null,
   );
 
   if (updatedSubmodules.length === 0) {
@@ -48,7 +48,7 @@ export async function applyGitlinkCommits(
       const commitMessage = formatGitlinkCommitMessage(
         result.submodule.path,
         result.submodule.branch ?? "main",
-        result.selection.sha
+        result.selection.sha,
       );
 
       await createCommit(commitMessage, gitConfig);
@@ -61,7 +61,7 @@ export async function applyGitlinkCommits(
 
       // Log error but continue with other submodules
       gitConfig.logger?.error(
-        `Failed to commit gitlink for ${result.submodule.path}: ${String(error)}`
+        `Failed to commit gitlink for ${result.submodule.path}: ${String(error)}`,
       );
     }
   }
@@ -77,9 +77,15 @@ export async function applyGitlinkCommits(
  */
 export async function restoreStashSafely(
   stash: StashResult,
-  gitConfig: GitOperationConfig
+  gitConfig: GitOperationConfig,
 ): Promise<void> {
   if (stash.created === false || stash.stashRef === undefined) {
+    return;
+  }
+
+  // In dry-run mode, the stash creation was simulated, so restoration should also be simulated
+  if (gitConfig.dryRun === true) {
+    gitConfig.logger?.info(`Would restore stash: ${stash.stashRef}`);
     return;
   }
 
@@ -95,21 +101,18 @@ export async function restoreStashSafely(
     // This is a serious issue - user's work might be stuck in stash
     gitConfig.logger?.error(
       `IMPORTANT: Failed to restore stash ${stash.stashRef}. ` +
-      `Your uncommitted changes are safely stored in the stash. ` +
-      `Use 'git stash list' to see stashes and 'git stash apply ${stash.stashRef}' to restore manually.`
+        `Your uncommitted changes are safely stored in the stash. ` +
+        `Use 'git stash list' to see stashes and 'git stash apply ${stash.stashRef}' to restore manually.`,
     );
 
-    throw new GitOperationError(
-      `Failed to restore stash: ${stash.stashRef}`,
-      {
-        cause: error as Error,
-        suggestions: [
-          `Use 'git stash apply ${stash.stashRef}' to restore manually`,
-          "Check for conflicts with recent changes",
-          "Use 'git stash list' to see all available stashes",
-        ],
-      }
-    );
+    throw new GitOperationError(`Failed to restore stash: ${stash.stashRef}`, {
+      cause: error as Error,
+      suggestions: [
+        `Use 'git stash apply ${stash.stashRef}' to restore manually`,
+        "Check for conflicts with recent changes",
+        "Use 'git stash list' to see all available stashes",
+      ],
+    });
   }
 }
 
@@ -124,7 +127,7 @@ export async function restoreStashSafely(
 export function formatGitlinkCommitMessage(
   submodulePath: string,
   branch: string,
-  sha: string
+  sha: string,
 ): string {
   const shortSha = sha.slice(0, SHORT_SHA_LENGTH);
   return `chore(submodule): bump ${submodulePath} to ${branch} @ ${shortSha}`;
