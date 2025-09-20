@@ -6,12 +6,22 @@
  */
 
 import { intro, createLogger } from "#ui";
-import type { ExecutionContext, UpdateResult } from "#types/core";
+import type { ExecutionContext } from "#types/core";
 
-import { validateEnvironment } from "./environment.js";
-import { processSubmodules } from "./submodules/index.js";
-import { executeMainWorkflow } from "./workflow/index.js";
-import { createSuccessResult, showExecutionSummary, handleExecutionError } from "./execution/index.js";
+import {
+  validateEnvironment,
+  type EnvironmentValidation,
+} from "./environment.js";
+import {
+  processSubmodules,
+  type SubmoduleProcessingSummary,
+} from "./submodules/index.js";
+import { executeMainWorkflow, type WorkflowResult } from "./workflow/index.js";
+import {
+  createSuccessResult,
+  showExecutionSummary,
+  handleExecutionError,
+} from "./execution/index.js";
 
 /**
  * Complete execution result.
@@ -48,58 +58,116 @@ export interface ExecutionResult {
 
 /**
  * Executes the complete pull-with-submodules operation.
- *
- * @param context - Execution context with user preferences
- * @returns Promise resolving to execution result
  */
-export async function executeComplete(context: ExecutionContext): Promise<ExecutionResult> {
+export async function executeComplete(
+  context: ExecutionContext,
+): Promise<ExecutionResult> {
   const startTime = Date.now();
-  const logger = createLogger(context);
   const errors: Error[] = [];
 
-  // Show intro
-  intro();
-
-  // Announce dry-run mode if enabled
-  if (context.dryRun) {
-    logger.info("Running in DRY-RUN mode - no changes will be made");
-  }
+  showIntroduction(context);
 
   try {
-    // Step 1: Validate environment
-    logger.debug("Starting environment validation");
-    const environment = await validateEnvironment(context.repositoryRoot);
-    logger.debug(`Environment validated: Git ${environment.gitVersion}, Node ${environment.nodeVersion}`);
-
-    // Step 2: Process submodules
-    logger.debug("Starting submodule processing");
+    const environment = await validateExecutionEnvironment(context);
+    const workflowResult = await executeMainWorkflow(context, []);
     const submoduleResult = await processSubmodules(context);
+    const gitlinkCommits = await applyGitlinkCommitsIfNeeded(
+      context,
+      submoduleResult,
+    );
 
-    // Step 3: Execute main workflow
-    logger.debug("Starting main workflow");
-    const workflowResult = await executeMainWorkflow(context, submoduleResult.results as UpdateResult[]);
-
-    // Collect any workflow errors
     errors.push(...workflowResult.errors);
 
-    // Calculate final result
-    const totalDuration = Date.now() - startTime;
-    const result = createSuccessResult({
+    const result = buildFinalResult({
       environment,
       submoduleResult,
       workflowResult,
-      totalDuration,
+      gitlinkCommits,
+      totalDuration: Date.now() - startTime,
       errors,
     });
 
-    // Show summary
     showExecutionSummary(result, submoduleResult.results, context);
-
     return result;
   } catch (error) {
     return handleExecutionError({ error, errors, context, startTime });
   }
 }
 
+/**
+ * Shows introduction and dry-run notice.
+ */
+function showIntroduction(context: ExecutionContext): void {
+  intro();
+  if (context.dryRun) {
+    const logger = createLogger(context);
+    logger.info("Running in DRY-RUN mode - no changes will be made");
+  }
+}
+
+/**
+ * Validates execution environment.
+ */
+async function validateExecutionEnvironment(
+  context: ExecutionContext,
+): Promise<EnvironmentValidation> {
+  const logger = createLogger(context);
+  logger.debug("Starting environment validation");
+  const environment = await validateEnvironment(context.repositoryRoot);
+  logger.debug(
+    `Environment validated: Git ${environment.gitVersion}, Node ${environment.nodeVersion}`,
+  );
+  return environment;
+}
+
+/**
+ * Applies gitlink commits if not disabled.
+ */
+async function applyGitlinkCommitsIfNeeded(
+  context: ExecutionContext,
+  submoduleResult: SubmoduleProcessingSummary,
+): Promise<number> {
+  const logger = createLogger(context);
+  logger.debug("Applying gitlink commits for submodule updates");
+
+  if (context.noCommit) {
+    return 0;
+  }
+
+  const { applyGitlinkCommits } = await import("./workflow/helpers.js");
+  const gitConfig = {
+    cwd: context.repositoryRoot,
+    dryRun: context.dryRun,
+    logger,
+  };
+  return applyGitlinkCommits([...submoduleResult.results], gitConfig);
+}
+
+/**
+ * Builds final execution result.
+ */
+function buildFinalResult(options: {
+  environment: EnvironmentValidation;
+  submoduleResult: SubmoduleProcessingSummary;
+  workflowResult: WorkflowResult;
+  gitlinkCommits: number;
+  totalDuration: number;
+  errors: Error[];
+}): ExecutionResult {
+  return createSuccessResult({
+    environment: options.environment,
+    submoduleResult: options.submoduleResult,
+    workflowResult: {
+      ...options.workflowResult,
+      gitlinkCommits: options.gitlinkCommits,
+    },
+    totalDuration: options.totalDuration,
+    errors: options.errors,
+  });
+}
+
 // Re-export constants for internal orchestrator use
-export { MAX_PARALLEL_SUBMODULES, MILLISECONDS_PER_SECOND } from "./constants.js";
+export {
+  MAX_PARALLEL_SUBMODULES,
+  MILLISECONDS_PER_SECOND,
+} from "./constants.js";
