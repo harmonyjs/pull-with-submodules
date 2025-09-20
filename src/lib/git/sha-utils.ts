@@ -19,6 +19,11 @@ const MIN_SHA_LENGTH = 7;
 const MAX_SHA_LENGTH = 40;
 
 /**
+ * Number of characters to display for short SHA hashes in UI.
+ */
+export const SHORT_SHA_LENGTH = 8;
+
+/**
  * Regular expression for validating Git SHA format.
  * Accepts both full (40 char) and abbreviated (7-40 char) SHA hashes.
  */

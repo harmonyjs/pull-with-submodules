@@ -44,23 +44,26 @@ test("formatGitlinkMessage", async (t) => {
 });
 
 test("checkGitlinkChanges", async (t) => {
-  await t.test("returns true by default (placeholder implementation)", () => {
-    const hasChanges = checkGitlinkChanges("path/to/submodule");
+  await t.test("returns true when git commands fail (safe fallback)", async () => {
+    // This will fail because we're not in a git repo or path doesn't exist
+    const hasChanges = await checkGitlinkChanges("path/to/submodule");
     assert.equal(hasChanges, true);
   });
 
-  await t.test("accepts configuration without error", () => {
-    const hasChanges = checkGitlinkChanges("path/to/submodule", {
+  await t.test("accepts configuration without error", async () => {
+    // This will fail because we're not in a git repo, but should return true safely
+    const hasChanges = await checkGitlinkChanges("path/to/submodule", {
       dryRun: true,
       verbose: true,
     });
     assert.equal(hasChanges, true);
   });
 
-  await t.test("handles different submodule paths", () => {
+  await t.test("handles different submodule paths", async () => {
     const paths = ["libs/auth", "packages/ui", "modules/core"];
     for (const path of paths) {
-      const hasChanges = checkGitlinkChanges(path);
+      // All should return true as safe fallback when git commands fail
+      const hasChanges = await checkGitlinkChanges(path);
       assert.equal(hasChanges, true);
     }
   });

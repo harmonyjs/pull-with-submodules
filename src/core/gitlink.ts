@@ -6,7 +6,8 @@
  */
 
 import { stageFiles, createCommit } from "#lib/git/operations.js";
-import type { GitOperationConfig } from "#lib/git/core.js";
+import { createGit, type GitOperationConfig } from "#lib/git/core.js";
+import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils.js";
 import type { Submodule } from "#types/core.js";
 import type { GitSha } from "#types/git.js";
 
@@ -42,10 +43,6 @@ export interface GitlinkCommitParams {
   readonly branch: string;
 }
 
-/**
- * Number of characters to display in abbreviated SHA.
- */
-const SHORT_SHA_LENGTH = 8;
 
 /**
  * Format a gitlink commit message.
@@ -116,20 +113,64 @@ export async function stageSubmodule(
  *
  * @example
  * ```typescript
- * const hasChanges = checkGitlinkChanges('libs/shared', { cwd: '/repo' });
+ * const hasChanges = await checkGitlinkChanges('libs/shared', { cwd: '/repo' });
  * ```
  */
-export function checkGitlinkChanges(
+export async function checkGitlinkChanges(
   submodulePath: string,
   config: GitlinkConfig = {},
-): boolean {
+): Promise<boolean> {
   config.logger?.debug(`Checking gitlink changes for: ${submodulePath}`);
 
-  // TODO: Implement actual gitlink change detection
-  // This would involve comparing the current submodule SHA with what's in the index
-  // For now, we'll assume changes exist (this will be refined in orchestration)
-  config.logger?.debug(`Assuming changes exist for: ${submodulePath}`);
-  return true;
+  try {
+    const git = createGit(config.cwd !== undefined ? { cwd: config.cwd } : {});
+
+    // Get the current working tree SHA for the submodule
+    const workingTreeResult = await git.raw(['ls-tree', 'HEAD', submodulePath]);
+    const workingSha = extractShaFromLsTree(workingTreeResult);
+
+    // Get the staged/index SHA for the submodule
+    const stagedResult = await git.raw(['ls-tree', '--cached', submodulePath]);
+    const stagedSha = extractShaFromLsTree(stagedResult);
+
+    const hasChanges = workingSha !== stagedSha;
+
+    config.logger?.debug(
+      `Gitlink changes for ${submodulePath}: ${hasChanges ? 'detected' : 'none'} ` +
+      `(working: ${workingSha?.slice(0, SHORT_SHA_LENGTH) ?? 'none'}, ` +
+      `staged: ${stagedSha?.slice(0, SHORT_SHA_LENGTH) ?? 'none'})`
+    );
+
+    return hasChanges;
+  } catch (error) {
+    config.logger?.debug(`Failed to check gitlink changes for ${submodulePath}: ${String(error)}`);
+    // If we can't determine, assume there are changes to be safe
+    return true;
+  }
+}
+
+/**
+ * Extracts SHA from git ls-tree output.
+ *
+ * @param lsTreeOutput - Output from git ls-tree command
+ * @returns SHA if found, null otherwise
+ */
+function extractShaFromLsTree(lsTreeOutput: string): string | null {
+  const trimmed = lsTreeOutput.trim();
+  if (trimmed === '') {
+    return null;
+  }
+
+  // git ls-tree format: <mode> <type> <sha> <path>
+  // Example: "160000 commit 1234567890abcdef1234567890abcdef12345678 submodule-path"
+  const parts = trimmed.split(/\s+/);
+  const MIN_LS_TREE_PARTS = 3;
+  const SHA_COLUMN_INDEX = 2;
+  if (parts.length >= MIN_LS_TREE_PARTS) {
+    return parts[SHA_COLUMN_INDEX] ?? null;
+  }
+
+  return null;
 }
 
 /**
