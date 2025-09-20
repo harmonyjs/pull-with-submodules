@@ -6,15 +6,10 @@
  */
 
 // Execution result creation and summary display
-export {
-  createSuccessResult,
-  showExecutionSummary
-} from "./summary.js";
+export { createSuccessResult, showExecutionSummary } from "./summary.js";
 
 // Execution error handling
-export {
-  handleExecutionError
-} from "./error-handler.js";
+export { handleExecutionError } from "./error-handler.js";
 
 // Re-export ExecutionResult type from main orchestrator
 export type { ExecutionResult } from "#orchestrator";

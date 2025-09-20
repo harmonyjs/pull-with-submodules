@@ -40,9 +40,10 @@ interface ErrorHandlingContext {
  */
 export async function handleWorkflowError(
   error: unknown,
-  errorContext: ErrorHandlingContext
+  errorContext: ErrorHandlingContext,
 ): Promise<WorkflowResult> {
-  const workflowError = error instanceof Error ? error : new Error(String(error));
+  const workflowError =
+    error instanceof Error ? error : new Error(String(error));
   const errors: Error[] = [workflowError];
   const { stash, gitConfig, state } = errorContext;
 
@@ -51,9 +52,18 @@ export async function handleWorkflowError(
     try {
       await restoreStashSafely(stash, gitConfig);
     } catch (restoreError) {
-      const errorString = restoreError instanceof Error ? restoreError.message : String(restoreError);
-      gitConfig.logger?.error(`Failed to restore stash during error recovery: ${errorString}`);
-      errors.push(restoreError instanceof Error ? restoreError : new Error(String(restoreError)));
+      const errorString =
+        restoreError instanceof Error
+          ? restoreError.message
+          : String(restoreError);
+      gitConfig.logger?.error(
+        `Failed to restore stash during error recovery: ${errorString}`,
+      );
+      errors.push(
+        restoreError instanceof Error
+          ? restoreError
+          : new Error(String(restoreError)),
+      );
     }
   }
 

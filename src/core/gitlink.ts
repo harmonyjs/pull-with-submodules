@@ -43,7 +43,6 @@ export interface GitlinkCommitParams {
   readonly branch: string;
 }
 
-
 /**
  * Format a gitlink commit message.
  *
@@ -97,7 +96,9 @@ export async function stageSubmodule(
     config.logger?.debug(`Successfully staged submodule: ${submodulePath}`);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to stage submodule ${submodulePath}: ${errorMessage}`);
+    throw new Error(
+      `Failed to stage submodule ${submodulePath}: ${errorMessage}`,
+    );
   }
 }
 
@@ -126,24 +127,26 @@ export async function checkGitlinkChanges(
     const git = createGit(config.cwd !== undefined ? { cwd: config.cwd } : {});
 
     // Get the current working tree SHA for the submodule
-    const workingTreeResult = await git.raw(['ls-tree', 'HEAD', submodulePath]);
+    const workingTreeResult = await git.raw(["ls-tree", "HEAD", submodulePath]);
     const workingSha = extractShaFromLsTree(workingTreeResult);
 
     // Get the staged/index SHA for the submodule
-    const stagedResult = await git.raw(['ls-tree', '--cached', submodulePath]);
+    const stagedResult = await git.raw(["ls-tree", "--cached", submodulePath]);
     const stagedSha = extractShaFromLsTree(stagedResult);
 
     const hasChanges = workingSha !== stagedSha;
 
     config.logger?.debug(
-      `Gitlink changes for ${submodulePath}: ${hasChanges ? 'detected' : 'none'} ` +
-      `(working: ${workingSha?.slice(0, SHORT_SHA_LENGTH) ?? 'none'}, ` +
-      `staged: ${stagedSha?.slice(0, SHORT_SHA_LENGTH) ?? 'none'})`
+      `Gitlink changes for ${submodulePath}: ${hasChanges ? "detected" : "none"} ` +
+        `(working: ${workingSha?.slice(0, SHORT_SHA_LENGTH) ?? "none"}, ` +
+        `staged: ${stagedSha?.slice(0, SHORT_SHA_LENGTH) ?? "none"})`,
     );
 
     return hasChanges;
   } catch (error) {
-    config.logger?.debug(`Failed to check gitlink changes for ${submodulePath}: ${String(error)}`);
+    config.logger?.debug(
+      `Failed to check gitlink changes for ${submodulePath}: ${String(error)}`,
+    );
     // If we can't determine, assume there are changes to be safe
     return true;
   }
@@ -157,7 +160,7 @@ export async function checkGitlinkChanges(
  */
 function extractShaFromLsTree(lsTreeOutput: string): string | null {
   const trimmed = lsTreeOutput.trim();
-  if (trimmed === '') {
+  if (trimmed === "") {
     return null;
   }
 
@@ -203,14 +206,18 @@ export async function commitGitlink(
   const { submodule, targetSha, branch } = params;
   const message = formatGitlinkMessage(submodule.path, branch, targetSha);
 
-  config.logger?.debug(`Creating gitlink commit for ${submodule.path}: ${message}`);
+  config.logger?.debug(
+    `Creating gitlink commit for ${submodule.path}: ${message}`,
+  );
 
   // Stage the submodule changes first
   await stageSubmodule(submodule.path, config);
 
   // Skip commit creation if noCommit flag is set
   if (config.noCommit === true) {
-    config.logger?.info(`Staged ${submodule.path} but skipping commit (--no-commit)`);
+    config.logger?.info(
+      `Staged ${submodule.path} but skipping commit (--no-commit)`,
+    );
     return {
       executed: false,
       message,
@@ -223,7 +230,7 @@ export async function commitGitlink(
 
     const wasExecuted = config.dryRun !== true;
     config.logger?.debug(
-      `Gitlink commit ${wasExecuted ? 'created' : 'simulated'}: ${commitSha}`,
+      `Gitlink commit ${wasExecuted ? "created" : "simulated"}: ${commitSha}`,
     );
 
     return {
@@ -233,6 +240,8 @@ export async function commitGitlink(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to create gitlink commit for ${submodule.path}: ${errorMessage}`);
+    throw new Error(
+      `Failed to create gitlink commit for ${submodule.path}: ${errorMessage}`,
+    );
   }
 }

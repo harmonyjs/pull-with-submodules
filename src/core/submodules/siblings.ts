@@ -180,7 +180,8 @@ async function createSiblingResult(options: {
 export async function findSiblingRepository(
   options: SiblingDiscoveryOptions,
 ): Promise<SiblingRepository | null> {
-  const { submodulePath, remoteUrl, branch, gitConfig, cache, logger } = options;
+  const { submodulePath, remoteUrl, branch, gitConfig, cache, logger } =
+    options;
 
   logger?.debug(
     `Starting sibling discovery for ${basename(submodulePath)} (${remoteUrl})`,

@@ -8,11 +8,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
 import { formatSummaryTable } from "./formatters.js";
-import type {
-  UpdateResult,
-  Submodule,
-  CommitSelection,
-} from "#types/core";
+import type { UpdateResult, Submodule, CommitSelection } from "#types/core";
 
 describe("formatters - table formatting", () => {
   const createSubmodule = (name: string, path: string): Submodule => ({

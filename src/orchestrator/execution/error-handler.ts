@@ -24,7 +24,8 @@ export function handleExecutionError(options: {
   startTime: number;
 }): ExecutionResult {
   const { error, errors, context, startTime } = options;
-  const executionError = error instanceof Error ? error : new Error(String(error));
+  const executionError =
+    error instanceof Error ? error : new Error(String(error));
   errors.push(executionError);
 
   const logger = createLogger(context);

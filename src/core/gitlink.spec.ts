@@ -14,41 +14,56 @@ test("formatGitlinkMessage", async (t) => {
     const message = formatGitlinkMessage(
       "libs/shared",
       "main",
-      "abc123def456789012345678"
+      "abc123def456789012345678",
     );
-    assert.equal(message, "chore(submodule): bump libs/shared to main @ abc123de");
+    assert.equal(
+      message,
+      "chore(submodule): bump libs/shared to main @ abc123de",
+    );
   });
 
   await t.test("handles short SHA input", () => {
     const message = formatGitlinkMessage("path/to/module", "develop", "abc123");
-    assert.equal(message, "chore(submodule): bump path/to/module to develop @ abc123");
+    assert.equal(
+      message,
+      "chore(submodule): bump path/to/module to develop @ abc123",
+    );
   });
 
   await t.test("handles different branch names", () => {
     const message = formatGitlinkMessage(
       "components/ui",
       "feature/new-ui",
-      "def456789"
+      "def456789",
     );
-    assert.equal(message, "chore(submodule): bump components/ui to feature/new-ui @ def45678");
+    assert.equal(
+      message,
+      "chore(submodule): bump components/ui to feature/new-ui @ def45678",
+    );
   });
 
   await t.test("handles nested paths", () => {
     const message = formatGitlinkMessage(
       "packages/core/utils",
       "v2.0",
-      "1234567890abcdef"
+      "1234567890abcdef",
     );
-    assert.equal(message, "chore(submodule): bump packages/core/utils to v2.0 @ 12345678");
+    assert.equal(
+      message,
+      "chore(submodule): bump packages/core/utils to v2.0 @ 12345678",
+    );
   });
 });
 
 test("checkGitlinkChanges", async (t) => {
-  await t.test("returns true when git commands fail (safe fallback)", async () => {
-    // This will fail because we're not in a git repo or path doesn't exist
-    const hasChanges = await checkGitlinkChanges("path/to/submodule");
-    assert.equal(hasChanges, true);
-  });
+  await t.test(
+    "returns true when git commands fail (safe fallback)",
+    async () => {
+      // This will fail because we're not in a git repo or path doesn't exist
+      const hasChanges = await checkGitlinkChanges("path/to/submodule");
+      assert.equal(hasChanges, true);
+    },
+  );
 
   await t.test("accepts configuration without error", async () => {
     // This will fail because we're not in a git repo, but should return true safely
@@ -113,7 +128,10 @@ test("commitGitlink", async (t) => {
     const result = await commitGitlink(testParams, { dryRun: true });
 
     assert.equal(result.executed, false);
-    assert.equal(result.message, "chore(submodule): bump libs/test to main @ abc123de");
+    assert.equal(
+      result.message,
+      "chore(submodule): bump libs/test to main @ abc123de",
+    );
     assert.equal(result.commitSha, "0000000000000000000000000000000000000000");
   });
 
@@ -124,7 +142,10 @@ test("commitGitlink", async (t) => {
     });
 
     assert.equal(result.executed, false);
-    assert.equal(result.message, "chore(submodule): bump libs/test to main @ abc123de");
+    assert.equal(
+      result.message,
+      "chore(submodule): bump libs/test to main @ abc123de",
+    );
     assert.equal(result.commitSha, undefined);
   });
 
@@ -147,7 +168,7 @@ test("commitGitlink", async (t) => {
       assert.equal(result.executed, false);
       assert.equal(
         result.message,
-        `chore(submodule): bump ${submodule.path} to ${submodule.branch} @ def45678`
+        `chore(submodule): bump ${submodule.path} to ${submodule.branch} @ def45678`,
       );
     }
   });
@@ -180,23 +201,29 @@ test("commitGitlink", async (t) => {
     });
   });
 
-  await t.test("processes minimal submodule without optional branch", async () => {
-    const minimalSubmodule: Submodule = {
-      name: "minimal",
-      path: "minimal",
-    };
+  await t.test(
+    "processes minimal submodule without optional branch",
+    async () => {
+      const minimalSubmodule: Submodule = {
+        name: "minimal",
+        path: "minimal",
+      };
 
-    const params: GitlinkCommitParams = {
-      submodule: minimalSubmodule,
-      targetSha: "xyz789",
-      branch: "master",
-    };
+      const params: GitlinkCommitParams = {
+        submodule: minimalSubmodule,
+        targetSha: "xyz789",
+        branch: "master",
+      };
 
-    const result = await commitGitlink(params, { dryRun: true });
+      const result = await commitGitlink(params, { dryRun: true });
 
-    assert.equal(result.executed, false);
-    assert.equal(result.message, "chore(submodule): bump minimal to master @ xyz789");
-  });
+      assert.equal(result.executed, false);
+      assert.equal(
+        result.message,
+        "chore(submodule): bump minimal to master @ xyz789",
+      );
+    },
+  );
 });
 
 test("GitlinkCommitParams interface validation", async (t) => {

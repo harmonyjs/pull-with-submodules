@@ -98,4 +98,3 @@ export interface PullOperationResult {
   /** Remote name that was pulled from (if any). */
   readonly remote: string | null;
 }
-

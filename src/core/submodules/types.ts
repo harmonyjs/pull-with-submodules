@@ -56,4 +56,7 @@ export interface SubmoduleProcessor {
   syncSubmodule(submodulePath: string): Promise<void>;
   initializeSubmodule(submodulePath: string): Promise<void>;
   prepareUpdatePlan(submodule: Submodule): Promise<SubmoduleUpdatePlan>;
+  executeUpdatePlan(
+    plan: SubmoduleUpdatePlan,
+  ): Promise<import("#types/core").UpdateResult>;
 }

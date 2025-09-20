@@ -8,10 +8,7 @@
 import { createGit, type GitOperationConfig } from "#lib/git";
 import { GitOperationError } from "#errors";
 
-import {
-  validateStashReference,
-  handleStashRestoreError
-} from "./helpers.js";
+import { validateStashReference, handleStashRestoreError } from "./helpers.js";
 
 /**
  * Stash creation result.
@@ -47,7 +44,7 @@ export interface WorkingTreeStatus {
  * @throws GitOperationError if status check fails
  */
 export async function getWorkingTreeStatus(
-  config: GitOperationConfig = {}
+  config: GitOperationConfig = {},
 ): Promise<WorkingTreeStatus> {
   const git = createGit(config);
 
@@ -59,7 +56,7 @@ export async function getWorkingTreeStatus(
     const modifiedPaths = [...status.modified, ...status.staged];
 
     config.logger?.debug(
-      `Working tree status: ${modifiedFiles} modified, ${untrackedFiles} untracked`
+      `Working tree status: ${modifiedFiles} modified, ${untrackedFiles} untracked`,
     );
 
     return {
@@ -69,13 +66,10 @@ export async function getWorkingTreeStatus(
       modifiedPaths,
     };
   } catch (error) {
-    throw new GitOperationError(
-      "Failed to check working tree status",
-      {
-        cause: error as Error,
-        suggestions: ["Ensure you're in a valid Git repository"],
-      }
-    );
+    throw new GitOperationError("Failed to check working tree status", {
+      cause: error as Error,
+      suggestions: ["Ensure you're in a valid Git repository"],
+    });
   }
 }
 
@@ -89,16 +83,13 @@ export async function getWorkingTreeStatus(
  */
 export async function createStash(
   message: string,
-  config: GitOperationConfig = {}
+  config: GitOperationConfig = {},
 ): Promise<StashResult> {
   if (message.trim() === "") {
-    throw new GitOperationError(
-      "Stash message cannot be empty",
-      {
-        cause: new Error("Invalid stash message"),
-        suggestions: ["Provide a descriptive message for the stash"],
-      }
-    );
+    throw new GitOperationError("Stash message cannot be empty", {
+      cause: new Error("Invalid stash message"),
+      suggestions: ["Provide a descriptive message for the stash"],
+    });
   }
 
   config.logger?.debug(`Creating stash with message: "${message}"`);
@@ -137,13 +128,13 @@ export async function createStash(
       message,
     };
   } catch (error) {
-    throw new GitOperationError(
-      `Failed to create stash: ${message}`,
-      {
-        cause: error as Error,
-        suggestions: ["Check for conflicts or invalid files", "Ensure working directory is accessible"],
-      }
-    );
+    throw new GitOperationError(`Failed to create stash: ${message}`, {
+      cause: error as Error,
+      suggestions: [
+        "Check for conflicts or invalid files",
+        "Ensure working directory is accessible",
+      ],
+    });
   }
 }
 
@@ -157,7 +148,7 @@ export async function createStash(
  */
 export async function restoreStash(
   stashRef: string,
-  config: GitOperationConfig = {}
+  config: GitOperationConfig = {},
 ): Promise<void> {
   validateStashReference(stashRef);
 
@@ -177,4 +168,3 @@ export async function restoreStash(
     handleStashRestoreError(error, stashRef);
   }
 }
-

@@ -191,7 +191,9 @@ export async function stageFiles(
   }
 
   const pathList = paths.join(", ");
-  config.logger?.debug(`staging files: ${pathList} in ${config.cwd ?? process.cwd()}`);
+  config.logger?.debug(
+    `staging files: ${pathList} in ${config.cwd ?? process.cwd()}`,
+  );
 
   if (config.dryRun === true) {
     config.logger?.info(`Would stage files: ${pathList}`);
@@ -230,7 +232,9 @@ export async function createCommit(
     throw new Error("Commit message cannot be empty");
   }
 
-  config.logger?.debug(`creating commit: "${message}" in ${config.cwd ?? process.cwd()}`);
+  config.logger?.debug(
+    `creating commit: "${message}" in ${config.cwd ?? process.cwd()}`,
+  );
 
   if (config.dryRun === true) {
     config.logger?.info(`Would create commit: "${message}"`);
