@@ -12,11 +12,51 @@ import { buildCli, parseArgv, createContext, executeComplete } from "pull-with-s
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { cancel } from "@clack/prompts";
+
+/**
+ * Sets up graceful shutdown handlers for SIGINT and SIGTERM.
+ */
+function setupSignalHandlers() {
+  let isShuttingDown = false;
+
+  const gracefulShutdown = (signal) => {
+    if (isShuttingDown) {
+      // Force exit if already shutting down
+      process.exit(1);
+    }
+
+    isShuttingDown = true;
+    cancel(`\nOperation cancelled by user (${signal})`);
+    process.exit(130); // Standard exit code for SIGINT
+  };
+
+  // Handle Ctrl+C (SIGINT)
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+  // Handle termination (SIGTERM)
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled promise rejection:", reason);
+    process.exit(1);
+  });
+
+  // Handle uncaught exceptions
+  process.on("uncaughtException", (error) => {
+    console.error("Uncaught exception:", error);
+    process.exit(1);
+  });
+}
 
 /**
  * Main CLI entry point.
  */
 async function main() {
+  // Set up signal handlers first
+  setupSignalHandlers();
+
   try {
     // Check for --help or --version flags first, before any validation
     const argv = process.argv.slice(2);

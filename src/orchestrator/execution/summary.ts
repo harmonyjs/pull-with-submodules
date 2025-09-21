@@ -5,7 +5,7 @@
  * summary information to users.
  */
 
-import { formatSummaryTable, createLogger, multilineNote, summaryNote } from "#ui";
+import { formatSummaryTable, createLogger, multilineNote, summaryNote, showNextSteps, type NextStepsContext } from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
 
 import { MILLISECONDS_PER_SECOND } from "#orchestrator/constants";
@@ -147,8 +147,20 @@ export function showExecutionSummary(
     logger.info(`Created ${result.workflow.gitlinkCommits} gitlink commit(s)`);
   }
 
-  // Show dry-run notice
+  // Show dry-run notice with proper icon
   if (context.dryRun) {
-    logger.warn("Dry-run mode: No actual changes were made");
+    logger.info("● Dry-run mode: No actual changes were made");
+  }
+
+  // Show next steps suggestions
+  const nextStepsContext: NextStepsContext = {
+    execution: context,
+    result,
+    submoduleResults,
+  };
+
+  const nextStepsText = showNextSteps(nextStepsContext);
+  if (nextStepsText !== "" && nextStepsText !== "No specific next steps required.") {
+    multilineNote(nextStepsText, "Next Steps");
   }
 }
