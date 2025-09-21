@@ -9,11 +9,27 @@ import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
 import type { GitSha } from "#types/git";
 import { createTaskLog, type TaskLog } from "#ui/task-log";
+import { getRepositoryStatusSymbol } from "#ui/colors";
+
+/**
+ * Detailed pull operation status.
+ */
+export type PullStatus =
+  | "fast-forward"
+  | "no-op"
+  | "rebase-applied"
+  | "would-rebase"
+  | "conflict"
+  | "diverged"
+  | "ahead"
+  | "up-to-date";
 
 /**
  * Result of a pull operation.
  */
 export interface PullResult {
+  /** Detailed status of the pull operation */
+  readonly status: PullStatus;
   /** Number of files changed */
   readonly changes: number;
   /** Number of insertions */
@@ -22,39 +38,53 @@ export interface PullResult {
   readonly deletions: number;
   /** List of changed files */
   readonly files: readonly string[];
+  /** Number of commits ahead of remote */
+  readonly ahead?: number;
+  /** Number of commits behind remote */
+  readonly behind?: number;
 }
 
 /**
  * Processes repository status and returns appropriate pull result.
  */
 function processRepositoryStatus(status: { ahead: number; behind: number }, taskLog: TaskLog): PullResult {
+  const symbol = getRepositoryStatusSymbol(status);
+
   if (status.behind > 0 && status.ahead > 0) {
-    taskLog.success(`Repository has diverged: ${status.ahead} local commits, ${status.behind} remote commits`);
+    taskLog.success(`${symbol} Repository has diverged: ${status.ahead} local, ${status.behind} remote commits`);
     return {
+      status: "diverged",
       changes: status.behind,
       insertions: 0,
       deletions: 0,
       files: [],
+      ahead: status.ahead,
+      behind: status.behind,
     };
   } else if (status.behind > 0) {
-    taskLog.success(`Would pull ${status.behind} new commits from origin`);
+    taskLog.success(`${symbol} Would pull ${status.behind} new commits from origin`);
     return {
+      status: "would-rebase",
       changes: status.behind,
       insertions: 0,
       deletions: 0,
       files: [],
+      behind: status.behind,
     };
   } else if (status.ahead > 0) {
-    taskLog.success(`Repository is ahead by ${status.ahead} commits (push needed)`);
+    taskLog.success(`${symbol} Repository is ahead by ${status.ahead} commits`);
     return {
+      status: "ahead",
       changes: 0,
       insertions: 0,
       deletions: 0,
       files: [],
+      ahead: status.ahead,
     };
   } else {
-    taskLog.success("Repository is already up-to-date with origin");
+    taskLog.success(`${symbol} Repository is up-to-date with origin`);
     return {
+      status: "up-to-date",
       changes: 0,
       insertions: 0,
       deletions: 0,
@@ -85,6 +115,7 @@ async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult>
     const errorMessage = error instanceof Error ? error.message : String(error);
     taskLog.warning(`Could not check repository status: ${errorMessage}`);
     return {
+      status: "up-to-date",
       changes: 0,
       insertions: 0,
       deletions: 0,
@@ -127,13 +158,18 @@ export async function pullWithRebase(
     const result = await git.pull(["--rebase"]);
 
     const changes = result.summary.changes;
+    const status: PullStatus = changes > 0 ? "rebase-applied" : "no-op";
+
     if (changes > 0) {
       taskLog.success(`Pull completed: ${changes} changes`);
+    } else {
+      taskLog.success("No changes to pull");
     }
 
     config.logger?.verbose(`Pull completed: ${changes} changes`);
 
     return {
+      status,
       changes,
       insertions: result.summary.insertions,
       deletions: result.summary.deletions,
