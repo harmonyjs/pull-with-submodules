@@ -22,17 +22,31 @@ export const status = {
 
 /**
  * Symbol-based color functions for status indicators.
+ * Uses semantic symbols for process states vs. results.
  */
 export const symbols = {
-  success: pc.green("+"),
-  warning: pc.yellow("!"),
-  error: pc.red("x"),
-  info: pc.blue("i"),
+  // Process indicators (for ongoing operations)
+  process: pc.gray("*"),
+  step: pc.gray("◇"),
+
+  // Result indicators (for final outcomes)
+  success: pc.green("◇"),
+  warning: pc.yellow("▲"),
+  error: pc.red("◇"),
+  info: pc.blue("◇"),
+
+  // Status-specific symbols
   verbose: pc.gray("*"),
   updated: pc.green("+"),
   upToDate: pc.cyan("="),
   skipped: pc.yellow("-"),
   failed: pc.red("x"),
+
+  // Special modes
+  dryRun: pc.blue("●"),
+  ahead: pc.cyan("↑"),
+  behind: pc.yellow("↓"),
+  diverged: pc.magenta("⚡"),
 } as const;
 
 /**
@@ -90,6 +104,49 @@ export function getStatusSymbol(
       return symbols.skipped;
     case "failed":
       return symbols.failed;
+    default:
+      return symbols.info;
+  }
+}
+
+/**
+ * Utility function to get repository status symbol.
+ */
+export function getRepositoryStatusSymbol(status: {
+  ahead?: number;
+  behind?: number;
+}): string {
+  const aheadCount = status.ahead ?? 0;
+  const behindCount = status.behind ?? 0;
+
+  if (aheadCount > 0 && behindCount > 0) {
+    return symbols.diverged;
+  } else if (aheadCount > 0) {
+    return symbols.ahead;
+  } else if (behindCount > 0) {
+    return symbols.behind;
+  } else {
+    return symbols.upToDate;
+  }
+}
+
+/**
+ * Gets appropriate symbol for process vs result context.
+ */
+export function getContextualSymbol(context: "process" | "result", type: "success" | "warning" | "error" | "info" = "info"): string {
+  if (context === "process") {
+    return symbols.process;
+  }
+
+  switch (type) {
+    case "success":
+      return symbols.success;
+    case "warning":
+      return symbols.warning;
+    case "error":
+      return symbols.error;
+    case "info":
+      return symbols.info;
     default:
       return symbols.info;
   }
