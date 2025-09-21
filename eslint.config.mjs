@@ -45,7 +45,7 @@ const JS_FILES = ['**/*.js', '**/*.cjs', '!bin/**/*.js'];
 const MJS_FILES = ['**/*.mjs', 'bin/**/*.js'];
 const TS_SRC_FILES = ['src/**/*.ts'];
 const LOGGER_FILE = ['src/logger/index.ts'];
-const UI_MODULES = ['src/ui/logger.ts', 'src/ui/formatters.ts'];
+const UI_MODULES = ['src/ui/**/*.ts'];
 const TEST_AND_TOOL_FILES = [
   '**/*.test.ts',
   '**/*.spec.ts'
