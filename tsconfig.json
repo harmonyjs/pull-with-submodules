@@ -93,10 +93,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "coverage",
-    "tests",
-    "**/*.spec.ts"
+    "dist"
   ],
   "ts-node": {
     "esm": true,
