@@ -48,3 +48,15 @@ export {
 
 // Task log exports
 export { createTaskLog, withTaskLog, type TaskLog, type TaskLogConfig } from "./task-log.js";
+
+// Next steps exports
+export {
+  generateNextSteps,
+  formatNextSteps,
+  showNextSteps,
+  type NextStep,
+  type NextStepsContext
+} from "./next-steps.js";
+
+// TTY detection exports
+export { getUIEnvironment, isInteractiveEnvironment, isNonInteractiveEnvironment, type UIEnvironment } from "./tty.js";
