@@ -7,99 +7,26 @@
 
 import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
+import {
+  processRepositoryStatus,
+  type PullStatus,
+  type PullResult,
+} from "./pull-status.js";
 import type { GitSha } from "#types/git";
-import { createTaskLog, type TaskLog } from "#ui/task-log";
-import { getRepositoryStatusSymbol } from "#ui/colors";
+import { createTaskLog } from "#ui/task-log";
 
-/**
- * Detailed pull operation status.
- */
-export type PullStatus =
-  | "fast-forward"
-  | "no-op"
-  | "rebase-applied"
-  | "would-rebase"
-  | "conflict"
-  | "diverged"
-  | "ahead"
-  | "up-to-date";
-
-/**
- * Result of a pull operation.
- */
-export interface PullResult {
-  /** Detailed status of the pull operation */
-  readonly status: PullStatus;
-  /** Number of files changed */
-  readonly changes: number;
-  /** Number of insertions */
-  readonly insertions: number;
-  /** Number of deletions */
-  readonly deletions: number;
-  /** List of changed files */
-  readonly files: readonly string[];
-  /** Number of commits ahead of remote */
-  readonly ahead?: number;
-  /** Number of commits behind remote */
-  readonly behind?: number;
-}
-
-/**
- * Processes repository status and returns appropriate pull result.
- */
-function processRepositoryStatus(status: { ahead: number; behind: number }, taskLog: TaskLog): PullResult {
-  const symbol = getRepositoryStatusSymbol(status);
-
-  if (status.behind > 0 && status.ahead > 0) {
-    taskLog.success(`${symbol} Repository has diverged: ${status.ahead} local, ${status.behind} remote commits`);
-    return {
-      status: "diverged",
-      changes: status.behind,
-      insertions: 0,
-      deletions: 0,
-      files: [],
-      ahead: status.ahead,
-      behind: status.behind,
-    };
-  } else if (status.behind > 0) {
-    taskLog.success(`${symbol} Would pull ${status.behind} new commits from origin`);
-    return {
-      status: "would-rebase",
-      changes: status.behind,
-      insertions: 0,
-      deletions: 0,
-      files: [],
-      behind: status.behind,
-    };
-  } else if (status.ahead > 0) {
-    taskLog.success(`${symbol} Repository is ahead by ${status.ahead} commits`);
-    return {
-      status: "ahead",
-      changes: 0,
-      insertions: 0,
-      deletions: 0,
-      files: [],
-      ahead: status.ahead,
-    };
-  } else {
-    taskLog.success(`${symbol} Repository is up-to-date with origin`);
-    return {
-      status: "up-to-date",
-      changes: 0,
-      insertions: 0,
-      deletions: 0,
-      files: [],
-    };
-  }
-}
+// Re-export types from pull-status module for convenience
+export type { PullStatus, PullResult } from "./pull-status.js";
 
 /**
  * Handles dry-run mode for pull operations by checking repository status.
  */
-async function handleDryRunPull(config: GitOperationConfig): Promise<PullResult> {
+async function handleDryRunPull(
+  config: GitOperationConfig,
+): Promise<PullResult> {
   const taskLog = createTaskLog({
     title: "Checking repository status (dry-run)",
-    verbose: config.verbose ?? false
+    verbose: config.verbose ?? false,
   });
 
   const git = createGit(config);
@@ -148,7 +75,7 @@ export async function pullWithRebase(
 
   const taskLog = createTaskLog({
     title: "Pulling main repository with rebase",
-    verbose: config.verbose ?? false
+    verbose: config.verbose ?? false,
   });
 
   const git = createGit(config);
@@ -212,7 +139,7 @@ export async function fetchRemotes(
 
   const taskLog = createTaskLog({
     title: "Fetching from remotes",
-    verbose: config.verbose ?? false
+    verbose: config.verbose ?? false,
   });
 
   const git = createGit(config);
@@ -265,28 +192,6 @@ export async function getCommitSha(
 /**
  * Get working tree status.
  *
- * @param config - Git operation configuration
- * @returns Promise resolving to true if working tree is clean
- *
- * @example
- * ```typescript
- * const clean = await getWorkingTreeStatus({ cwd: '/path/to/repo' });
- * ```
+ * getWorkingTreeStatus has been moved to status-utils.ts with an enhanced interface.
+ * Import from "#lib/git/status-utils" for the new WorkingTreeStatus interface.
  */
-export async function getWorkingTreeStatus(
-  config: GitOperationConfig = {},
-): Promise<{ clean: boolean }> {
-  const git = createGit(config);
-
-  try {
-    const status = await git.status();
-    const clean = status.files.length === 0;
-    config.logger?.debug(`Working tree is ${clean ? "clean" : "dirty"}`);
-    return { clean };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Status check failed: ${errorMessage}`);
-  }
-}
-
-

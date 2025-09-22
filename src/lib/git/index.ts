@@ -19,7 +19,6 @@ export {
   pullWithRebase,
   fetchRemotes,
   getCommitSha,
-  getWorkingTreeStatus,
   type PullResult,
 } from "./operations.js";
 
@@ -37,3 +36,8 @@ export { extractRepoName } from "./url-parser.js";
 export { isGitRepository } from "./repository-validator.js";
 
 export { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";
+
+export {
+  getWorkingTreeStatus,
+  type WorkingTreeStatus,
+} from "./status-utils.js";
