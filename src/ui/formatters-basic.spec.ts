@@ -11,7 +11,6 @@ import {
   formatDuration,
   formatGitHash,
   formatSubmodulePath,
-  formatStatusIcon,
   formatStatistics,
 } from "./formatters.js";
 import type { UpdateResult, CommitSelection } from "#types/core";
@@ -66,15 +65,6 @@ describe("formatters - basic functions", () => {
       assert.equal(formatSubmodulePath("libs/common"), "libs/common");
       assert.equal(formatSubmodulePath("apps/frontend"), "apps/frontend");
       assert.equal(formatSubmodulePath("src"), "src");
-    });
-  });
-
-  describe("formatStatusIcon", () => {
-    void it("returns correct icons for each status", () => {
-      assert.equal(formatStatusIcon("updated"), "+");
-      assert.equal(formatStatusIcon("up-to-date"), "=");
-      assert.equal(formatStatusIcon("skipped"), "-");
-      assert.equal(formatStatusIcon("failed"), "x");
     });
   });
 

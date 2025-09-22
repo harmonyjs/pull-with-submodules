@@ -19,6 +19,12 @@ export interface LoggerMock {
   error: MockFunction<Logger["error"]>;
   withSpinner: <T>(message: string, operation: () => Promise<T>) => Promise<T>;
   withTasks: (tasks: Task[]) => Promise<void>;
+  createCallbacks: () => {
+    onProgress?: (message: string) => void;
+    onSuccess?: (message: string) => void;
+    onError?: (message: string) => void;
+    onWarning?: (message: string) => void;
+  };
 }
 
 /**
@@ -103,6 +109,17 @@ export function createMockLogger(): LoggerMock {
         }
       }
     },
+    createCallbacks: (): {
+      onProgress?: (message: string) => void;
+      onSuccess?: (message: string) => void;
+      onError?: (message: string) => void;
+      onWarning?: (message: string) => void;
+    } => ({
+      onProgress: (): void => {},
+      onSuccess: (): void => {},
+      onError: (): void => {},
+      onWarning: (): void => {},
+    }),
   };
 }
 
@@ -140,5 +157,16 @@ export function createSimpleLogger(): Logger {
         await task.task();
       }
     },
+    createCallbacks: (): {
+      onProgress?: (message: string) => void;
+      onSuccess?: (message: string) => void;
+      onError?: (message: string) => void;
+      onWarning?: (message: string) => void;
+    } => ({
+      onProgress: noop,
+      onSuccess: noop,
+      onError: noop,
+      onWarning: noop,
+    }),
   };
 }
