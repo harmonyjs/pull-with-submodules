@@ -8,15 +8,17 @@
  * logging, user prompts, and output formatting.
  */
 
-// Logger module exports
-export { createLogger, type Logger, type LogLevel } from "./logger.js";
+// Logger module exports (including TUI State Manager)
+export { createLogger, TUIStateManager } from "./logger.js";
+export { BufferedLogger } from "./buffered-logger.js";
+export { TUICoordinator } from "./tui-coordinator.js";
+export type { Logger, LogLevel, Task, LogImplementation } from "./types.js";
 
 // Prompts module exports
 export {
   intro,
   outro,
   confirm,
-  spinner,
   note,
   multilineNote,
   summaryNote,
@@ -46,8 +48,23 @@ export {
   getStatusSymbol,
 } from "./colors.js";
 
+// UI constants exports
+export {
+  UI_SYMBOLS,
+  UI_FORMATTING,
+  UI_TIMING,
+  CLI_CONSTANTS,
+  type UISymbolKey,
+  type UIFormattingKey,
+} from "./constants.js";
+
 // Task log exports
-export { createTaskLog, withTaskLog, type TaskLog, type TaskLogConfig } from "./task-log.js";
+export {
+  createTaskLog,
+  withTaskLog,
+  type TaskLog,
+  type TaskLogConfig,
+} from "./task-log.js";
 
 // Next steps exports
 export {
@@ -55,8 +72,13 @@ export {
   formatNextSteps,
   showNextSteps,
   type NextStep,
-  type NextStepsContext
+  type NextStepsContext,
 } from "./next-steps.js";
 
 // TTY detection exports
-export { getUIEnvironment, isInteractiveEnvironment, isNonInteractiveEnvironment, type UIEnvironment } from "./tty.js";
+export {
+  getUIEnvironment,
+  isInteractiveEnvironment,
+  isNonInteractiveEnvironment,
+  type UIEnvironment,
+} from "./tty.js";
