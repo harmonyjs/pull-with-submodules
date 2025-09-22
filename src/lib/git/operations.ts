@@ -13,7 +13,6 @@ import {
   type PullResult,
 } from "./pull-status.js";
 import type { GitSha } from "#types/git";
-import { createTaskLog } from "#ui/task-log";
 
 // Re-export types from pull-status module for convenience
 export type { PullStatus, PullResult } from "./pull-status.js";
@@ -24,23 +23,20 @@ export type { PullStatus, PullResult } from "./pull-status.js";
 async function handleDryRunPull(
   config: GitOperationConfig,
 ): Promise<PullResult> {
-  const taskLog = createTaskLog({
-    title: "Checking repository status (dry-run)",
-    verbose: config.verbose ?? false,
-  });
+  const callbacks = config.callbacks || {};
 
   const git = createGit(config);
   try {
-    taskLog.message("Fetching from origin...");
+    callbacks.onProgress?.("Fetching from origin...");
     await git.fetch(["--prune", "origin"]);
 
-    taskLog.message("Checking status...");
+    callbacks.onProgress?.("Checking status...");
     const status = await git.status();
 
-    return processRepositoryStatus(status, taskLog);
+    return processRepositoryStatus(status, callbacks);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    taskLog.warning(`Could not check repository status: ${errorMessage}`);
+    callbacks.onWarning?.(`Could not check repository status: ${errorMessage}`);
     return {
       status: "up-to-date",
       changes: 0,
@@ -73,24 +69,20 @@ export async function pullWithRebase(
     return handleDryRunPull(config);
   }
 
-  const taskLog = createTaskLog({
-    title: "Pulling main repository with rebase",
-    verbose: config.verbose ?? false,
-  });
-
+  const callbacks = config.callbacks || {};
   const git = createGit(config);
 
   try {
-    taskLog.message("Executing git pull --rebase...");
+    callbacks.onProgress?.("Executing git pull --rebase...");
     const result = await git.pull(["--rebase"]);
 
     const changes = result.summary.changes;
     const status: PullStatus = changes > 0 ? "rebase-applied" : "no-op";
 
     if (changes > 0) {
-      taskLog.success(`Pull completed: ${changes} changes`);
+      callbacks.onSuccess?.(`Pull completed: ${changes} changes`);
     } else {
-      taskLog.success("No changes to pull");
+      callbacks.onSuccess?.("No changes to pull");
     }
 
     config.logger?.verbose(`Pull completed: ${changes} changes`);
@@ -106,11 +98,11 @@ export async function pullWithRebase(
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     if (errorMessage.includes("conflict")) {
-      taskLog.error("Rebase conflicts detected");
+      callbacks.onError?.("Rebase conflicts detected");
       throw new Error(`Rebase conflicts detected: ${errorMessage}`);
     }
 
-    taskLog.error(`Pull failed: ${errorMessage}`);
+    callbacks.onError?.(`Pull failed: ${errorMessage}`);
     throw new Error(`Pull with rebase failed: ${errorMessage}`);
   }
 }
@@ -133,25 +125,21 @@ export async function fetchRemotes(
   config.logger?.verbose(`fetch in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
-    config.logger?.info("Fetch remotes (dry-run)");
+    config.logger?.verbose("Fetch remotes (dry-run)");
     return;
   }
 
-  const taskLog = createTaskLog({
-    title: "Fetching from remotes",
-    verbose: config.verbose ?? false,
-  });
-
+  const callbacks = config.callbacks || {};
   const git = createGit(config);
 
   try {
-    taskLog.message("Fetching from all remotes...");
+    callbacks.onProgress?.("Fetching from all remotes...");
     await git.fetch();
-    taskLog.success("Fetch completed");
+    callbacks.onSuccess?.("Fetch completed");
     config.logger?.verbose("Fetch completed");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    taskLog.error(`Fetch failed: ${errorMessage}`);
+    callbacks.onError?.(`Fetch failed: ${errorMessage}`);
     throw new Error(`Fetch failed: ${errorMessage}`);
   }
 }

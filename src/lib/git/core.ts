@@ -19,6 +19,24 @@ export interface AncestryCheckResult {
 }
 
 /**
+ * Callbacks for operation progress reporting.
+ *
+ * Simple callback interface that replaces TaskLog for progress reporting.
+ * Library code uses these callbacks to report progress without knowing
+ * about UI implementations.
+ */
+export interface OperationCallbacks {
+  /** Called to report operation progress */
+  onProgress?: (message: string) => void;
+  /** Called when operation succeeds */
+  onSuccess?: (message: string) => void;
+  /** Called when operation fails */
+  onError?: (message: string) => void;
+  /** Called when operation has warnings */
+  onWarning?: (message: string) => void;
+}
+
+/**
  * Configuration for git operations.
  */
 export interface GitOperationConfig {
@@ -32,6 +50,8 @@ export interface GitOperationConfig {
   readonly verbose?: boolean;
   /** Optional logger instance for operation logging */
   readonly logger?: Logger;
+  /** Optional callbacks for progress reporting */
+  readonly callbacks?: OperationCallbacks;
 }
 
 const DEFAULT_GIT_TIMEOUT = 30_000;

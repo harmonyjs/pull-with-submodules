@@ -14,7 +14,7 @@
  */
 
 import * as clack from "@clack/prompts";
-import { backgrounds, symbols } from "./colors.js";
+import { backgrounds } from "./colors.js";
 import { isInteractiveEnvironment } from "./tty.js";
 
 /**
@@ -92,13 +92,13 @@ export async function spinner<T>(
 ): Promise<T> {
   if (!isInteractiveEnvironment()) {
     // Non-interactive environment: use simple logging
-    clack.log.info(`${symbols.process} ${message}...`);
+    clack.log.info(`${message}...`);
     try {
       const result = await operation();
-      clack.log.info(`${symbols.success} ${message} completed`);
+      clack.log.info(`${message} completed`);
       return result;
     } catch (error) {
-      clack.log.error(`${symbols.error} ${message} failed`);
+      clack.log.error(`${message} failed`);
       throw error;
     }
   }

@@ -10,7 +10,7 @@
 import type { ExecutionContext, UpdateResult } from "#types/core";
 import type { ExecutionResult } from "#orchestrator/index";
 import type { PullResult } from "#lib/git/operations";
-import { symbols, status } from "./colors.js";
+import { status } from "./colors.js";
 
 /**
  * Next step suggestion with description.
@@ -184,7 +184,7 @@ export function formatNextSteps(steps: NextStep[]): string {
 
   const formatted = steps
     .map((step) => {
-      const bullet = symbols.step;
+      const bullet = "•";
       const actionText = status.info(step.action);
       const reason = step.reason ?? "";
       const reasonText = reason !== "" ? status.muted(` (${reason})`) : "";

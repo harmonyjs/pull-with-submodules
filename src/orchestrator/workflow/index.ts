@@ -1,8 +1,8 @@
 /**
- * @fileoverview Main workflow coordinator.
+ * @fileoverview Barrel file for workflow modules.
  *
- * Orchestrates the primary pull-with-submodules workflow including repository pull,
- * stash management, and gitlink operations with proper error handling and user feedback.
+ * Re-exports all public APIs from workflow modules including types, functions,
+ * and workflow orchestration capabilities.
  */
 
 import type { GitOperationConfig } from "#lib/git";
@@ -18,8 +18,24 @@ import {
 import { handleWorkflowError } from "./error-handler.js";
 import type { WorkflowResult } from "./types.js";
 
-// Re-export types for convenience
-export type { WorkflowResult } from "./types.js";
+// Re-export all types
+export type { WorkflowResult, GitlinkCommitResult } from "./types.js";
+
+// Re-export helper functions
+export {
+  applyGitlinkCommits,
+  restoreStashSafely,
+  formatGitlinkCommitMessage,
+} from "./helpers.js";
+
+// Re-export pull operations
+export {
+  handleUncommittedChanges,
+  pullMainRepository,
+} from "./pull-operations.js";
+
+// Re-export error handler
+export { handleWorkflowError } from "./error-handler.js";
 
 /**
  * Executes the main workflow for pulling repository with submodules.

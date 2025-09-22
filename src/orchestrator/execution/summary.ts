@@ -154,9 +154,9 @@ export function showExecutionSummary(
     logger.info(`Created ${result.workflow.gitlinkCommits} gitlink commit(s)`);
   }
 
-  // Show dry-run notice with proper icon
+  // Show dry-run notice
   if (context.dryRun) {
-    logger.info("● Dry-run mode: No actual changes were made");
+    logger.info("Dry-run mode: No actual changes were made");
   }
 
   // Show next steps suggestions

@@ -6,7 +6,7 @@
  */
 
 import { getRepositoryStatusSymbol } from "#ui/colors";
-import type { TaskLog } from "#ui/task-log";
+import type { OperationCallbacks } from "./core.js";
 
 /**
  * Detailed pull operation status.
@@ -46,18 +46,18 @@ export interface PullResult {
  */
 export function processRepositoryStatus(
   status: { ahead: number; behind: number },
-  taskLog: TaskLog,
+  callbacks: OperationCallbacks,
 ): PullResult {
   const symbol = getRepositoryStatusSymbol(status);
 
   if (status.behind > 0 && status.ahead > 0) {
-    return handleDivergedRepository(status, symbol, taskLog);
+    return handleDivergedRepository(status, symbol, callbacks);
   } else if (status.behind > 0) {
-    return handleBehindRepository(status, symbol, taskLog);
+    return handleBehindRepository(status, symbol, callbacks);
   } else if (status.ahead > 0) {
-    return handleAheadRepository(status, symbol, taskLog);
+    return handleAheadRepository(status, symbol, callbacks);
   } else {
-    return handleUpToDateRepository(symbol, taskLog);
+    return handleUpToDateRepository(symbol, callbacks);
   }
 }
 
@@ -67,9 +67,9 @@ export function processRepositoryStatus(
 function handleDivergedRepository(
   status: { ahead: number; behind: number },
   symbol: string,
-  taskLog: TaskLog,
+  callbacks: OperationCallbacks,
 ): PullResult {
-  taskLog.success(
+  callbacks.onSuccess?.(
     `${symbol} Repository has diverged: ${status.ahead} local, ${status.behind} remote commits`,
   );
   return {
@@ -89,9 +89,9 @@ function handleDivergedRepository(
 function handleBehindRepository(
   status: { behind: number },
   symbol: string,
-  taskLog: TaskLog,
+  callbacks: OperationCallbacks,
 ): PullResult {
-  taskLog.success(
+  callbacks.onSuccess?.(
     `${symbol} Would pull ${status.behind} new commits from origin`,
   );
   return {
@@ -109,10 +109,10 @@ function handleBehindRepository(
  */
 function handleAheadRepository(
   status: { ahead: number },
-  symbol: string,
-  taskLog: TaskLog,
+  _symbol: string,
+  callbacks: OperationCallbacks,
 ): PullResult {
-  taskLog.success(`${symbol} Repository is ahead by ${status.ahead} commits`);
+  callbacks.onSuccess?.(`Repository is ahead by ${status.ahead} commits`);
   return {
     status: "ahead",
     changes: 0,
@@ -127,10 +127,10 @@ function handleAheadRepository(
  * Handles the case where the repository is up-to-date.
  */
 function handleUpToDateRepository(
-  symbol: string,
-  taskLog: TaskLog,
+  _symbol: string,
+  callbacks: OperationCallbacks,
 ): PullResult {
-  taskLog.success(`${symbol} Repository is up-to-date with origin`);
+  callbacks.onSuccess?.("Repository is up-to-date with origin");
   return {
     status: "up-to-date",
     changes: 0,

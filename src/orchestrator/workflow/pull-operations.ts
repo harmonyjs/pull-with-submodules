@@ -100,7 +100,10 @@ export async function pullMainRepository(
     "Pull main repository with rebase",
     async () => {
       try {
-        const result = await pullWithRebase(gitConfig);
+        const result = await pullWithRebase({
+          ...gitConfig,
+          callbacks: logger.createCallbacks(),
+        });
         return handlePullResult(result, gitConfig, logger);
       } catch (error) {
         return handlePullError(error);

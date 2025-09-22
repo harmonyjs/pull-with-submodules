@@ -5,7 +5,6 @@
  * when running in non-interactive environments.
  */
 
-import { symbols } from "./colors.js";
 import type { LogImplementation, Task } from "./types.js";
 
 /**
@@ -16,13 +15,13 @@ export async function executeSpinnerNonInteractive<T>(
   operation: () => Promise<T>,
   logImpl: LogImplementation,
 ): Promise<T> {
-  logImpl.info(`${symbols.process} ${message}...`);
+  logImpl.info(`${message}...`);
   try {
     const result = await operation();
-    logImpl.info(`${symbols.success} ${message} completed`);
+    logImpl.info(`${message} completed`);
     return result;
   } catch (error) {
-    logImpl.error(`${symbols.error} ${message} failed`);
+    logImpl.error(`${message} failed`);
     throw error;
   }
 }
@@ -35,12 +34,12 @@ export async function executeTasksNonInteractive(
   logImpl: LogImplementation,
 ): Promise<void> {
   for (const task of tasks) {
-    logImpl.info(`${symbols.process} ${task.title}...`);
+    logImpl.info(`${task.title}...`);
     try {
       await task.task();
-      logImpl.info(`${symbols.success} ${task.title} completed`);
+      logImpl.info(`${task.title} completed`);
     } catch (error) {
-      logImpl.error(`${symbols.error} ${task.title} failed`);
+      logImpl.error(`${task.title} failed`);
       throw error;
     }
   }
