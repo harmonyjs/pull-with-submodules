@@ -50,7 +50,7 @@ export async function handleWorkflowError(
   // Attempt emergency stash restore if needed
   if (stash?.created === true) {
     try {
-      await restoreStashSafely(stash, gitConfig);
+      await restoreStashSafely(stash, gitConfig, errorContext.context);
     } catch (restoreError) {
       const errorString =
         restoreError instanceof Error

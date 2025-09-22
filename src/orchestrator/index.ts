@@ -142,7 +142,7 @@ async function applyGitlinkCommitsIfNeeded(
     dryRun: context.dryRun,
     logger,
   };
-  return applyGitlinkCommits([...submoduleResult.results], gitConfig);
+  return applyGitlinkCommits([...submoduleResult.results], gitConfig, context);
 }
 
 /**

@@ -49,17 +49,17 @@ export async function executeMainWorkflow(
 
   try {
     // Step 1: Handle uncommitted changes
-    stash = await handleUncommittedChanges(gitConfig);
+    stash = await handleUncommittedChanges(gitConfig, context);
 
     // Step 2: Pull main repository
-    mainRepositoryUpdated = await pullMainRepository(gitConfig);
+    mainRepositoryUpdated = await pullMainRepository(gitConfig, context);
 
     // Step 3: Gitlink commits will be applied later after submodule processing
     // (in the main orchestrator)
 
     // Step 4: Restore stash if created
     if (stash !== null && stash.created === true) {
-      await restoreStashSafely(stash, gitConfig);
+      await restoreStashSafely(stash, gitConfig, context);
     }
 
     const duration = Date.now() - startTime;

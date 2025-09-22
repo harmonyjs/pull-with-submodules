@@ -6,6 +6,10 @@
  */
 
 import { createGit, type GitOperationConfig } from "#lib/git";
+import {
+  getWorkingTreeStatus as getGitWorkingTreeStatus,
+  type WorkingTreeStatus,
+} from "#lib/git/status-utils";
 import { GitOperationError } from "#errors";
 import { createTaskLog } from "#ui/task-log";
 
@@ -23,15 +27,18 @@ export interface StashResult {
   readonly message: string;
 }
 
+// WorkingTreeStatus interface is now imported from "#lib/git/status-utils"
+
 /**
- * Working tree status information.
+ * Extended working tree status for stash operations.
+ *
+ * Extends the base WorkingTreeStatus with additional fields needed
+ * for stash operations like file path lists for logging purposes.
  */
-export interface WorkingTreeStatus {
-  /** True if working tree is clean (no uncommitted changes) */
-  readonly clean: boolean;
-  /** Number of modified files */
+export interface StashWorkingTreeStatus extends WorkingTreeStatus {
+  /** Number of modified files (alias for modified + staged) */
   readonly modifiedFiles: number;
-  /** Number of untracked files */
+  /** Number of untracked files (alias for untracked) */
   readonly untrackedFiles: number;
   /** List of modified file paths (for logging) */
   readonly modifiedPaths: readonly string[];
@@ -46,21 +53,24 @@ export interface WorkingTreeStatus {
  */
 export async function getWorkingTreeStatus(
   config: GitOperationConfig = {},
-): Promise<WorkingTreeStatus> {
-  const git = createGit(config);
-
+): Promise<StashWorkingTreeStatus> {
   try {
-    const status = await git.status();
+    const status = await getGitWorkingTreeStatus(config);
 
-    const modifiedFiles = status.modified.length + status.staged.length;
-    const untrackedFiles = status.not_added.length;
-    const modifiedPaths = [...status.modified, ...status.staged];
-
+    // Create git instance to get detailed file lists
+    const git = createGit(config);
+    const gitStatus = await git.status();
+    const modifiedPaths = [...gitStatus.modified, ...gitStatus.staged];
 
     return {
-      clean: status.files.length === 0,
-      modifiedFiles,
-      untrackedFiles,
+      // Base WorkingTreeStatus fields
+      clean: status.clean,
+      staged: status.staged,
+      modified: status.modified,
+      untracked: status.untracked,
+      // Additional fields for stash operations
+      modifiedFiles: status.staged + status.modified,
+      untrackedFiles: status.untracked,
       modifiedPaths,
     };
   } catch (error) {
@@ -127,7 +137,7 @@ export async function createStash(
   const git = createGit(config);
   const taskLog = createTaskLog({
     title: "Creating stash for uncommitted changes",
-    verbose: config.verbose ?? false
+    verbose: config.verbose ?? false,
   });
 
   try {
@@ -177,7 +187,7 @@ export async function restoreStash(
   const git = createGit(config);
   const taskLog = createTaskLog({
     title: "Restoring stashed changes",
-    verbose: config.verbose ?? false
+    verbose: config.verbose ?? false,
   });
 
   try {

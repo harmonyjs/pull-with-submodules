@@ -5,7 +5,14 @@
  * summary information to users.
  */
 
-import { formatSummaryTable, createLogger, multilineNote, summaryNote, showNextSteps, type NextStepsContext } from "#ui";
+import {
+  formatSummaryTable,
+  createLogger,
+  multilineNote,
+  summaryNote,
+  showNextSteps,
+  type NextStepsContext,
+} from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
 
 import { MILLISECONDS_PER_SECOND } from "#orchestrator/constants";
@@ -160,7 +167,10 @@ export function showExecutionSummary(
   };
 
   const nextStepsText = showNextSteps(nextStepsContext);
-  if (nextStepsText !== "" && nextStepsText !== "No specific next steps required.") {
+  if (
+    nextStepsText !== "" &&
+    nextStepsText !== "No specific next steps required."
+  ) {
     multilineNote(nextStepsText, "Next Steps");
   }
 }

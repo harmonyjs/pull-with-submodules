@@ -6,12 +6,9 @@
  */
 
 import { createParallelRunner, type ParallelResult } from "#lib/async";
-import { createLogger } from "#ui";
+import { createLogger, type Task } from "#ui";
 import { GitOperationError } from "#errors";
 import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
-import { spinner, log } from "@clack/prompts";
-import { isInteractiveEnvironment } from "#ui/tty";
-import { symbols } from "#ui/colors";
 
 import { MAX_PARALLEL_SUBMODULES } from "#orchestrator";
 import {
@@ -107,61 +104,30 @@ async function processSubmodulesSequentially(
 
   logger.verbose(`Processing ${submodules.length} submodules sequentially`);
 
-  if (!isInteractiveEnvironment()) {
-    // Non-interactive environment: use simple logging
-    for (let i = 0; i < submodules.length; i++) {
-      const submodule = submodules[i];
-      if (submodule === undefined) {
-        throw new Error(`Submodule at index ${i} is undefined`);
-      }
-
-      log.info(`${symbols.process} [${i + 1}/${submodules.length}] Process submodule: ${submodule.path}...`);
-
-      const result = await processSubmoduleWithErrorHandling(submodule, context);
+  // Create tasks for each submodule
+  const tasks: Task[] = submodules.map((submodule, i) => ({
+    title: `[${i + 1}/${submodules.length}] Process submodule: ${submodule.path}`,
+    task: async (): Promise<string> => {
+      const result = await processSubmoduleWithErrorHandling(
+        submodule,
+        context,
+      );
       results.push(result);
 
       const statusText = getStatusText(result);
-      log.info(`${symbols.success} [${i + 1}/${submodules.length}] ${submodule.path} - ${statusText}`);
 
       if (result.status === "failed") {
         logger.error(
           `Failed to process ${submodule.path}: ${result.error?.message ?? "Unknown error"}`,
         );
       }
-    }
-    return results;
-  }
 
-  // Interactive environment: use spinners
-  for (let i = 0; i < submodules.length; i++) {
-    const submodule = submodules[i];
-    if (submodule === undefined) {
-      throw new Error(`Submodule at index ${i} is undefined`);
-    }
+      return `${submodule.path} - ${statusText}`;
+    },
+  }));
 
-    const s = spinner();
-    try {
-      s.start(`[${i + 1}/${submodules.length}] Process submodule: ${submodule.path}`);
-
-      const result = await processSubmoduleWithErrorHandling(submodule, context);
-      results.push(result);
-
-      const statusText = getStatusText(result);
-      s.stop(`[${i + 1}/${submodules.length}] ${submodule.path} - ${statusText}`);
-
-      if (result.status === "failed") {
-        logger.error(
-          `Failed to process ${submodule.path}: ${result.error?.message ?? "Unknown error"}`,
-        );
-      }
-    } finally {
-      try {
-        s.stop();
-      } catch {
-        // Ignore errors when stopping spinner
-      }
-    }
-  }
+  // Execute tasks using the logger's withTasks method
+  await logger.withTasks(tasks);
 
   return results;
 }
@@ -179,47 +145,20 @@ async function processSubmodulesInParallel(
     `Processing ${submodules.length} submodules in parallel (max 4 concurrent)`,
   );
 
-  if (!isInteractiveEnvironment()) {
-    // Non-interactive environment: use simple logging
-    log.info(`${symbols.process} Process ${submodules.length} submodules in parallel...`);
-    try {
+  // Use withSpinner for parallel processing
+  return await logger.withSpinner(
+    `Process ${submodules.length} submodules in parallel`,
+    async () => {
       const results = await runParallelSubmoduleProcessing(submodules, context);
       const summary = summarizeParallelResults(results);
 
-      log.info(
-        `${symbols.success} Completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
+      logger.info(
+        `Completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
       );
 
       return results;
-    } catch (error) {
-      log.error(`${symbols.error} Parallel processing failed`);
-      throw error;
-    }
-  }
-
-  // Interactive environment: use spinner
-  const s = spinner();
-  try {
-    s.start(`Process ${submodules.length} submodules in parallel`);
-
-    const results = await runParallelSubmoduleProcessing(submodules, context);
-    const summary = summarizeParallelResults(results);
-
-    s.stop(
-      `Completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
-    );
-
-    return results;
-  } catch (error) {
-    s.stop("Parallel processing failed");
-    throw error;
-  } finally {
-    try {
-      s.stop();
-    } catch {
-      // Ignore errors when stopping spinner
-    }
-  }
+    },
+  );
 }
 
 /**

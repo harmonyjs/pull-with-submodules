@@ -7,10 +7,8 @@
 
 import { parseSubmodules } from "#core";
 import type { ExecutionContext, UpdateResult, Submodule } from "#types/core";
-import { spinner, log } from "@clack/prompts";
+import { createLogger } from "#ui";
 import { SHORT_SHA_LENGTH } from "#lib/git/sha-utils";
-import { isInteractiveEnvironment } from "#ui/tty";
-import { symbols } from "#ui/colors";
 
 import type { SubmoduleProcessingSummary } from "./index.js";
 
@@ -23,36 +21,13 @@ import type { SubmoduleProcessingSummary } from "./index.js";
 export async function parseSubmodulesWithProgress(
   context: ExecutionContext,
 ): Promise<readonly Submodule[]> {
-  if (!isInteractiveEnvironment()) {
-    // Non-interactive environment: use simple logging with consolidated message
-    try {
-      const submodules = await parseSubmodules(context.repositoryRoot, context);
-      log.info(`${symbols.success} Found ${submodules.length} submodule(s)`);
-      return submodules;
-    } catch (error) {
-      log.error(`${symbols.error} Failed to parse .gitmodules`);
-      throw error;
-    }
-  }
+  const logger = createLogger(context);
 
-  // Interactive environment: use spinner
-  const s = spinner();
-  try {
-    s.start("Parse .gitmodules");
-
+  return await logger.withSpinner("Parse .gitmodules", async () => {
     const submodules = await parseSubmodules(context.repositoryRoot, context);
-    s.stop(`Found ${submodules.length} submodule(s)`);
+    logger.info(`Found ${submodules.length} submodule(s)`);
     return submodules;
-  } catch (error) {
-    s.stop("Failed to parse .gitmodules");
-    throw error;
-  } finally {
-    try {
-      s.stop();
-    } catch {
-      // Ignore errors when stopping spinner
-    }
-  }
+  });
 }
 
 /**
