@@ -88,7 +88,20 @@ export interface UIOperations {
  * This interface combines BaseLogger and UIOperations for components that need
  * both capabilities. Most application code should depend on this interface.
  */
-export interface Logger extends BaseLogger, UIOperations {}
+export interface Logger extends BaseLogger, UIOperations {
+  /**
+   * Create operation callbacks for library functions.
+   *
+   * This method creates callbacks that map to the logger's output methods,
+   * allowing library code to report progress without knowing about UI.
+   */
+  createCallbacks(): {
+    onProgress?: (message: string) => void;
+    onSuccess?: (message: string) => void;
+    onError?: (message: string) => void;
+    onWarning?: (message: string) => void;
+  };
+}
 
 /**
  * Buffered log entry for deferred output during UI operations.

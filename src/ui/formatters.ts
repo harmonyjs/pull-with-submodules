@@ -89,9 +89,7 @@ export function formatSummaryTable(results: UpdateResult[]): string {
 
   // Add data rows without colors for proper alignment
   for (const result of results) {
-    const statusIcon = formatStatusIcon(result.status);
     const statusText = result.status;
-    const statusWithSymbol = `${statusIcon} ${statusText}`;
 
     const source = result.selection?.source ?? "-";
     const sha = result.selection
@@ -99,46 +97,13 @@ export function formatSummaryTable(results: UpdateResult[]): string {
       : "-";
     const duration = formatDuration(result.duration);
 
-    tableData.push([
-      result.submodule.path,
-      statusWithSymbol,
-      source,
-      sha,
-      duration,
-    ]);
+    tableData.push([result.submodule.path, statusText, source, sha, duration]);
   }
 
   // Create borderless table with proper alignment
   return table(tableData, {
     align: ["l", "l", "l", "l", "r"], // left-align most columns, right-align duration
   });
-}
-
-/**
- * Formats a status icon based on submodule processing result.
- *
- * @param status Submodule processing status.
- * @returns Text icon representing the status.
- * @example
- * formatStatusIcon("updated") // "+"
- * formatStatusIcon("up-to-date") // "="
- * formatStatusIcon("failed") // "x"
- */
-export function formatStatusIcon(
-  status: "updated" | "up-to-date" | "skipped" | "failed",
-): string {
-  switch (status) {
-    case "updated":
-      return "+";
-    case "up-to-date":
-      return "=";
-    case "skipped":
-      return "-";
-    case "failed":
-      return "x";
-    default:
-      return "?";
-  }
 }
 
 /**

@@ -21,29 +21,13 @@ export const status = {
 } as const;
 
 /**
- * Symbol-based color functions for status indicators.
- * Uses semantic symbols for process states vs. results.
+ * Minimal symbol set for custom functionality.
+ * @clack/prompts handles all standard UI symbols automatically.
  */
 export const symbols = {
-  // Process indicators (for ongoing operations)
-  process: pc.gray("*"),
-  step: pc.gray("◇"),
-
-  // Result indicators (for final outcomes)
-  success: pc.green("◇"),
-  warning: pc.yellow("▲"),
-  error: pc.red("◇"),
-  info: pc.blue("◇"),
-
-  // Status-specific symbols
   verbose: pc.gray("*"),
-  updated: pc.green("+"),
-  upToDate: pc.cyan("="),
-  skipped: pc.yellow("-"),
-  failed: pc.red("x"),
 
-  // Special modes
-  dryRun: pc.blue("●"),
+  // Repository status symbols (standalone use only)
   ahead: pc.cyan("↑"),
   behind: pc.yellow("↓"),
   diverged: pc.magenta("⚡"),
@@ -88,24 +72,6 @@ export function colorizeStatus(statusText: string): string {
 }
 
 /**
- * Utility function to get status symbol by status name.
- */
-export function getStatusSymbol(statusText: string): string {
-  switch (statusText) {
-    case "updated":
-      return symbols.updated;
-    case "up-to-date":
-      return symbols.upToDate;
-    case "skipped":
-      return symbols.skipped;
-    case "failed":
-      return symbols.failed;
-    default:
-      return symbols.info;
-  }
-}
-
-/**
  * Utility function to get repository status symbol.
  */
 export function getRepositoryStatusSymbol(status: {
@@ -122,31 +88,7 @@ export function getRepositoryStatusSymbol(status: {
   } else if (behindCount > 0) {
     return symbols.behind;
   } else {
-    return symbols.upToDate;
-  }
-}
-
-/**
- * Gets appropriate symbol for process vs result context.
- */
-export function getContextualSymbol(
-  context: "process" | "result",
-  type: "success" | "warning" | "error" | "info" = "info",
-): string {
-  if (context === "process") {
-    return symbols.process;
-  }
-
-  switch (type) {
-    case "success":
-      return symbols.success;
-    case "warning":
-      return symbols.warning;
-    case "error":
-      return symbols.error;
-    case "info":
-      return symbols.info;
-    default:
-      return symbols.info;
+    // For up-to-date status, return empty string since we don't need a symbol
+    return "";
   }
 }

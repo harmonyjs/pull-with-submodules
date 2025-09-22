@@ -8,11 +8,10 @@
  * logging, user prompts, and output formatting.
  */
 
-// Logger module exports (including TUI State Manager)
-export { createLogger, TUIStateManager } from "./logger.js";
-export { BufferedLogger } from "./buffered-logger.js";
-export { TUICoordinator } from "./tui-coordinator.js";
-export type { Logger, LogLevel, Task, LogImplementation } from "./types.js";
+// Logger module exports (new UIManager architecture)
+export { createLogger } from "./logger.js";
+export { createUIManager } from "./ui-manager.js";
+export type { Logger, LogLevel, Task } from "./types.js";
 
 // Prompts module exports
 export {
@@ -31,7 +30,6 @@ export {
   formatGitHash,
   formatSubmodulePath,
   formatSummaryTable,
-  formatStatusIcon,
   formatStatistics,
 } from "./formatters.js";
 
@@ -45,7 +43,6 @@ export {
   backgrounds,
   styles,
   colorizeStatus,
-  getStatusSymbol,
 } from "./colors.js";
 
 // UI constants exports
@@ -58,13 +55,8 @@ export {
   type UIFormattingKey,
 } from "./constants.js";
 
-// Task log exports
-export {
-  createTaskLog,
-  withTaskLog,
-  type TaskLog,
-  type TaskLogConfig,
-} from "./task-log.js";
+// Destination exports
+export type { LogDestination, SpinnerHandle, TaskHandle } from "./destinations/base.js";
 
 // Next steps exports
 export {
