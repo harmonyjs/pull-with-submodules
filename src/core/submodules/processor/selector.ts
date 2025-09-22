@@ -7,7 +7,10 @@
 
 import { getCommitSha } from "#lib/git/operations";
 import { selectCommitSmart } from "#core/submodules/strategies";
-import { findSiblingRepository } from "#core/submodules/siblings";
+import {
+  findSiblingRepository,
+  type SiblingRepository,
+} from "#core/submodules/siblings";
 import type { ExecutionContext, CommitSelection } from "#types/core";
 import type { SubmoduleUpdatePlan } from "#core/submodules/types";
 import type { Logger } from "#ui/logger";
@@ -41,43 +44,104 @@ export class SubmoduleCommitSelector {
     const remoteBranch = `origin/${plan.branch.branch}`;
     const remoteSha = await getCommitSha(remoteBranch, { cwd: absolutePath });
 
-    let sibling = null;
-    if (plan.submodule.url !== undefined && plan.submodule.url !== "") {
-      this.logger.verbose(`Searching for local sibling repository for ${plan.submodule.name}`);
-      sibling = await findSiblingRepository({
-        submodulePath: absolutePath,
-        remoteUrl: plan.submodule.url,
-        branch: plan.branch.branch,
-        gitConfig: {
-          cwd: this.context.repositoryRoot,
-          dryRun: this.context.dryRun,
-          logger: this.logger,
-        },
-        logger: this.logger,
-      });
+    const sibling = await this.findSiblingIfAvailable(plan, absolutePath);
+    const selection = await this.selectCommitWithSibling(
+      sibling,
+      remoteSha,
+      absolutePath,
+    );
 
-      if (sibling !== null && sibling.isValid === true && sibling.commitSha !== null) {
-        this.logger.verbose(`Found local sibling: ${sibling.name} at ${sibling.path} with SHA ${sibling.commitSha}`);
-      } else if (sibling !== null && sibling.isValid === true) {
-        this.logger.verbose(`Found local sibling: ${sibling.name} at ${sibling.path} but no valid SHA for branch ${plan.branch.branch}`);
-      } else {
-        this.logger.verbose(`No valid local sibling found for ${plan.submodule.name}`);
-      }
-    } else {
-      this.logger.verbose(`No URL configured for submodule ${plan.submodule.name}, skipping sibling search`);
+    this.logSelectionResult(selection, plan.submodule.name);
+    return selection;
+  }
+
+  /**
+   * Finds and validates a sibling repository if available.
+   */
+  private async findSiblingIfAvailable(
+    plan: SubmoduleUpdatePlan,
+    absolutePath: string,
+  ): Promise<SiblingRepository | null> {
+    if (plan.submodule.url === undefined || plan.submodule.url === "") {
+      this.logger.verbose(
+        `No URL configured for submodule ${plan.submodule.name}, skipping sibling search`,
+      );
+      return null;
     }
 
-    const selection = await selectCommitSmart(sibling?.commitSha || null, remoteSha, {
+    this.logger.verbose(
+      `Searching for local sibling repository for ${plan.submodule.name}`,
+    );
+
+    const sibling = await findSiblingRepository({
+      submodulePath: absolutePath,
+      remoteUrl: plan.submodule.url,
+      branch: plan.branch.branch,
+      gitConfig: {
+        cwd: this.context.repositoryRoot,
+        dryRun: this.context.dryRun,
+        logger: this.logger,
+      },
+    });
+
+    this.logSiblingResult(sibling, plan);
+    return sibling;
+  }
+
+  /**
+   * Logs the result of sibling repository discovery.
+   */
+  private logSiblingResult(
+    sibling: SiblingRepository | null,
+    plan: SubmoduleUpdatePlan,
+  ): void {
+    if (
+      sibling !== null &&
+      sibling.isValid === true &&
+      sibling.commitSha !== null
+    ) {
+      this.logger.verbose(
+        `Found local sibling: ${sibling.name} at ${sibling.path} with SHA ${sibling.commitSha}`,
+      );
+    } else if (sibling !== null && sibling.isValid === true) {
+      this.logger.verbose(
+        `Found local sibling: ${sibling.name} at ${sibling.path} but no valid SHA for branch ${plan.branch.branch}`,
+      );
+    } else {
+      this.logger.verbose(
+        `No valid local sibling found for ${plan.submodule.name}`,
+      );
+    }
+  }
+
+  /**
+   * Selects commit using smart commit selection with sibling consideration.
+   */
+  private async selectCommitWithSibling(
+    sibling: SiblingRepository | null,
+    remoteSha: string | null,
+    absolutePath: string,
+  ): Promise<CommitSelection | null> {
+    const siblingCommitSha = sibling?.commitSha ?? null;
+    return await selectCommitSmart(siblingCommitSha, remoteSha, {
       forceRemote: this.context.forceRemote,
       cwd: absolutePath,
     });
+  }
 
+  /**
+   * Logs the final commit selection result.
+   */
+  private logSelectionResult(
+    selection: CommitSelection | null,
+    submoduleName: string,
+  ): void {
     if (selection) {
-      this.logger.verbose(`Selected commit ${selection.sha} from ${selection.source}: ${selection.reason}`);
+      this.logger.verbose(
+        `Selected commit ${selection.sha} from ${selection.source}: ${selection.reason}`,
+      );
     } else {
-      this.logger.verbose(`No commit selected for ${plan.submodule.name}`);
+      this.logger.verbose(`No commit selected for ${submoduleName}`);
     }
-
-    return selection;
   }
 }

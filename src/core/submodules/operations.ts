@@ -213,7 +213,9 @@ async function updateSubmoduleToCommit(
         `Fast-forward merge failed for ${submodulePath}, using detached HEAD`,
       );
       await git.checkout([targetSha, "--detach"]);
-      logger.verbose(`Updated ${submodulePath} to detached HEAD @ ${targetSha}`);
+      logger.verbose(
+        `Updated ${submodulePath} to detached HEAD @ ${targetSha}`,
+      );
     }
   } catch (error) {
     throw new GitOperationError(

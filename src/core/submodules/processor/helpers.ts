@@ -39,7 +39,9 @@ export function logPlanDetails(
   });
 
   if (plan.currentSha) {
-    logger.verbose(`Current SHA for ${plan.submodule.name}: ${plan.currentSha}`);
+    logger.verbose(
+      `Current SHA for ${plan.submodule.name}: ${plan.currentSha}`,
+    );
   }
 }
 
