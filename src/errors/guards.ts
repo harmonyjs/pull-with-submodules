@@ -1,5 +1,5 @@
 /**
- * @fileoverview Type guards and unions for application errors (relocated to src/errors/).
+ * @fileoverview Type guards and unions for application errors.
  */
 import { GitOperationError } from "./git-operation.js";
 import { NetworkError } from "./network.js";

@@ -1,5 +1,5 @@
 /**
- * @fileoverview NetworkError concrete subclass (relocated to src/errors/).
+ * @fileoverview NetworkError concrete subclass.
  */
 import { BaseAppError, type AppErrorOptions } from "./base.js";
 

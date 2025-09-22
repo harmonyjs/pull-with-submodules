@@ -1,5 +1,5 @@
 /**
- * @fileoverview GitOperationError concrete subclass (relocated to src/errors/).
+ * @fileoverview GitOperationError concrete subclass.
  */
 import { BaseAppError, type AppErrorOptions } from "./base.js";
 

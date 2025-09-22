@@ -1,5 +1,5 @@
 /**
- * @fileoverview Shared error type declarations (relocated to src/errors/).
+ * @fileoverview Shared error type declarations.
  */
 
 export type ErrorCode = "GIT_OPERATION" | "NETWORK";

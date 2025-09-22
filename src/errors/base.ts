@@ -1,5 +1,5 @@
 /**
- * @fileoverview Internal base class for typed application errors (relocated to src/errors/).
+ * @fileoverview Internal base class for typed application errors.
  */
 import type { ErrorCode } from "./types.js";
 
