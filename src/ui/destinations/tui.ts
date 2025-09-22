@@ -12,6 +12,7 @@ import {
   tasks,
   note,
 } from "@clack/prompts";
+import pc from "picocolors";
 import type { LogLevel, Task } from "#ui/types";
 import { symbols } from "#ui/colors";
 import {
@@ -101,11 +102,11 @@ export class TUIDestination extends BaseLogDestination {
         break;
       case "verbose":
         // Verbose uses special symbol from colors
-        log.message(message, { symbol: symbols.verbose });
+        log.message(pc.gray(message), { symbol: symbols.verbose });
         break;
       case "debug":
         // Debug treated same as verbose for now
-        log.message(message, { symbol: symbols.verbose });
+        log.message(pc.gray(message), { symbol: symbols.verbose });
         break;
       default:
         log.info(message);
