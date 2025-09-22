@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Test suite for git repository cache functionality.
+ *
+ * Tests in-memory caching of repository validation results to improve
+ * performance when repeatedly checking repository paths.
+ */
+
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";

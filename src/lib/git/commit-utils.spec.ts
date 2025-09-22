@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Test suite for git commit utilities.
+ *
+ * Tests commit SHA retrieval and validation functionality for determining
+ * current branch states and commit references in submodules.
+ */
+
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { getCommitSha } from "./commit-utils.js";

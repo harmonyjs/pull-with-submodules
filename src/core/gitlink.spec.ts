@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Test suite for gitlink operations.
+ *
+ * Tests gitlink creation and management functionality used for coordinating
+ * submodule reference commits with parent repository state.
+ */
+
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {

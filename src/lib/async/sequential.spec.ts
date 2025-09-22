@@ -154,10 +154,11 @@ describe("sequential", () => {
   });
 
   it("should throw for undefined operation", async () => {
+    // Intentionally create invalid operations array to test error handling
     const operations: Array<() => Promise<string>> = [
       async () => "result1",
-
-      undefined as any,
+      // @ts-expect-error Testing invalid input handling
+      undefined,
       async () => "result3",
     ];
 

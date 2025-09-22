@@ -1,5 +1,12 @@
+/**
+ * @fileoverview Test suite for sibling repository discovery functionality.
+ *
+ * Tests sibling repository discovery logic and integration with utility functions
+ * like URL parsing, repository validation, and commit SHA retrieval.
+ */
+
 import { strict as assert } from "node:assert";
-import { test, mock } from "node:test";
+import { test } from "node:test";
 import {
   findSiblingRepository,
   type SiblingDiscoveryOptions,
@@ -8,6 +15,7 @@ import { extractRepoName } from "#lib/git/url-parser";
 import { isGitRepository } from "#lib/git/repository-validator";
 import { getCommitSha } from "#lib/git/commit-utils";
 import { InMemoryRepositoryCache } from "#lib/git/cache";
+import { createMockLogger, getMockCalls } from "#test-utils";
 
 // URL parser tests - verify integration
 test("extractRepoName integration", () => {
@@ -59,12 +67,7 @@ test("findSiblingRepository - uses cache and logger when provided", async () => 
   const cache = new InMemoryRepositoryCache();
 
   // Mock logger
-  const mockLogger = {
-    debug: mock(), verbose: mock.fn().fn(),
-    info: mock.fn(),
-    warn: mock.fn(),
-    error: mock.fn(),
-  };
+  const mockLogger = createMockLogger();
 
   const options: SiblingDiscoveryOptions = {
     submodulePath: "/workspace/main-repo/libs/shared",
@@ -78,7 +81,7 @@ test("findSiblingRepository - uses cache and logger when provided", async () => 
   await findSiblingRepository(options);
 
   // Verify logger was called
-  assert.ok((mockLogger.debug as any).mock.calls.length > 0);
+  assert.ok(getMockCalls(mockLogger.debug).length > 0);
 });
 
 test("extractRepoName and path logic integration", () => {
@@ -96,12 +99,7 @@ test("findSiblingRepository - path generation logic", () => {
   // This tests the internal generateCandidatePaths logic indirectly
 
   // Mock the filesystem operations to control behavior
-  const mockLogger = {
-    debug: mock(), verbose: mock.fn().fn(),
-    info: mock.fn(),
-    warn: mock.fn(),
-    error: mock.fn(),
-  };
+  const mockLogger = createMockLogger();
 
   // The function should generate paths based on URL name and submodule path name
   // URL: "https://github.com/user/shared-utils.git" -> "shared-utils"
@@ -121,12 +119,7 @@ test("findSiblingRepository - successful discovery scenario", async () => {
   // Pre-populate cache to simulate found repository
   cache.set("/workspace/shared-utils", true);
 
-  const mockLogger = {
-    debug: mock(), verbose: mock.fn().fn(),
-    info: mock.fn(),
-    warn: mock.fn(),
-    error: mock.fn(),
-  };
+  const mockLogger = createMockLogger();
 
   const options: SiblingDiscoveryOptions = {
     submodulePath: "/workspace/main/libs/shared",
@@ -147,12 +140,7 @@ test("findSiblingRepository - successful discovery scenario", async () => {
 
 test("findSiblingRepository - cache efficiency", async () => {
   const cache = new InMemoryRepositoryCache();
-  const mockLogger = {
-    debug: mock(), verbose: mock.fn().fn(),
-    info: mock.fn(),
-    warn: mock.fn(),
-    error: mock.fn(),
-  };
+  const mockLogger = createMockLogger();
 
   const options: SiblingDiscoveryOptions = {
     submodulePath: "/workspace/main/libs/shared",
@@ -175,7 +163,7 @@ test("findSiblingRepository - cache efficiency", async () => {
   await findSiblingRepository(options);
 
   // Logger should show cache hit messages
-  const debugCalls = (mockLogger.debug as any).mock.calls;
+  const debugCalls = getMockCalls(mockLogger.debug);
 
   // We expect cache-related logging when cache is used
   assert.ok(debugCalls.length > 0); // At least some debug calls were made

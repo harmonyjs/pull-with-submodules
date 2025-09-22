@@ -19,21 +19,13 @@ import {
   prepareUpdatePlan,
   enrichPlanWithCurrentSha,
 } from "./update-planner.js";
+import { createMockLogger, createTypedMock, getMockCalls } from "#test-utils";
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";
 const TEST_SUBMODULE_PATH = "libs/test";
 const TEST_SUBMODULE_NAME = "test";
 const TEST_SHA: GitSha = "abc123def456" as GitSha;
-
-// Mock logger interface
-interface MockLogger {
-  debug: (message: string, data?: any) => void;
-  verbose: (message: string, data?: any) => void;
-  info: (message: string) => void;
-  warn: (message: string) => void;
-  error: (message: string) => void;
-}
 
 // Mock execution context
 const mockContext: ExecutionContext = {
@@ -45,18 +37,21 @@ const mockContext: ExecutionContext = {
   repositoryRoot: TEST_REPO_ROOT,
 };
 
-const createMockLogger = (): MockLogger => ({
-  debug: mock.fn(),
-  verbose: mock.fn(),
-  info: mock.fn(),
-  warn: mock.fn(),
-  error: mock.fn(),
-});
+/**
+ * Type alias for branch resolver function signature.
+ */
+type BranchResolverFunction = (
+  submodule: Submodule,
+) => Promise<BranchResolution>;
 
-function createMockBranchResolver(
-  branchResolution: BranchResolution,
-): (submodule: Submodule) => Promise<BranchResolution> {
-  return mock.fn(async () => branchResolution);
+/**
+ * Creates a typed mock branch resolver without using as any.
+ *
+ * @param branchResolution The resolution to return from the mock
+ * @returns Properly typed mock function
+ */
+function createMockBranchResolver(branchResolution: BranchResolution) {
+  return createTypedMock<BranchResolverFunction>(async () => branchResolution);
 }
 
 describe("prepareUpdatePlan - basic functionality", () => {
@@ -123,7 +118,7 @@ describe("prepareUpdatePlan - basic functionality", () => {
         resolveBranch: mockResolveBranch,
       });
 
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.equal(debugCalls.length, 1);
       assert.match(
         debugCalls[0]?.arguments[0] as string,
@@ -154,7 +149,7 @@ describe("prepareUpdatePlan - basic functionality", () => {
       });
 
       // Verify branch resolver was called with normalized submodule
-      const resolveBranchCalls = (mockResolveBranch as any).mock.calls;
+      const resolveBranchCalls = mockResolveBranch.mock.calls;
       assert.equal(resolveBranchCalls.length, 1);
 
       const normalizedSubmodule = resolveBranchCalls[0]?.arguments[0];

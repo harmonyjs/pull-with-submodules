@@ -1,7 +1,40 @@
+/**
+ * @fileoverview Test suite for git repository validation utilities.
+ *
+ * Tests repository validation functionality including caching mechanisms
+ * to efficiently determine if paths contain valid git repositories.
+ */
+
 import { strict as assert } from "node:assert";
 import { test, mock } from "node:test";
 import { isGitRepository } from "./repository-validator.js";
 import { InMemoryRepositoryCache, type RepositoryCache } from "./cache.js";
+import { createTypedMock, type MockFunction } from "#test-utils";
+
+/**
+ * Creates a typed mock repository cache for testing without using as any.
+ * Uses the centralized createTypedMock helper for type safety.
+ */
+function createMockCache(
+  cacheHit: boolean = true,
+  cacheValue: boolean = true,
+): {
+  cache: RepositoryCache;
+  getMock: MockFunction<RepositoryCache["get"]>;
+  setMock: MockFunction<RepositoryCache["set"]>;
+} {
+  const getMock = createTypedMock<RepositoryCache["get"]>(() => cacheValue);
+  const setMock = createTypedMock<RepositoryCache["set"]>();
+
+  const cache: RepositoryCache = {
+    has: mock.fn(() => cacheHit),
+    get: getMock,
+    set: setMock,
+    clear: mock.fn(),
+  };
+
+  return { cache, getMock, setMock };
+}
 
 test("isGitRepository", async (t) => {
   await t.test("returns false for nonexistent paths", async () => {
@@ -10,18 +43,13 @@ test("isGitRepository", async (t) => {
   });
 
   await t.test("uses cache when provided", async () => {
-    const cache: RepositoryCache = {
-      has: mock.fn(() => true),
-      get: mock.fn(() => true),
-      set: mock.fn(),
-      clear: mock.fn(),
-    };
+    const { cache, getMock, setMock } = createMockCache(true, true);
 
     const result = await isGitRepository("/cached/path", cache);
 
     assert.equal(result, true);
-    assert.equal((cache.get as any).mock.calls.length, 1);
-    assert.equal((cache.set as any).mock.calls.length, 0); // Should not set when cache hit
+    assert.equal(getMock.mock.calls.length, 1);
+    assert.equal(setMock.mock.calls.length, 0); // Should not set when cache hit
   });
 
   await t.test("sets cache on miss", async () => {

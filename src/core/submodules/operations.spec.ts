@@ -6,22 +6,15 @@
  */
 
 import { strict as assert } from "node:assert";
-import { test, describe, mock } from "node:test";
+import { test, describe } from "node:test";
 import type { ExecutionContext } from "#types/core";
 import { GitOperationError } from "#errors/index";
 import { performSubmoduleSync, performSubmoduleInit } from "./operations.js";
+import { createMockLogger, getMockCalls } from "#test-utils";
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";
 const TEST_SUBMODULE_PATH = "/test/repo/libs/test";
-
-// Mock logger interface
-interface MockLogger {
-  debug: (message: string, data?: any) => void;
-  info: (message: string) => void;
-  warn: (message: string) => void;
-  error: (message: string) => void;
-}
 
 // Mock execution context
 const mockContext: ExecutionContext = {
@@ -32,13 +25,6 @@ const mockContext: ExecutionContext = {
   verbose: false,
   repositoryRoot: TEST_REPO_ROOT,
 };
-
-const createMockLogger = (): MockLogger => ({
-  debug: mock(), verbose: mock.fn().fn(),
-  info: mock.fn(),
-  warn: mock.fn(),
-  error: mock.fn(),
-});
 
 describe("performSubmoduleSync", () => {
   describe("dry run mode", () => {
@@ -52,16 +38,12 @@ describe("performSubmoduleSync", () => {
         mockLogger,
       );
 
-      const infoCalls = (mockLogger.info as any).mock.calls;
+      const infoCalls = getMockCalls(mockLogger.info);
       assert.equal(infoCalls.length, 1);
-      assert.match(
-        infoCalls[0]?.arguments[0] as string,
-        /Would sync submodule/,
-      );
-      assert.match(
-        infoCalls[0]?.arguments[0] as string,
-        new RegExp(TEST_SUBMODULE_PATH),
-      );
+      const firstCall = infoCalls[0];
+      assert.ok(firstCall);
+      assert.match(firstCall.arguments[0], /Would sync submodule/);
+      assert.match(firstCall.arguments[0], new RegExp(TEST_SUBMODULE_PATH));
     });
 
     test("should not perform actual git operations in dry run", async () => {
@@ -76,12 +58,11 @@ describe("performSubmoduleSync", () => {
       );
 
       // Only info log should be called, no debug logs for actual operations
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.equal(debugCalls.length, 1); // Only initial debug log
-      assert.match(
-        debugCalls[0]?.arguments[0] as string,
-        /Syncing submodule at/,
-      );
+      const firstDebugCall = debugCalls[0];
+      assert.ok(firstDebugCall);
+      assert.match(firstDebugCall.arguments[0], /Syncing submodule at/);
     });
   });
 
@@ -146,7 +127,7 @@ describe("performSubmoduleSync", () => {
         // Expected to fail in test environment
       }
 
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.equal(debugCalls.length, 1);
       assert.match(
         debugCalls[0]?.arguments[0] as string,
@@ -204,7 +185,7 @@ describe("performSubmoduleInit", () => {
         mockLogger,
       );
 
-      const infoCalls = (mockLogger.info as any).mock.calls;
+      const infoCalls = getMockCalls(mockLogger.info);
       assert.equal(infoCalls.length, 1);
       assert.match(
         infoCalls[0]?.arguments[0] as string,
@@ -227,7 +208,7 @@ describe("performSubmoduleInit", () => {
         mockLogger,
       );
 
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.equal(debugCalls.length, 1); // Only initial debug log
       assert.match(
         debugCalls[0]?.arguments[0] as string,
@@ -260,7 +241,7 @@ describe("performSubmoduleInit", () => {
         // Expected in test environment
       }
 
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.equal(debugCalls.length, 1);
       assert.match(
         debugCalls[0]?.arguments[0] as string,
@@ -309,7 +290,7 @@ describe("performSubmoduleInit", () => {
       }
 
       // Verify initial debug log was called
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.ok(debugCalls.length >= 1);
       assert.match(
         debugCalls[0]?.arguments[0] as string,

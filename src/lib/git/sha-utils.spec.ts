@@ -103,13 +103,13 @@ test("asGitSha - throws GitOperationError for invalid SHA", () => {
       assert.ok(gitError.message.includes("invalid"));
 
       // Check error details
-      const details = (gitError as any).details;
+      const details = gitError.details;
       assert.ok(details);
-      assert.equal(details.sha, "invalid");
-      assert.ok(details.expectedFormat);
+      assert.equal(details["sha"], "invalid");
+      assert.ok(details["expectedFormat"]);
 
       // Check suggestions
-      const suggestions = (gitError as any).suggestions;
+      const suggestions = gitError.suggestions;
       assert.ok(Array.isArray(suggestions));
       assert.ok(suggestions.length > 0);
       assert.ok(suggestions.some((s: string) => s.includes("hexadecimal")));

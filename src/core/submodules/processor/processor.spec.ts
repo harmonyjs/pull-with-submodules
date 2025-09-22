@@ -16,19 +16,27 @@ import {
 import { resolveBranch } from "#core/submodules/branch-resolver";
 import { SubmoduleProcessorImpl } from "./implementation.js";
 import { normalizeSubmoduleEntry } from "#core/submodules/helpers";
+import { createMockLogger, createSpyLogger } from "#test-utils";
+
+/**
+ * Type-safe helper for injecting mock logger into processor for testing.
+ * Uses Reflect API to access private property safely.
+ *
+ * @param processor The processor instance to inject logger into
+ * @param mockLogger The mock logger to inject
+ */
+function injectMockLogger(
+  processor: SubmoduleProcessorImpl,
+  mockLogger: unknown,
+): void {
+  // Use Reflect API to set private property safely for testing
+  Reflect.set(processor, "logger", mockLogger);
+}
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";
 const TEST_SUBMODULE_PATH = "libs/test";
 const TEST_SUBMODULE_NAME = "test";
-
-// Mock dependencies interfaces for testing
-interface MockLogger {
-  debug: (message: string, data?: any) => void;
-  info: (message: string) => void;
-  warn: (message: string) => void;
-  error: (message: string) => void;
-}
 
 describe("SubmoduleProcessorImpl", () => {
   const mockContext: ExecutionContext = {
@@ -39,13 +47,6 @@ describe("SubmoduleProcessorImpl", () => {
     verbose: false,
     repositoryRoot: TEST_REPO_ROOT,
   };
-
-  const createMockLogger = (): MockLogger => ({
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-  });
 
   describe("resolveBranch", () => {
     test("should return explicit branch when configured", async () => {
@@ -99,40 +100,43 @@ describe("SubmoduleProcessorImpl", () => {
   describe("syncSubmodule - dry run", () => {
     test("should handle dry-run mode", async () => {
       const dryRunContext = { ...mockContext, dryRun: true };
-      const mockLogger = createMockLogger();
-      let infoMessage = "";
-      mockLogger.info = (message: string) => {
-        infoMessage = message;
-      };
+      const mockLogger = createSpyLogger("info");
 
       // Create a testable processor that accepts a custom logger
       const processor = new SubmoduleProcessorImpl(dryRunContext);
-      (processor as any).logger = mockLogger;
+      injectMockLogger(processor, mockLogger);
 
       await processor.syncSubmodule(`${TEST_REPO_ROOT}/${TEST_SUBMODULE_PATH}`);
 
-      assert.match(infoMessage, /Would sync submodule/);
+      // Verify the info method was called with the expected message pattern
+      assert.equal(mockLogger.info.mock.callCount(), 1);
+      const infoCall = mockLogger.info.mock.calls[0];
+      assert.ok(infoCall?.arguments[0]);
+      assert.match(infoCall.arguments[0] as string, /Would sync submodule/);
     });
   });
 
   describe("initializeSubmodule - dry run", () => {
     test("should handle dry-run mode", async () => {
       const dryRunContext = { ...mockContext, dryRun: true };
-      const mockLogger = createMockLogger();
-      let infoMessage = "";
-      mockLogger.info = (message: string) => {
-        infoMessage = message;
-      };
+      const mockLogger = createSpyLogger("info");
 
       // Create a testable processor that accepts a custom logger
       const processor = new SubmoduleProcessorImpl(dryRunContext);
-      (processor as any).logger = mockLogger;
+      injectMockLogger(processor, mockLogger);
 
       await processor.initializeSubmodule(
         `${TEST_REPO_ROOT}/${TEST_SUBMODULE_PATH}`,
       );
 
-      assert.match(infoMessage, /Would initialize submodule/);
+      // Verify the info method was called with the expected message pattern
+      assert.equal(mockLogger.info.mock.callCount(), 1);
+      const infoCall = mockLogger.info.mock.calls[0];
+      assert.ok(infoCall?.arguments[0]);
+      assert.match(
+        infoCall.arguments[0] as string,
+        /Would initialize submodule/,
+      );
     });
   });
 

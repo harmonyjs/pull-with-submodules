@@ -6,7 +6,7 @@
  */
 
 import { strict as assert } from "node:assert";
-import { test, describe, mock } from "node:test";
+import { test, describe } from "node:test";
 import type { ExecutionContext, Submodule } from "#types/core";
 import {
   BRANCH_SOURCES,
@@ -14,19 +14,12 @@ import {
   type BranchResolution,
 } from "./types.js";
 import { resolveBranch } from "./branch-resolver.js";
+import { createMockLogger, getMockCalls, getMockCallCount } from "#test-utils";
 
 // Test constants
 const TEST_REPO_ROOT = "/test/repo";
 const TEST_SUBMODULE_PATH = "libs/test";
 const TEST_SUBMODULE_NAME = "test";
-
-// Mock logger interface
-interface MockLogger {
-  debug: (message: string, data?: any) => void;
-  info: (message: string) => void;
-  warn: (message: string) => void;
-  error: (message: string) => void;
-}
 
 // Mock execution context
 const mockContext: ExecutionContext = {
@@ -37,13 +30,6 @@ const mockContext: ExecutionContext = {
   verbose: false,
   repositoryRoot: TEST_REPO_ROOT,
 };
-
-const createMockLogger = (): MockLogger => ({
-  debug: mock(), verbose: mock.fn().fn(),
-  info: mock.fn(),
-  warn: mock.fn(),
-  error: mock.fn(),
-});
 
 describe("resolveBranch", () => {
   describe("explicit branch configuration", () => {
@@ -64,7 +50,7 @@ describe("resolveBranch", () => {
       };
 
       assert.deepEqual(result, expected);
-      assert.equal((mockLogger.debug as any).mock.callCount(), 1);
+      assert.equal(getMockCallCount(mockLogger.debug), 1);
     });
 
     test("should handle feature/branch-name with slashes", async () => {
@@ -214,7 +200,7 @@ describe("resolveBranch - fallback scenarios", () => {
       const mockLogger = createMockLogger();
       await resolveBranch(submodule, mockContext, mockLogger);
 
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.ok(debugCalls.length >= 1);
       assert.match(
         debugCalls[0]?.arguments[0] as string,
@@ -280,7 +266,7 @@ describe("resolveBranch - edge cases", () => {
       const mockLogger = createMockLogger();
       await resolveBranch(submodule, mockContext, mockLogger);
 
-      const debugCalls = (mockLogger.debug as any).mock.calls;
+      const debugCalls = getMockCalls(mockLogger.debug);
       assert.ok(debugCalls.length >= 1);
       const firstCall = debugCalls[0];
       if (firstCall && firstCall.arguments && firstCall.arguments[0]) {
@@ -301,7 +287,7 @@ describe("resolveBranch - edge cases", () => {
       const mockLogger = createMockLogger();
       await resolveBranch(submodule, mockContext, mockLogger);
 
-      const warnCalls = (mockLogger.warn as any).mock.calls;
+      const warnCalls = getMockCalls(mockLogger.warn);
       assert.equal(warnCalls.length, 0);
     });
   });

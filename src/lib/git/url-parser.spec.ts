@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Test suite for git URL parsing utilities.
+ *
+ * Tests parsing of various git URL formats including HTTPS, SSH, and
+ * local paths to extract repository names for sibling discovery.
+ */
+
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { extractRepoName } from "./url-parser.js";
