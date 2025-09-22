@@ -68,7 +68,6 @@ export function formatSubmodulePath(path: string): string {
   return path;
 }
 
-
 /**
  * Creates a formatted summary table from update results.
  *
@@ -85,7 +84,7 @@ export function formatSummaryTable(results: UpdateResult[]): string {
 
   // Prepare table data with header
   const tableData: string[][] = [
-    ["Path", "Status", "Source", "SHA", "Duration"]
+    ["Path", "Status", "Source", "SHA", "Duration"],
   ];
 
   // Add data rows without colors for proper alignment
@@ -95,7 +94,9 @@ export function formatSummaryTable(results: UpdateResult[]): string {
     const statusWithSymbol = `${statusIcon} ${statusText}`;
 
     const source = result.selection?.source ?? "-";
-    const sha = result.selection ? formatGitHash(result.selection.sha, true) : "-";
+    const sha = result.selection
+      ? formatGitHash(result.selection.sha, true)
+      : "-";
     const duration = formatDuration(result.duration);
 
     tableData.push([
@@ -103,13 +104,13 @@ export function formatSummaryTable(results: UpdateResult[]): string {
       statusWithSymbol,
       source,
       sha,
-      duration
+      duration,
     ]);
   }
 
   // Create borderless table with proper alignment
   return table(tableData, {
-    align: ['l', 'l', 'l', 'l', 'r'] // left-align most columns, right-align duration
+    align: ["l", "l", "l", "l", "r"], // left-align most columns, right-align duration
   });
 }
 

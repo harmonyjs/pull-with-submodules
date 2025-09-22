@@ -56,10 +56,9 @@ function detectTest(): boolean {
 }
 
 /**
- * Detects whether the terminal supports color output.
+ * Checks explicit color environment variables.
  */
-function detectColorSupport(): boolean {
-  // Explicit color preference
+function checkExplicitColorPreference(): boolean | null {
   const forceColor = process.env["FORCE_COLOR"];
   if (forceColor !== undefined && forceColor !== "") {
     return forceColor !== "0";
@@ -67,35 +66,69 @@ function detectColorSupport(): boolean {
 
   const noColor = process.env["NO_COLOR"];
   const nodeDisableColors = process.env["NODE_DISABLE_COLORS"];
-  if ((noColor !== undefined && noColor !== "") || (nodeDisableColors !== undefined && nodeDisableColors !== "")) {
+  if (
+    (noColor !== undefined && noColor !== "") ||
+    (nodeDisableColors !== undefined && nodeDisableColors !== "")
+  ) {
     return false;
   }
 
-  // Check for CI environments that support color
-  if (detectCI()) {
-    const githubActions = process.env["GITHUB_ACTIONS"];
-    const gitlabCi = process.env["GITLAB_CI"];
-    const buildkite = process.env["BUILDKITE"];
-    const circleci = process.env["CIRCLECI"];
+  return null;
+}
 
-    return Boolean(
-      (githubActions !== undefined && githubActions !== "") ||
-        (gitlabCi !== undefined && gitlabCi !== "") ||
-        (buildkite !== undefined && buildkite !== "") ||
-        (circleci !== undefined && circleci !== "")
-    );
+/**
+ * Checks if CI environment supports color.
+ */
+function checkCIColorSupport(): boolean {
+  if (!detectCI()) {
+    return false;
   }
 
-  // Standard TTY color detection
+  const githubActions = process.env["GITHUB_ACTIONS"];
+  const gitlabCi = process.env["GITLAB_CI"];
+  const buildkite = process.env["BUILDKITE"];
+  const circleci = process.env["CIRCLECI"];
+
+  return Boolean(
+    (githubActions !== undefined && githubActions !== "") ||
+      (gitlabCi !== undefined && gitlabCi !== "") ||
+      (buildkite !== undefined && buildkite !== "") ||
+      (circleci !== undefined && circleci !== ""),
+  );
+}
+
+/**
+ * Checks standard TTY color support.
+ */
+function checkTTYColorSupport(): boolean {
   const term = process.env["TERM"];
   const colorterm = process.env["COLORTERM"];
 
   return Boolean(
     process.stdout.isTTY &&
-    term !== "dumb" &&
-    (colorterm !== undefined ||
-      (term !== undefined && term !== "" && term.includes("color")))
+      term !== "dumb" &&
+      (colorterm !== undefined ||
+        (term !== undefined && term !== "" && term.includes("color"))),
   );
+}
+
+/**
+ * Detects whether the terminal supports color output.
+ */
+function detectColorSupport(): boolean {
+  // Check explicit color preference first
+  const explicitPreference = checkExplicitColorPreference();
+  if (explicitPreference !== null) {
+    return explicitPreference;
+  }
+
+  // Check CI environment support
+  if (detectCI()) {
+    return checkCIColorSupport();
+  }
+
+  // Fall back to standard TTY detection
+  return checkTTYColorSupport();
 }
 
 /**

@@ -57,7 +57,11 @@ export interface CommitSelection {
 }
 
 /** Processing outcome classification for a submodule. */
-export type SubmoduleProcessStatus = "updated" | "up-to-date" | "skipped" | "failed";
+export type SubmoduleProcessStatus =
+  | "updated"
+  | "up-to-date"
+  | "skipped"
+  | "failed";
 
 /**
  * Result of attempting to process (evaluate & update) a single submodule.

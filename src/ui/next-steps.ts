@@ -37,23 +37,27 @@ export interface NextStepsContext {
 }
 
 /**
- * Generates contextual next steps suggestions.
- *
- * @param context - Context information for generating suggestions
- * @returns Array of next step suggestions
+ * Adds dry-run specific suggestions.
  */
-export function generateNextSteps(context: NextStepsContext): NextStep[] {
-  const steps: NextStep[] = [];
-
-  // Dry-run mode: suggest real execution
+function addDryRunSuggestions(
+  steps: NextStep[],
+  context: NextStepsContext,
+): void {
   if (context.execution.dryRun) {
     steps.push({
       action: "Re-run without --dry-run to apply changes",
       reason: "This was a preview run - no actual changes were made",
     });
   }
+}
 
-  // Repository ahead: suggest push
+/**
+ * Adds repository status suggestions.
+ */
+function addRepositoryStatusSuggestions(
+  steps: NextStep[],
+  context: NextStepsContext,
+): void {
   const aheadCount = context.pullResult?.ahead ?? 0;
   if (context.pullResult?.status === "ahead" && aheadCount > 0) {
     steps.push({
@@ -62,7 +66,6 @@ export function generateNextSteps(context: NextStepsContext): NextStep[] {
     });
   }
 
-  // Repository diverged: suggest resolution
   if (context.pullResult?.status === "diverged") {
     steps.push({
       action: "Resolve diverged history",
@@ -73,56 +76,97 @@ export function generateNextSteps(context: NextStepsContext): NextStep[] {
       reason: "To replay local commits on top of remote changes",
     });
   }
+}
 
-  // Failed submodules: suggest investigation
-  const failedSubmodules = context.submoduleResults.filter(r => r.status === "failed");
-  if (failedSubmodules.length > 0) {
+/**
+ * Adds failed submodule suggestions.
+ */
+function addFailedSubmoduleSuggestions(
+  steps: NextStep[],
+  context: NextStepsContext,
+): void {
+  const failedSubmodules = context.submoduleResults.filter(
+    (r) => r.status === "failed",
+  );
+  if (failedSubmodules.length === 0) return;
+
+  steps.push({
+    action: "Investigate failed submodules",
+    reason: `${failedSubmodules.length} submodule(s) failed to update`,
+  });
+
+  const maxFailuresToShow = 3;
+  for (const failed of failedSubmodules.slice(0, maxFailuresToShow)) {
+    const errorMessage = failed.error?.message ?? "Unknown error";
     steps.push({
-      action: "Investigate failed submodules",
-      reason: `${failedSubmodules.length} submodule(s) failed to update`,
+      action: `Check ${failed.submodule.path}`,
+      reason: errorMessage !== "" ? errorMessage : "Unknown error",
     });
-
-    const maxFailuresToShow = 3;
-    for (const failed of failedSubmodules.slice(0, maxFailuresToShow)) {
-      const errorMessage = failed.error?.message ?? "Unknown error";
-      steps.push({
-        action: `Check ${failed.submodule.path}`,
-        reason: errorMessage !== "" ? errorMessage : "Unknown error",
-      });
-    }
   }
+}
 
-  // Conflicts detected: suggest resolution steps
-  if (context.result.errors.some(e => e.message.includes("conflict"))) {
-    steps.push({
+/**
+ * Adds conflict resolution suggestions.
+ */
+function addConflictSuggestions(
+  steps: NextStep[],
+  context: NextStepsContext,
+): void {
+  if (!context.result.errors.some((e) => e.message.includes("conflict")))
+    return;
+
+  steps.push(
+    {
       action: "Resolve merge conflicts",
       reason: "Conflicts were detected during the operation",
-    });
-    steps.push({
+    },
+    {
       action: "git rebase --continue",
       reason: "After resolving conflicts",
-    });
-    steps.push({
+    },
+    {
       action: "git rebase --abort",
       reason: "To cancel the rebase if conflicts cannot be resolved",
-    });
-  }
+    },
+  );
+}
 
-  // No changes but successful: suggest regular workflow
-  if (context.result.success && context.result.submodules.updated === 0 && !context.execution.dryRun) {
+/**
+ * Adds success-based suggestions.
+ */
+function addSuccessSuggestions(
+  steps: NextStep[],
+  context: NextStepsContext,
+): void {
+  if (!context.result.success || context.execution.dryRun) return;
+
+  if (context.result.submodules.updated === 0) {
     steps.push({
       action: "Continue development",
       reason: "All repositories are up-to-date",
     });
-  }
-
-  // Successful updates: suggest testing
-  if (context.result.success && context.result.submodules.updated > 0 && !context.execution.dryRun) {
+  } else {
     steps.push({
       action: "Test your application",
       reason: `${context.result.submodules.updated} submodule(s) were updated`,
     });
   }
+}
+
+/**
+ * Generates contextual next steps suggestions.
+ *
+ * @param context - Context information for generating suggestions
+ * @returns Array of next step suggestions
+ */
+export function generateNextSteps(context: NextStepsContext): NextStep[] {
+  const steps: NextStep[] = [];
+
+  addDryRunSuggestions(steps, context);
+  addRepositoryStatusSuggestions(steps, context);
+  addFailedSubmoduleSuggestions(steps, context);
+  addConflictSuggestions(steps, context);
+  addSuccessSuggestions(steps, context);
 
   return steps;
 }
@@ -138,13 +182,15 @@ export function formatNextSteps(steps: NextStep[]): string {
     return "No specific next steps required.";
   }
 
-  const formatted = steps.map((step) => {
-    const bullet = symbols.step;
-    const actionText = status.info(step.action);
-    const reason = step.reason ?? "";
-    const reasonText = reason !== "" ? status.muted(` (${reason})`) : "";
-    return `${bullet} ${actionText}${reasonText}`;
-  }).join("\n");
+  const formatted = steps
+    .map((step) => {
+      const bullet = symbols.step;
+      const actionText = status.info(step.action);
+      const reason = step.reason ?? "";
+      const reasonText = reason !== "" ? status.muted(` (${reason})`) : "";
+      return `${bullet} ${actionText}${reasonText}`;
+    })
+    .join("\n");
 
   return formatted;
 }

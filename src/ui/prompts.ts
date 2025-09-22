@@ -138,11 +138,7 @@ export function note(
 ): void {
   clack.note(
     message,
-    type === "info"
-      ? "Info"
-      : type === "warning"
-        ? "Warning"
-        : "Error",
+    type === "info" ? "Info" : type === "warning" ? "Warning" : "Error",
   );
 }
 

@@ -72,9 +72,7 @@ export const styles = {
 /**
  * Utility function to colorize submodule status.
  */
-export function colorizeStatus(
-  statusText: string,
-): string {
+export function colorizeStatus(statusText: string): string {
   switch (statusText) {
     case "updated":
       return status.success(statusText);
@@ -92,9 +90,7 @@ export function colorizeStatus(
 /**
  * Utility function to get status symbol by status name.
  */
-export function getStatusSymbol(
-  statusText: string,
-): string {
+export function getStatusSymbol(statusText: string): string {
   switch (statusText) {
     case "updated":
       return symbols.updated;
@@ -133,7 +129,10 @@ export function getRepositoryStatusSymbol(status: {
 /**
  * Gets appropriate symbol for process vs result context.
  */
-export function getContextualSymbol(context: "process" | "result", type: "success" | "warning" | "error" | "info" = "info"): string {
+export function getContextualSymbol(
+  context: "process" | "result",
+  type: "success" | "warning" | "error" | "info" = "info",
+): string {
   if (context === "process") {
     return symbols.process;
   }
