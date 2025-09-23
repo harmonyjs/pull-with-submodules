@@ -1,8 +1,8 @@
 /**
- * @fileoverview JSON destination for CI and non-interactive environments.
+ * @fileoverview JSON destination for structured logging in CI environments.
  *
- * Outputs structured JSON logs suitable for parsing by CI systems
- * and other automated tools. No fancy UI elements, just clean JSON.
+ * Outputs clean JSON logs without any terminal UI elements.
+ * Each log entry includes timestamp, level, and structured metadata.
  */
 
 import type { LogLevel, Task } from "#ui/types";
@@ -10,95 +10,23 @@ import {
   BaseLogDestination,
   type SpinnerHandle,
   type TaskHandle,
-} from "./base.js";
-
-/**
- * JSON log entry structure.
- */
-interface JSONLogEntry {
-  timestamp: string;
-  level: LogLevel;
-  message: string;
-  type: "log" | "spinner_start" | "spinner_end" | "task_start" | "task_end" | "note";
-  status?: "success" | "error";
-  title?: string;
-}
-
-/**
- * JSON-specific spinner handle.
- */
-class JSONSpinnerHandle implements SpinnerHandle {
-  constructor(
-    private readonly destination: JSONDestination,
-    private readonly message: string,
-  ) {}
-
-  success(message?: string): void {
-    this.destination.outputJSON({
-      timestamp: new Date().toISOString(),
-      level: "info",
-      message: message ?? `${this.message} completed`,
-      type: "spinner_end",
-      status: "success",
-    });
-    this.destination.onSpinnerStopped();
-  }
-
-  error(message?: string): void {
-    this.destination.outputJSON({
-      timestamp: new Date().toISOString(),
-      level: "error",
-      message: message ?? `${this.message} failed`,
-      type: "spinner_end",
-      status: "error",
-    });
-    this.destination.onSpinnerStopped();
-  }
-
-  update(message: string): void {
-    this.destination.outputJSON({
-      timestamp: new Date().toISOString(),
-      level: "info",
-      message,
-      type: "log",
-    });
-  }
-}
-
-/**
- * JSON-specific tasks handle.
- */
-class JSONTaskHandle implements TaskHandle {
-  constructor(private readonly destination: JSONDestination) {}
-
-  complete(): void {
-    this.destination.outputJSON({
-      timestamp: new Date().toISOString(),
-      level: "info",
-      message: "All tasks completed",
-      type: "task_end",
-      status: "success",
-    });
-    this.destination.onTasksStopped();
-  }
-
-  error(message?: string): void {
-    this.destination.outputJSON({
-      timestamp: new Date().toISOString(),
-      level: "error",
-      message: message ?? "Tasks failed",
-      type: "task_end",
-      status: "error",
-    });
-    this.destination.onTasksStopped();
-  }
-}
+} from "#ui/destinations/base";
+import type { JSONLogEntry } from "./types.js";
+import { JSONSpinnerHandle } from "./spinner-handle.js";
+import { JSONTaskHandle } from "./task-handle.js";
 
 /**
  * JSON destination for structured logging in CI environments.
  *
  * Outputs clean JSON logs without any terminal UI elements.
  * Each log entry includes timestamp, level, and structured metadata.
+ *
+ * @example
+ * ```typescript
+ * const destination = new JSONDestination();
+ * destination.info("Processing started");
+ * // Output: {"timestamp":"2024-01-01T00:00:00.000Z","level":"info","message":"Processing started","type":"log"}
+ * ```
  */
 export class JSONDestination extends BaseLogDestination {
   protected writeOutput(level: LogLevel, message: string): void {
@@ -130,30 +58,38 @@ export class JSONDestination extends BaseLogDestination {
     });
 
     // Execute tasks in sequence
-    this.executeTasks(tasks);
+    void this.executeTasks(tasks);
 
     return new JSONTaskHandle(this);
   }
 
   protected showNoteOutput(content: string, title?: string): void {
-    this.outputJSON({
+    const entry: JSONLogEntry = {
       timestamp: new Date().toISOString(),
       level: "info",
       message: content,
       type: "note",
-      ...(title && { title }),
-    });
+    };
+
+    if (title !== undefined && title !== "") {
+      entry.title = title;
+    }
+
+    this.outputJSON(entry);
   }
 
   /**
    * Output JSON entry to stdout.
+   * Used internally by handle classes to maintain JSON output format.
    */
+  // eslint-disable-next-line class-methods-use-this -- Method belongs to instance for interface consistency
   outputJSON(entry: JSONLogEntry): void {
     console.log(JSON.stringify(entry));
   }
 
   /**
    * Called when spinner handle completes.
+   * Part of the handle callback interface.
    */
   onSpinnerStopped(): void {
     this.activeElement = "none";
@@ -162,6 +98,7 @@ export class JSONDestination extends BaseLogDestination {
 
   /**
    * Called when tasks handle completes.
+   * Part of the handle callback interface.
    */
   onTasksStopped(): void {
     this.activeElement = "none";

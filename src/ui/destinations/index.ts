@@ -6,14 +6,10 @@
  */
 
 // Base interfaces and classes
-export type {
-  SpinnerHandle,
-  TaskHandle,
-  LogDestination,
-} from "./base.js";
+export type { SpinnerHandle, TaskHandle, LogDestination } from "./base.js";
 export { BaseLogDestination } from "./base.js";
 
 // Concrete destination implementations
-export { JSONDestination } from "./json.js";
-export { SilentDestination } from "./silent.js";
-export { TUIDestination } from "./tui.js";
+export { JSONDestination } from "./json/index.js";
+export { SilentDestination } from "./silent/index.js";
+export { TUIDestination } from "./tui/index.js";
