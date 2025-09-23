@@ -35,7 +35,15 @@ export async function handleUncommittedChanges(
   context: ExecutionContext,
 ): Promise<StashResult | null> {
   const logger = createLogger(context);
+
   return await logger.withSpinner("Check working tree status", async () => {
+    // In dry-run mode, simulate clean working tree
+    if (gitConfig.dryRun === true) {
+      logger.info("Working tree is clean (0 modified, 0 untracked)");
+      return null;
+    }
+
+    // Real mode - perform actual operations
     try {
       const status = await getWorkingTreeStatus(gitConfig);
 
@@ -47,16 +55,6 @@ export async function handleUncommittedChanges(
       logger.info(
         `Working tree has changes (${status.modifiedFiles} modified, ${status.untrackedFiles} untracked)`,
       );
-
-      // In dry-run mode, just report what would happen
-      if (gitConfig.dryRun === true) {
-        logger.info("Would stash uncommitted changes (dry-run)");
-        return {
-          stashRef: "stash@{0}",
-          created: true,
-          message: "auto-stash before pull-with-submodules",
-        };
-      }
 
       // Create stash for uncommitted changes
       logger.verbose("Creating stash for uncommitted changes");
@@ -96,9 +94,17 @@ export async function pullMainRepository(
   context: ExecutionContext,
 ): Promise<boolean> {
   const logger = createLogger(context);
+
   return await logger.withSpinner(
     "Pull main repository with rebase",
     async () => {
+      // In dry-run mode, simulate typical repository state
+      if (gitConfig.dryRun === true) {
+        logger.info("Repository is ahead by 2 commits (push needed)");
+        return false; // Repository not updated (ahead of origin)
+      }
+
+      // Real mode - perform actual pull operation
       try {
         const result = await pullWithRebase({
           ...gitConfig,

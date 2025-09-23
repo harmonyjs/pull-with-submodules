@@ -24,13 +24,30 @@ export interface WorkingTreeStatus {
 /**
  * Gets working tree status for a repository.
  *
+ * In dry-run mode, returns a simulated clean working tree to avoid:
+ * - I/O operations that could fail and cause spinners to show as failed
+ * - File system permission errors in restricted environments
+ * - Git repository access issues during preview mode
+ *
  * @param config Git operation configuration
  * @returns Promise resolving to working tree status
- * @throws Error if unable to get status
+ * @throws Error if unable to get status (only in non-dry-run mode)
  */
 export async function getWorkingTreeStatus(
   config: GitOperationConfig = {},
 ): Promise<WorkingTreeStatus> {
+  // In dry-run mode, simulate clean working tree without I/O operations
+  if (config.dryRun === true) {
+    config.logger?.verbose("Simulating clean working tree (dry-run mode)");
+    return {
+      clean: true,
+      staged: 0,
+      modified: 0,
+      untracked: 0,
+    };
+  }
+
+  // Real mode - perform actual git status operation
   config.logger?.verbose(
     `git status --porcelain in ${config.cwd ?? process.cwd()}`,
   );

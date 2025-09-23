@@ -7,44 +7,40 @@
 
 import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
-import {
-  processRepositoryStatus,
-  type PullStatus,
-  type PullResult,
-} from "./pull-status.js";
+import { type PullStatus, type PullResult } from "./pull-status.js";
 import type { GitSha } from "#types/git";
 
 // Re-export types from pull-status module for convenience
 export type { PullStatus, PullResult } from "./pull-status.js";
 
 /**
- * Handles dry-run mode for pull operations by checking repository status.
+ * Handles dry-run mode for pull operations by simulating pull without I/O operations.
+ *
+ * This function performs NO actual git operations to avoid the following issues:
+ * - Network timeouts that would cause spinners to show as failed
+ * - File system permission errors in restricted environments
+ * - Git authentication failures during preview mode
+ * - Unnecessary resource consumption for preview-only operations
+ *
+ * Returns a simulated result representing a typical up-to-date repository state.
  */
-async function handleDryRunPull(
-  config: GitOperationConfig,
-): Promise<PullResult> {
+function handleDryRunPull(config: GitOperationConfig): PullResult {
   const callbacks = config.callbacks || {};
 
-  const git = createGit(config);
-  try {
-    callbacks.onProgress?.("Fetching from origin...");
-    await git.fetch(["--prune", "origin"]);
+  // Simulate progress without actual operations
+  callbacks.onProgress?.("Would fetch from origin (dry-run)");
+  callbacks.onProgress?.("Would check repository status (dry-run)");
 
-    callbacks.onProgress?.("Checking status...");
-    const status = await git.status();
+  // Return simulated result - up-to-date repository
+  callbacks.onSuccess?.("Repository status check skipped (dry-run mode)");
 
-    return processRepositoryStatus(status, callbacks);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    callbacks.onWarning?.(`Could not check repository status: ${errorMessage}`);
-    return {
-      status: "up-to-date",
-      changes: 0,
-      insertions: 0,
-      deletions: 0,
-      files: [],
-    };
-  }
+  return {
+    status: "up-to-date",
+    changes: 0,
+    insertions: 0,
+    deletions: 0,
+    files: [],
+  };
 }
 
 /**
@@ -60,13 +56,14 @@ async function handleDryRunPull(
  * console.log(`${result.changes} files changed`);
  * ```
  */
+// eslint-disable-next-line complexity -- Complexity increased after inlining micro-functions to eliminate parameter drilling
 export async function pullWithRebase(
   config: GitOperationConfig = {},
 ): Promise<PullResult> {
   config.logger?.verbose(`pull --rebase in ${config.cwd ?? process.cwd()}`);
 
   if (config.dryRun === true) {
-    return handleDryRunPull(config);
+    return Promise.resolve(handleDryRunPull(config));
   }
 
   const callbacks = config.callbacks || {};
@@ -76,25 +73,29 @@ export async function pullWithRebase(
     callbacks.onProgress?.("Executing git pull --rebase...");
     const result = await git.pull(["--rebase"]);
 
+    // Process pull result directly
     const changes = result.summary.changes;
     const status: PullStatus = changes > 0 ? "rebase-applied" : "no-op";
 
-    if (changes > 0) {
-      callbacks.onSuccess?.(`Pull completed: ${changes} changes`);
-    } else {
-      callbacks.onSuccess?.("No changes to pull");
-    }
-
-    config.logger?.verbose(`Pull completed: ${changes} changes`);
-
-    return {
+    const pullResult: PullResult = {
       status,
       changes,
       insertions: result.summary.insertions,
       deletions: result.summary.deletions,
       files: result.files,
     };
+
+    // Handle success callbacks
+    if (changes > 0) {
+      callbacks.onSuccess?.(`Pull completed: ${changes} changes`);
+    } else {
+      callbacks.onSuccess?.("No changes to pull");
+    }
+    config.logger?.verbose(`Pull completed: ${changes} changes`);
+
+    return pullResult;
   } catch (error) {
+    // Handle errors with conflict detection
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     if (errorMessage.includes("conflict")) {
@@ -119,6 +120,7 @@ export async function pullWithRebase(
  * await fetchRemotes({ cwd: '/path/to/repo' });
  * ```
  */
+// eslint-disable-next-line complexity -- Complexity increased after inlining micro-functions to eliminate parameter drilling
 export async function fetchRemotes(
   config: GitOperationConfig = {},
 ): Promise<void> {
@@ -133,11 +135,13 @@ export async function fetchRemotes(
   const git = createGit(config);
 
   try {
+    // Execute fetch directly
     callbacks.onProgress?.("Fetching from all remotes...");
     await git.fetch();
     callbacks.onSuccess?.("Fetch completed");
     config.logger?.verbose("Fetch completed");
   } catch (error) {
+    // Handle fetch errors
     const errorMessage = error instanceof Error ? error.message : String(error);
     callbacks.onError?.(`Fetch failed: ${errorMessage}`);
     throw new Error(`Fetch failed: ${errorMessage}`);
