@@ -17,13 +17,31 @@ import type { OperationCallbacks } from "#lib/git/core";
  * Provides the Logger interface while delegating to UIManager
  * for actual output operations.
  */
+interface ExtendedExecutionContext extends ExecutionContext {
+  quiet?: boolean;
+  interactive?: boolean;
+}
+
+/**
+ * Type guard to check if context has UI properties.
+ * Prevents type assertions by providing a safe way to access optional properties.
+ */
+function hasUIProperties(
+  context: ExecutionContext,
+): context is ExtendedExecutionContext {
+  return "quiet" in context || "interactive" in context;
+}
+
 class UIManagerLogger implements Logger {
   constructor(
     private readonly context: ExecutionContext,
     private readonly uiManager = createUIManager({
       // Extract quiet and interactive from context if available, otherwise use defaults
-      quiet: (context as any).quiet ?? false,
-      interactive: (context as any).interactive,
+      quiet: hasUIProperties(context) ? (context.quiet ?? false) : false,
+      ...(hasUIProperties(context) &&
+        context.interactive !== undefined && {
+          interactive: context.interactive,
+        }),
     }),
   ) {}
 
@@ -79,6 +97,7 @@ class UIManagerLogger implements Logger {
   /**
    * Format message with arguments using util.format.
    */
+  // eslint-disable-next-line class-methods-use-this -- Utility method belongs to instance
   private formatMessage(message: string, args: unknown[]): string {
     if (args.length === 0) {
       return message;
