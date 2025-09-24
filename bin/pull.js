@@ -8,7 +8,7 @@
  * and orchestrates the complete pull-with-submodules workflow.
  */
 
-import { buildCli, parseArgv, createContext, executeComplete } from "pull-with-submodules";
+import { buildCli, parseArgv, createContext, executeComplete, setForceInteractive } from "pull-with-submodules";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -78,6 +78,11 @@ async function main() {
 
     // Parse the actual options for the application
     const options = parseArgv(process.argv.slice(2));
+
+    // Set force interactive mode if requested
+    if (options.interactive) {
+      setForceInteractive(true);
+    }
 
     // Create execution context
     const context = createContext(options, process.cwd());

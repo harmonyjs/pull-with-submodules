@@ -15,6 +15,9 @@ export type { ExecutionContext } from "./types/core.js";
 export { executeComplete } from "./orchestrator/index.js";
 export type { ExecutionResult } from "./orchestrator/index.js";
 
+// UI configuration API
+export { setForceInteractive } from "./ui/tty.js";
+
 // Errors public API
 export {
   GitOperationError,

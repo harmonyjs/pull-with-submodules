@@ -10,6 +10,21 @@
 import process from "node:process";
 
 /**
+ * Force interactive mode flag set by CLI option.
+ * This overrides TTY detection when set to true.
+ */
+let forceInteractive = false;
+
+/**
+ * Sets the force interactive mode flag.
+ *
+ * @param value Whether to force interactive mode
+ */
+export function setForceInteractive(value: boolean): void {
+  forceInteractive = value;
+}
+
+/**
  * Environment capabilities for UI adaptation.
  */
 export interface UIEnvironment {
@@ -149,8 +164,8 @@ export function getUIEnvironment(): UIEnvironment {
   const hasTTY = process.stdout.isTTY;
 
   return {
-    supportsSpinners: hasTTY && !isCI && !isTest,
-    supportsColor: detectColorSupport(),
+    supportsSpinners: (hasTTY && !isCI && !isTest) || forceInteractive,
+    supportsColor: detectColorSupport() || forceInteractive,
     isCI,
     isTest,
   };

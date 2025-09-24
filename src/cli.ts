@@ -24,6 +24,8 @@ export interface CliOptions {
   readonly parallel: boolean;
   /** Emit verbose diagnostic output for debugging. */
   readonly verbose: boolean;
+  /** Force interactive TTY output mode even in non-TTY environments. */
+  readonly interactive: boolean;
 }
 
 /** Internal mutable parsing shape prior to freezing into `CliOptions`. */
@@ -36,6 +38,7 @@ const defaultOptions: CliOptions = Object.freeze({
   forceRemote: false,
   parallel: false,
   verbose: false,
+  interactive: false,
 });
 
 /**
@@ -52,7 +55,8 @@ export function buildCli(programName = "pull-with-submodules"): CAC {
     .option("-n, --no-commit", "Skip auto-commit of gitlink updates")
     .option("-r, --force-remote", "Always prefer remote over local siblings")
     .option("-p, --parallel", "Process submodules in parallel (max 4)")
-    .option("-v, --verbose", "Show detailed debug output");
+    .option("-v, --verbose", "Show detailed debug output")
+    .option("-i, --interactive", "Force interactive TTY output mode");
   return cli;
 }
 
@@ -86,6 +90,7 @@ export function parseArgv(argv: readonly string[]): CliOptions {
     forceRemote: Boolean(flags["forceRemote"]),
     parallel: Boolean(flags["parallel"]),
     verbose: Boolean(flags["verbose"]),
+    interactive: Boolean(flags["interactive"]),
   };
   return Object.freeze({ ...defaultOptions, ...result });
 }
