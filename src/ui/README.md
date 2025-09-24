@@ -110,3 +110,12 @@ Each ExecutionContext gets its own logger instance, enabling proper isolation in
 - **Logging** operations are separate from **UI** operations
 - Components can depend only on what they need (ISP)
 - Adapters isolate external dependencies
+
+### 5. Unified Minimalistic Appearance
+- We never use emojis in logs
+- We never use custom unicode characters as icons, we rely only on what `@clack/prompts` provides
+
+### 6. UI Layer is Agnostic towards Business Logic
+- No business logic or domain-specific code
+- No knowledge of Git or submodules
+- No knowledge of dry-run or commit semantics

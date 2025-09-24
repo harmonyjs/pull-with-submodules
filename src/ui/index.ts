@@ -56,7 +56,11 @@ export {
 } from "./constants.js";
 
 // Destination exports
-export type { LogDestination, SpinnerHandle, TaskHandle } from "./destinations/base.js";
+export type {
+  LogDestination,
+  SpinnerHandle,
+  TaskHandle,
+} from "./destinations/base.js";
 
 // Next steps exports
 export {

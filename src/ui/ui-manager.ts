@@ -8,9 +8,9 @@
 
 import type { LogLevel, Task } from "./types.js";
 import type { LogDestination } from "./destinations/base.js";
-import { TUIDestination } from "./destinations/tui.js";
-import { JSONDestination } from "./destinations/json.js";
-import { SilentDestination } from "./destinations/silent.js";
+import { TUIDestination } from "./destinations/tui/index.js";
+import { JSONDestination } from "./destinations/json/index.js";
+import { SilentDestination } from "./destinations/silent/index.js";
 import { isInteractiveEnvironment } from "./tty.js";
 
 /**
@@ -37,35 +37,10 @@ interface UIEnvironment {
  */
 export class UIManager {
   private static instance: UIManager | null = null;
-  private destination: LogDestination;
+  private readonly destination: LogDestination;
 
   private constructor(environment: UIEnvironment = {}) {
     this.destination = this.selectDestination(environment);
-  }
-
-  /**
-   * Get the singleton UIManager instance.
-   *
-   * @param environment Optional environment override for testing
-   * @returns UIManager instance
-   */
-  static getInstance(environment: UIEnvironment = {}): UIManager {
-    if (!UIManager.instance) {
-      UIManager.instance = new UIManager(environment);
-    }
-    return UIManager.instance;
-  }
-
-  /**
-   * Reset singleton instance (for testing only).
-   *
-   * @internal
-   */
-  static resetInstance(): void {
-    if (UIManager.instance) {
-      UIManager.instance.destination.destroy();
-      UIManager.instance = null;
-    }
   }
 
   /**
@@ -93,7 +68,8 @@ export class UIManager {
       handle.success();
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       handle.error(errorMessage);
       throw error;
     }
@@ -105,17 +81,19 @@ export class UIManager {
    * @param tasks Array of tasks to execute
    * @returns Promise that resolves when all tasks complete
    */
-  async withTasks(tasks: Task[]): Promise<void> {
+  withTasks(tasks: Task[]): Promise<void> {
     const handle = this.destination.startTasks(tasks);
 
     try {
       // Tasks are executed by the destination itself
       // This just waits for completion signal
       handle.complete();
+      return Promise.resolve();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       handle.error(errorMessage);
-      throw error;
+      return Promise.reject(new Error(errorMessage));
     }
   }
 
@@ -137,8 +115,21 @@ export class UIManager {
   }
 
   /**
+   * Get current destination type for testing.
+   *
+   * @internal
+   */
+  getDestinationType(): string {
+    if (this.destination instanceof TUIDestination) return "tui";
+    if (this.destination instanceof JSONDestination) return "json";
+    if (this.destination instanceof SilentDestination) return "silent";
+    return "unknown";
+  }
+
+  /**
    * Select appropriate destination based on environment.
    */
+  // eslint-disable-next-line class-methods-use-this -- Factory method doesn't need instance state
   private selectDestination(environment: UIEnvironment): LogDestination {
     // Force quiet mode - only errors
     if (environment.quiet === true) {
@@ -152,7 +143,8 @@ export class UIManager {
 
     // Check if we're in CI or non-interactive environment
     const interactive = environment.interactive ?? isInteractiveEnvironment();
-    const inCI = process.env["CI"] === "true" || process.env["GITHUB_ACTIONS"] === "true";
+    const inCI =
+      process.env["CI"] === "true" || process.env["GITHUB_ACTIONS"] === "true";
 
     if (!interactive || inCI) {
       return new JSONDestination();
@@ -163,15 +155,28 @@ export class UIManager {
   }
 
   /**
-   * Get current destination type for testing.
+   * Get the singleton UIManager instance.
+   *
+   * @param environment Optional environment override for testing
+   * @returns UIManager instance
+   */
+  static getInstance(environment: UIEnvironment = {}): UIManager {
+    if (!UIManager.instance) {
+      UIManager.instance = new UIManager(environment);
+    }
+    return UIManager.instance;
+  }
+
+  /**
+   * Reset singleton instance (for testing only).
    *
    * @internal
    */
-  getDestinationType(): string {
-    if (this.destination instanceof TUIDestination) return "tui";
-    if (this.destination instanceof JSONDestination) return "json";
-    if (this.destination instanceof SilentDestination) return "silent";
-    return "unknown";
+  static resetInstance(): void {
+    if (UIManager.instance) {
+      UIManager.instance.destination.destroy();
+      UIManager.instance = null;
+    }
   }
 }
 
