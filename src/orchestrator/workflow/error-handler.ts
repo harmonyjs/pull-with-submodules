@@ -70,6 +70,7 @@ export async function handleWorkflowError(
   const duration = Date.now() - state.startTime;
   return {
     mainRepositoryUpdated: state.mainRepositoryUpdated,
+    pullResult: null, // Error occurred, no valid pull result
     stash,
     submodulesProcessed: state.submoduleResults.length,
     gitlinkCommits: state.gitlinkCommits,

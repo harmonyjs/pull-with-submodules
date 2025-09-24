@@ -83,6 +83,51 @@ export async function handleUncommittedChanges(
 }
 
 /**
+ * Pulls the main repository with rebase and returns full result.
+ *
+ * @param gitConfig - Git operation configuration
+ * @param context - Execution context for logging
+ * @returns Promise resolving to pull result with status information
+ */
+export async function pullMainRepositoryWithResult(
+  gitConfig: GitOperationConfig,
+  context: ExecutionContext,
+): Promise<PullResult> {
+  const logger = createLogger(context);
+
+  return await logger.withSpinner(
+    "Pull main repository with rebase",
+    async () => {
+      // In dry-run mode, simulate typical repository state
+      if (gitConfig.dryRun === true) {
+        logger.info("Repository is ahead by 2 commits (push needed)");
+        return {
+          status: "ahead",
+          changes: 0,
+          insertions: 0,
+          deletions: 0,
+          files: [],
+          ahead: 2,
+          behind: 0,
+        };
+      }
+
+      // Real mode - perform actual pull operation
+      try {
+        const result = await pullWithRebase({
+          ...gitConfig,
+          callbacks: logger.createCallbacks(),
+        });
+        handlePullResult(result, gitConfig, logger);
+        return result;
+      } catch (error) {
+        return handlePullError(error);
+      }
+    },
+  );
+}
+
+/**
  * Pulls the main repository with rebase.
  *
  * @param gitConfig - Git operation configuration
@@ -93,29 +138,8 @@ export async function pullMainRepository(
   gitConfig: GitOperationConfig,
   context: ExecutionContext,
 ): Promise<boolean> {
-  const logger = createLogger(context);
-
-  return await logger.withSpinner(
-    "Pull main repository with rebase",
-    async () => {
-      // In dry-run mode, simulate typical repository state
-      if (gitConfig.dryRun === true) {
-        logger.info("Repository is ahead by 2 commits (push needed)");
-        return false; // Repository not updated (ahead of origin)
-      }
-
-      // Real mode - perform actual pull operation
-      try {
-        const result = await pullWithRebase({
-          ...gitConfig,
-          callbacks: logger.createCallbacks(),
-        });
-        return handlePullResult(result, gitConfig, logger);
-      } catch (error) {
-        return handlePullError(error);
-      }
-    },
-  );
+  const result = await pullMainRepositoryWithResult(gitConfig, context);
+  return result.changes > 0;
 }
 
 /**
@@ -133,7 +157,8 @@ function handlePullResult(
     logPullChanges(result, gitConfig, logger);
     return true;
   } else {
-    logger.info("Repository is up-to-date with origin");
+    // Status message already handled by processRepositoryStatus callbacks
+    // No need to duplicate messages here
     return false;
   }
 }

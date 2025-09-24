@@ -7,6 +7,7 @@
 
 import { intro, createLogger, showCompletionMessage } from "#ui";
 import type { ExecutionContext } from "#types/core";
+import type { PullResult } from "#lib/git";
 
 import {
   validateEnvironment,
@@ -44,6 +45,7 @@ export interface ExecutionResult {
   /** Main workflow result */
   readonly workflow: {
     mainRepositoryUpdated: boolean;
+    pullResult: PullResult | null;
     stashCreated: boolean;
     gitlinkCommits: number;
     duration: number;

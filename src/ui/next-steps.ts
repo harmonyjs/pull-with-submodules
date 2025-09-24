@@ -33,7 +33,7 @@ export interface NextStepsContext {
   /** Submodule processing results */
   readonly submoduleResults: readonly UpdateResult[];
   /** Pull operation result if available */
-  readonly pullResult?: PullResult;
+  readonly pullResult?: PullResult | undefined;
 }
 
 /**
@@ -141,10 +141,23 @@ function addSuccessSuggestions(
   if (!context.result.success || context.execution.dryRun) return;
 
   if (context.result.submodules.updated === 0) {
-    steps.push({
-      action: "Continue development",
-      reason: "All repositories are up-to-date",
-    });
+    const aheadCount = context.pullResult?.ahead ?? 0;
+
+    if (aheadCount > 0) {
+      // Don't suggest "Continue development" when there are unpushed commits
+      // The push suggestion is already added in addRepositoryStatusSuggestions()
+      return;
+    } else if (context.pullResult?.status === "up-to-date") {
+      steps.push({
+        action: "Continue development",
+        reason: "All repositories are synchronized with origin",
+      });
+    } else {
+      steps.push({
+        action: "Continue development",
+        reason: "No updates were needed",
+      });
+    }
   } else {
     steps.push({
       action: "Test your application",

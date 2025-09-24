@@ -14,7 +14,7 @@ import type { TUIDestination } from "./destination.js";
 export class TUITaskHandle implements TaskHandle {
   constructor(
     private readonly destination: TUIDestination,
-    private readonly tasksPromise: Promise<void>
+    private readonly tasksPromise: Promise<void>,
   ) {}
 
   // eslint-disable-next-line class-methods-use-this -- Interface implementation

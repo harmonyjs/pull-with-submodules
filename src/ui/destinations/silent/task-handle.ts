@@ -16,7 +16,7 @@ export class SilentTaskHandle implements TaskHandle {
   ) {
     // Execute tasks silently (fire and forget)
     this.executeTasks().catch((error: unknown) => {
-      console.error('Silent task execution failed:', error);
+      console.error("Silent task execution failed:", error);
     });
   }
 

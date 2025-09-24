@@ -30,6 +30,32 @@ export interface GitPullResult {
 }
 
 /**
+ * Result from git status operation.
+ */
+export interface GitStatusResult {
+  /** Number of commits ahead of remote */
+  readonly ahead: number;
+  /** Number of commits behind remote */
+  readonly behind: number;
+  /** Current branch name */
+  readonly current: string | null;
+  /** Tracking branch name */
+  readonly tracking: string | null;
+  /** Array of file status results */
+  readonly files: readonly string[];
+  /** Array of staged files */
+  readonly staged: readonly string[];
+  /** Array of created files */
+  readonly created: readonly string[];
+  /** Array of deleted files */
+  readonly deleted: readonly string[];
+  /** Array of modified files */
+  readonly modified: readonly string[];
+  /** Array of renamed files */
+  readonly renamed: readonly string[];
+}
+
+/**
  * Re-export SimpleGit for consistent usage.
  */
 export type { SimpleGit };

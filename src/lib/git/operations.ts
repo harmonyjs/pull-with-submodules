@@ -7,7 +7,7 @@
 
 import { asGitSha } from "./sha-utils.js";
 import { createGit, type GitOperationConfig } from "./core.js";
-import { type PullStatus, type PullResult } from "./pull-status.js";
+import { type PullResult, processRepositoryStatus } from "./pull-status.js";
 import type { GitSha } from "#types/git";
 
 // Re-export types from pull-status module for convenience
@@ -71,29 +71,41 @@ export async function pullWithRebase(
 
   try {
     callbacks.onProgress?.("Executing git pull --rebase...");
-    const result = await git.pull(["--rebase"]);
+    const pullResult = await git.pull(["--rebase"]);
 
-    // Process pull result directly
-    const changes = result.summary.changes;
-    const status: PullStatus = changes > 0 ? "rebase-applied" : "no-op";
+    // If pull brought no changes, check ahead/behind status for accurate reporting
+    if (pullResult.summary.changes === 0) {
+      const status = await git.status();
 
-    const pullResult: PullResult = {
-      status,
-      changes,
-      insertions: result.summary.insertions,
-      deletions: result.summary.deletions,
-      files: result.files,
+      // Use processRepositoryStatus for accurate status determination
+      const repositoryStatus = processRepositoryStatus(
+        { ahead: status.ahead, behind: status.behind },
+        callbacks,
+      );
+
+      config.logger?.verbose(
+        `Pull completed: 0 changes, ahead: ${status.ahead}, behind: ${status.behind}`,
+      );
+      return repositoryStatus;
+    }
+
+    // If pull brought changes, return standard result
+    const pullResultTyped: PullResult = {
+      status: "rebase-applied",
+      changes: pullResult.summary.changes,
+      insertions: pullResult.summary.insertions,
+      deletions: pullResult.summary.deletions,
+      files: pullResult.files,
     };
 
-    // Handle success callbacks
-    if (changes > 0) {
-      callbacks.onSuccess?.(`Pull completed: ${changes} changes`);
-    } else {
-      callbacks.onSuccess?.("No changes to pull");
-    }
-    config.logger?.verbose(`Pull completed: ${changes} changes`);
+    callbacks.onSuccess?.(
+      `Pull completed: ${pullResult.summary.changes} changes`,
+    );
+    config.logger?.verbose(
+      `Pull completed: ${pullResult.summary.changes} changes`,
+    );
 
-    return pullResult;
+    return pullResultTyped;
   } catch (error) {
     // Handle errors with conflict detection
     const errorMessage = error instanceof Error ? error.message : String(error);

@@ -91,8 +91,13 @@ export class UIManager {
     try {
       // IMPORTANT: Wait for tasks to actually complete, not just start
       // Check if handle has waitForCompletion method (TUI destinations)
-      if ('waitForCompletion' in handle && typeof handle.waitForCompletion === 'function') {
-        await (handle as { waitForCompletion(): Promise<void> }).waitForCompletion();
+      if (
+        "waitForCompletion" in handle &&
+        typeof handle.waitForCompletion === "function"
+      ) {
+        await (
+          handle as { waitForCompletion(): Promise<void> }
+        ).waitForCompletion();
       }
 
       handle.complete();

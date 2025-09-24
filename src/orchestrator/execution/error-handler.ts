@@ -57,6 +57,7 @@ export function handleExecutionError(options: {
     },
     workflow: {
       mainRepositoryUpdated: false,
+      pullResult: null,
       stashCreated: false,
       gitlinkCommits: 0,
       duration: 0,

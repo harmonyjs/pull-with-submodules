@@ -5,7 +5,7 @@
  * and workflow orchestration capabilities.
  */
 
-import type { GitOperationConfig } from "#lib/git";
+import type { GitOperationConfig, PullResult } from "#lib/git";
 import { createLogger } from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
 
@@ -13,7 +13,7 @@ import type { StashResult } from "#orchestrator/stash";
 import { restoreStashSafely } from "./helpers.js";
 import {
   handleUncommittedChanges,
-  pullMainRepository,
+  pullMainRepositoryWithResult,
 } from "./pull-operations.js";
 import { handleWorkflowError } from "./error-handler.js";
 import type { WorkflowResult } from "./types.js";
@@ -32,6 +32,7 @@ export {
 export {
   handleUncommittedChanges,
   pullMainRepository,
+  pullMainRepositoryWithResult,
 } from "./pull-operations.js";
 
 // Re-export error handler
@@ -61,6 +62,7 @@ export async function executeMainWorkflow(
 
   let stash: StashResult | null = null;
   let mainRepositoryUpdated = false;
+  let pullResult: PullResult | null = null;
   const gitlinkCommits = 0;
 
   try {
@@ -68,7 +70,8 @@ export async function executeMainWorkflow(
     stash = await handleUncommittedChanges(gitConfig, context);
 
     // Step 2: Pull main repository
-    mainRepositoryUpdated = await pullMainRepository(gitConfig, context);
+    pullResult = await pullMainRepositoryWithResult(gitConfig, context);
+    mainRepositoryUpdated = pullResult.changes > 0;
 
     // Step 3: Gitlink commits will be applied later after submodule processing
     // (in the main orchestrator)
@@ -83,6 +86,7 @@ export async function executeMainWorkflow(
 
     return {
       mainRepositoryUpdated,
+      pullResult,
       stash,
       submodulesProcessed: 0, // Submodules will be processed later
       gitlinkCommits: 0, // Gitlink commits will be applied later

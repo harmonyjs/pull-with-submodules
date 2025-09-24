@@ -6,6 +6,7 @@
  */
 
 import type { StashResult } from "#orchestrator/stash";
+import type { PullResult } from "#lib/git";
 
 /**
  * Main workflow execution result.
@@ -13,6 +14,8 @@ import type { StashResult } from "#orchestrator/stash";
 export interface WorkflowResult {
   /** Whether the main repository was updated */
   readonly mainRepositoryUpdated: boolean;
+  /** Pull operation result with status information */
+  readonly pullResult: PullResult | null;
   /** Stash information if created */
   readonly stash: StashResult | null;
   /** Number of submodules processed */

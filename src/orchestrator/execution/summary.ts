@@ -14,6 +14,7 @@ import {
   type NextStepsContext,
 } from "#ui";
 import type { ExecutionContext, UpdateResult } from "#types/core";
+import type { PullResult } from "#lib/git";
 
 import { MILLISECONDS_PER_SECOND } from "#orchestrator/constants";
 import type { ExecutionResult } from "./index.js";
@@ -36,6 +37,7 @@ interface CreateResultOptions {
   };
   workflowResult: {
     mainRepositoryUpdated: boolean;
+    pullResult: PullResult | null;
     stash?: { created: boolean } | null;
     gitlinkCommits: number;
     duration: number;
@@ -104,12 +106,14 @@ function createWorkflowResult(
   workflow: CreateResultOptions["workflowResult"],
 ): {
   mainRepositoryUpdated: boolean;
+  pullResult: PullResult | null;
   stashCreated: boolean;
   gitlinkCommits: number;
   duration: number;
 } {
   return {
     mainRepositoryUpdated: workflow.mainRepositoryUpdated,
+    pullResult: workflow.pullResult,
     stashCreated: workflow.stash?.created ?? false,
     gitlinkCommits: workflow.gitlinkCommits,
     duration: workflow.duration,
@@ -164,6 +168,7 @@ export function showExecutionSummary(
     execution: context,
     result,
     submoduleResults,
+    pullResult: result.workflow.pullResult ?? undefined,
   };
 
   const nextStepsText = showNextSteps(nextStepsContext);
