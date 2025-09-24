@@ -67,6 +67,7 @@ const STYLE_RULES = {
   'require-await': 'off', // Disabled in favor of @typescript-eslint/require-await
   'class-methods-use-this': 'error',
   'consistent-return': 'error',
+  'no-void': ['error', { allowAsStatement: false }], // Prevent using void to ignore promises
   'unicorn/filename-case': ['error', { case: 'kebabCase' }],
   'unicorn/prefer-node-protocol': 'error',
   'no-underscore-dangle': 'error',
@@ -87,6 +88,8 @@ const TS_SPECIFIC_RULES = {
   '@typescript-eslint/explicit-module-boundary-types': 'error',
   '@typescript-eslint/require-await': 'error',
   '@typescript-eslint/switch-exhaustiveness-check': 'error',
+  '@typescript-eslint/no-floating-promises': 'error',
+  '@typescript-eslint/no-misused-promises': 'error',
   '@typescript-eslint/strict-boolean-expressions': [
     'error',
     { allowString: false, allowNumber: false, allowNullableBoolean: false },
@@ -256,6 +259,7 @@ export default defineConfig([
       'max-lines-per-function': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
       'max-params': 'off',
       'no-console': 'off',
+      'no-void': 'off', // Allow void in tests for assert statements
       '@typescript-eslint/no-magic-numbers': 'off',
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',

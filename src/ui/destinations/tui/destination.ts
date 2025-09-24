@@ -97,7 +97,7 @@ export class TUIDestination extends BaseLogDestination {
     }));
 
     // Execute tasks and create handle
-    void tasks(clackTasks)
+    const tasksPromise = tasks(clackTasks)
       .then(() => {
         this.onTasksStopped();
       })
@@ -106,9 +106,10 @@ export class TUIDestination extends BaseLogDestination {
           error instanceof Error ? error.message : String(error);
         this.writeOutput("error", `Tasks failed: ${errorMessage}`);
         this.onTasksStopped();
+        throw error; // Re-throw so handle can track the error
       });
 
-    const handle = new TUITaskHandle(this);
+    const handle = new TUITaskHandle(this, tasksPromise);
     this.activeTasksHandle = handle;
 
     return handle;

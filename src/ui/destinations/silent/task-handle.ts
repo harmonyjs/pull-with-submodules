@@ -14,7 +14,10 @@ export class SilentTaskHandle implements TaskHandle {
     private readonly destination: SilentDestination,
     private readonly tasks: Task[],
   ) {
-    void this.executeTasks();
+    // Execute tasks silently (fire and forget)
+    this.executeTasks().catch((error: unknown) => {
+      console.error('Silent task execution failed:', error);
+    });
   }
 
   complete(): void {

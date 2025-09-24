@@ -57,8 +57,11 @@ export class JSONDestination extends BaseLogDestination {
       type: "task_start",
     });
 
-    // Execute tasks in sequence
-    void this.executeTasks(tasks);
+    // Execute tasks in sequence (fire and forget for JSON output)
+    this.executeTasks(tasks).catch((error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.writeOutput("error", `Tasks failed: ${errorMessage}`);
+    });
 
     return new JSONTaskHandle(this);
   }

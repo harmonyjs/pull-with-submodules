@@ -78,22 +78,29 @@ export class UIManager {
   /**
    * Execute multiple tasks with coordinated output.
    *
+   * CRITICAL: This method MUST wait for all tasks to complete before resolving.
+   * The previous implementation was returning immediately, causing tasks to run
+   * in background and creating UI spam after outro().
+   *
    * @param tasks Array of tasks to execute
-   * @returns Promise that resolves when all tasks complete
+   * @returns Promise that resolves ONLY when all tasks are complete
    */
-  withTasks(tasks: Task[]): Promise<void> {
+  async withTasks(tasks: Task[]): Promise<void> {
     const handle = this.destination.startTasks(tasks);
 
     try {
-      // Tasks are executed by the destination itself
-      // This just waits for completion signal
+      // IMPORTANT: Wait for tasks to actually complete, not just start
+      // Check if handle has waitForCompletion method (TUI destinations)
+      if ('waitForCompletion' in handle && typeof handle.waitForCompletion === 'function') {
+        await (handle as { waitForCompletion(): Promise<void> }).waitForCompletion();
+      }
+
       handle.complete();
-      return Promise.resolve();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       handle.error(errorMessage);
-      return Promise.reject(new Error(errorMessage));
+      throw error; // Re-throw instead of wrapping
     }
   }
 

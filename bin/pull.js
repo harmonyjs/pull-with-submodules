@@ -90,8 +90,21 @@ async function main() {
     // Execute the complete workflow
     const result = await executeComplete(context);
 
-    // Set exit code based on success
-    process.exit(result.success ? 0 : 1);
+    // IMPORTANT: Do NOT use process.exit(0) for successful completion!
+    // @clack/prompts registers handlers on process 'exit' event when creating
+    // interactive elements (intro, spinner, etc.). If we call process.exit()
+    // immediately after outro(), the library detects that as an abnormal termination
+    // and outputs "◇ Canceled" message.
+    //
+    // By letting Node.js exit naturally, we allow @clack/prompts to properly
+    // clean up its event handlers and avoid the spurious "Canceled" message.
+    // Node.js will automatically exit with code 0 when there are no more
+    // active handles or timers.
+    //
+    // We only use process.exit(1) for errors to ensure non-zero exit code.
+    if (!result.success) {
+      process.exit(1);
+    }
   } catch (error) {
     console.error("Fatal error:", error instanceof Error ? error.message : String(error));
     process.exit(1);
