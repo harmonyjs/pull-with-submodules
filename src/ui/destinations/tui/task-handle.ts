@@ -23,8 +23,11 @@ export class TUITaskHandle implements TaskHandle {
     private readonly tasksPromise: Promise<void>,
     private readonly totalTasks: number,
   ) {
-    // Show initial message immediately
-    this.destination.writeLog("info", `Starting ${totalTasks} tasks...`);
+    // Show initial message immediately using step symbol (◇)
+    this.destination.writeLog(
+      "step",
+      `Starting ${totalTasks} ${totalTasks === 1 ? "task" : "tasks"}...`,
+    );
   }
 
   complete(): void {

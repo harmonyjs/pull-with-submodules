@@ -59,6 +59,11 @@ class UIManagerLogger implements Logger {
     }
   }
 
+  step(message: string, ...args: unknown[]): void {
+    const formatted = this.formatMessage(message, args);
+    this.uiManager.log("step", formatted);
+  }
+
   info(message: string, ...args: unknown[]): void {
     const formatted = this.formatMessage(message, args);
     this.uiManager.log("info", formatted);

@@ -21,8 +21,19 @@ export const status = {
 } as const;
 
 /**
- * Minimal symbol set for custom functionality.
- * @clack/prompts handles all standard UI symbols automatically.
+ * Symbol definitions and visual hierarchy for logging levels.
+ *
+ * Visual hierarchy (importance): verbose (*) < step (◇) < info (●) < warn (▲) < error
+ *
+ * Symbol meanings:
+ * - * (verbose): Debug/verbose information, gray color, low importance
+ * - ◇ (step): Process start/in-progress, used by log.step(), indicates beginning of operations
+ * - ● (info): Completion/result, used by log.info(), indicates finished state or status
+ * - ▲ (warn): Warnings, used by log.warn(), indicates issues requiring attention
+ * - (error): Errors, used by log.error(), highest importance, indicates failures
+ *
+ * @clack/prompts handles standard UI symbols automatically (◇, ●, ▲).
+ * This exports only custom symbols not provided by @clack/prompts.
  */
 export const symbols = {
   verbose: pc.gray("*"),

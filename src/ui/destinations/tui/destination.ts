@@ -45,6 +45,9 @@ export class TUIDestination extends BaseLogDestination {
   // eslint-disable-next-line class-methods-use-this -- Abstract method implementation
   protected writeOutput(level: LogLevel, message: string): void {
     switch (level) {
+      case "step":
+        log.step(message);
+        break;
       case "info":
         log.info(message);
         break;
@@ -76,11 +79,22 @@ export class TUIDestination extends BaseLogDestination {
   }
 
   protected createTasks(taskList: Task[]): TaskHandle {
-    // Execute tasks sequentially with simple logging
-    const tasksPromise = this.executeTasks(taskList);
+    // Create a promise that we can resolve after creating the handle
+    let resolveTasksPromise: () => void;
+    let rejectTasksPromise: (error: unknown) => void;
+    const tasksPromise = new Promise<void>((resolve, reject) => {
+      resolveTasksPromise = resolve;
+      rejectTasksPromise = reject;
+    });
 
+    // Create handle first before starting task execution
     const handle = new TUITaskHandle(this, tasksPromise, taskList.length);
     this.activeTasksHandle = handle;
+
+    // Execute tasks sequentially with simple logging, passing the handle
+    this.executeTasks(taskList, handle)
+      .then(() => resolveTasksPromise())
+      .catch((error: unknown) => rejectTasksPromise(error));
 
     return handle;
   }
@@ -161,9 +175,10 @@ export class TUIDestination extends BaseLogDestination {
   /**
    * Execute tasks sequentially with progress logging.
    */
-  private async executeTasks(taskList: Task[]): Promise<void> {
-    const handle = this.activeTasksHandle as TUITaskHandle;
-
+  private async executeTasks(
+    taskList: Task[],
+    handle: TUITaskHandle,
+  ): Promise<void> {
     for (const task of taskList) {
       try {
         let lastMessage: string | undefined;

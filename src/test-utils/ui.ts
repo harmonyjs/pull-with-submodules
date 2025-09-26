@@ -14,6 +14,7 @@ import { createTypedMock, type MockFunction } from "./core.js";
 export interface LoggerMock {
   debug: MockFunction<Logger["debug"]>;
   verbose: MockFunction<Logger["verbose"]>;
+  step: MockFunction<Logger["step"]>;
   info: MockFunction<Logger["info"]>;
   warn: MockFunction<Logger["warn"]>;
   error: MockFunction<Logger["error"]>;
@@ -40,7 +41,7 @@ export interface LoggerMock {
 export function createSpyLogger(
   captureMethod?: keyof Pick<
     Logger,
-    "debug" | "verbose" | "info" | "warn" | "error"
+    "debug" | "verbose" | "step" | "info" | "warn" | "error"
   >,
 ): LoggerMock & { [K in keyof LoggerMock]: LoggerMock[K] } {
   const logger = createMockLogger();
@@ -92,6 +93,7 @@ export function createMockLogger(): LoggerMock {
   return {
     debug: createTypedMock<Logger["debug"]>(),
     verbose: createTypedMock<Logger["verbose"]>(),
+    step: createTypedMock<Logger["step"]>(),
     info: createTypedMock<Logger["info"]>(),
     warn: createTypedMock<Logger["warn"]>(),
     error: createTypedMock<Logger["error"]>(),
@@ -143,6 +145,7 @@ export function createSimpleLogger(): Logger {
   return {
     debug: noop,
     verbose: noop,
+    step: noop,
     info: noop,
     warn: noop,
     error: noop,

@@ -22,8 +22,8 @@ export class TUISpinnerHandle implements SpinnerHandle {
     private readonly destination: TUIDestination,
     private readonly initialMessage: string,
   ) {
-    // Show initial message immediately
-    this.destination.writeLog("info", `${this.initialMessage}...`);
+    // Show initial message immediately using step symbol (◇)
+    this.destination.writeLog("step", `${this.initialMessage}...`);
   }
 
   success(message?: string): void {
@@ -53,8 +53,8 @@ export class TUISpinnerHandle implements SpinnerHandle {
       !this.isStopped &&
       !this.isInterrupted
     ) {
-      // Show update as indented message
-      this.destination.writeLog("info", `  ${message}`);
+      // Show update as indented step message using step symbol (◇)
+      this.destination.writeLog("step", `  ${message}`);
     }
   }
 

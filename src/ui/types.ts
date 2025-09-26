@@ -25,8 +25,10 @@ export interface ExtendedLogImplementation extends LogImplementation {
 
 /**
  * Log level enumeration for type safety and filtering.
+ *
+ * Visual hierarchy: verbose (*) < step (◇) < info (●) < warn (▲) < error
  */
-export type LogLevel = "debug" | "info" | "warn" | "error" | "verbose";
+export type LogLevel = "debug" | "verbose" | "step" | "info" | "warn" | "error";
 
 /**
  * Task definition for sequential execution.
@@ -57,6 +59,7 @@ export interface Task {
 export interface BaseLogger {
   debug(message: string, ...args: unknown[]): void;
   verbose(message: string, ...args: unknown[]): void;
+  step(message: string, ...args: unknown[]): void;
   info(message: string, ...args: unknown[]): void;
   warn(message: string, ...args: unknown[]): void;
   error(message: string, ...args: unknown[]): void;
