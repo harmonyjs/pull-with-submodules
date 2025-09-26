@@ -90,9 +90,10 @@ function addFailedSubmoduleSuggestions(
   );
   if (failedSubmodules.length === 0) return;
 
+  const count = failedSubmodules.length;
   steps.push({
     action: "Investigate failed submodules",
-    reason: `${failedSubmodules.length} submodule(s) failed to update`,
+    reason: `${count} ${count === 1 ? "submodule" : "submodules"} failed to update`,
   });
 
   const maxFailuresToShow = 3;

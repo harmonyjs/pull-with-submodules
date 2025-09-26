@@ -79,7 +79,7 @@ export async function processSubmodules(
       submodules.length,
     );
 
-    logger.verbose(
+    logger.info(
       `Submodule processing completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
     );
 
@@ -106,7 +106,10 @@ async function processSubmodulesSequentially(
   const logger = createLogger(context);
   const results: UpdateResult[] = [];
 
-  logger.verbose(`Processing ${submodules.length} submodules sequentially`);
+  const count = submodules.length;
+  logger.info(
+    `Processing ${count} ${count === 1 ? "submodule" : "submodules"} sequentially`,
+  );
 
   // Create tasks for each submodule
   const tasks: Task[] = submodules.map((submodule, i) => ({

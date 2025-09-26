@@ -141,8 +141,9 @@ export function showExecutionSummary(
   }
 
   // Show final statistics in a summary note
+  const totalCount = result.submodules.totalSubmodules;
   const stats = [
-    `Total: ${result.submodules.totalSubmodules} submodules`,
+    `Total: ${totalCount} ${totalCount === 1 ? "submodule" : "submodules"}`,
     `Updated: ${result.submodules.updated}`,
     `Skipped: ${result.submodules.skipped}`,
     result.submodules.failed > 0 ? `Failed: ${result.submodules.failed}` : null,
@@ -153,9 +154,12 @@ export function showExecutionSummary(
 
   summaryNote(stats);
 
-  // Show gitlink commits if any were created
+  // Show submodule reference updates if any were created
   if (result.workflow.gitlinkCommits > 0) {
-    logger.info(`Created ${result.workflow.gitlinkCommits} gitlink commit(s)`);
+    const count = result.workflow.gitlinkCommits;
+    logger.info(
+      `Created ${count} submodule reference ${count === 1 ? "update" : "updates"}`,
+    );
   }
 
   // Show dry-run notice

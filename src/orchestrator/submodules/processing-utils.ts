@@ -25,7 +25,8 @@ export async function parseSubmodulesWithProgress(
 
   return await logger.withSpinner("Parse .gitmodules", async () => {
     const submodules = await parseSubmodules(context.repositoryRoot, context);
-    logger.info(`Found ${submodules.length} submodule(s)`);
+    const count = submodules.length;
+    logger.info(`Found ${count} ${count === 1 ? "submodule" : "submodules"}`);
     return submodules;
   });
 }

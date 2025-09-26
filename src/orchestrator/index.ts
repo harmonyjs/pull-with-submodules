@@ -132,7 +132,7 @@ async function applyGitlinkCommitsIfNeeded(
   submoduleResult: SubmoduleProcessingSummary,
 ): Promise<number> {
   const logger = createLogger(context);
-  logger.verbose("Applying gitlink commits for submodule updates");
+  logger.verbose("Applying submodule reference updates");
 
   if (context.noCommit) {
     return 0;

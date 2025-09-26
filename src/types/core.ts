@@ -56,7 +56,7 @@ export interface CommitSelection {
   readonly reason: string;
   /**
    * Optional absolute path to local sibling repository when source is 'local'.
-   * Used to fetch unpushed commits from local development repositories.
+   * Used to access local commits from development repositories.
    * Only set when the selected commit comes from a local sibling that has
    * unpushed changes not available in the submodule's remote.
    */
