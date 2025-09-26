@@ -73,7 +73,11 @@ export async function processSubmodules(
       : await processSubmodulesSequentially(submodules, context);
 
     // Calculate summary statistics
-    const summary = calculateProcessingSummary(results, startTime);
+    const summary = calculateProcessingSummary(
+      results,
+      startTime,
+      submodules.length,
+    );
 
     logger.verbose(
       `Submodule processing completed: ${summary.updated} updated, ${summary.skipped} skipped, ${summary.failed} failed`,
@@ -128,6 +132,27 @@ async function processSubmodulesSequentially(
 
   // Execute tasks using the logger's withTasks method
   await logger.withTasks(tasks);
+
+  // Ensure we have results for all submodules (protective logic for incomplete task execution)
+  if (results.length < submodules.length) {
+    logger.warn(
+      `Task execution incomplete: expected ${submodules.length} results, got ${results.length}`,
+    );
+
+    // Create failed results for missing submodules
+    const processedPaths = new Set(results.map((r) => r.submodule.path));
+    for (const submodule of submodules) {
+      if (!processedPaths.has(submodule.path)) {
+        results.push({
+          submodule,
+          selection: null,
+          status: "failed",
+          duration: 0,
+          error: new Error("Task execution was incomplete or interrupted"),
+        });
+      }
+    }
+  }
 
   return results;
 }

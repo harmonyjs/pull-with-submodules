@@ -35,18 +35,20 @@ export async function parseSubmodulesWithProgress(
  *
  * @param results - Array of individual submodule results
  * @param startTime - Processing start timestamp
+ * @param foundSubmodulesCount - Total number of submodules found (for accurate counting when tasks fail)
  * @returns Aggregated processing summary
  */
 export function calculateProcessingSummary(
   results: readonly UpdateResult[],
   startTime: number,
+  foundSubmodulesCount: number,
 ): SubmoduleProcessingSummary {
   const updated = results.filter((r) => r.status === "updated").length;
   const skipped = results.filter((r) => r.status === "skipped").length;
   const failed = results.filter((r) => r.status === "failed").length;
 
   return {
-    totalSubmodules: results.length,
+    totalSubmodules: foundSubmodulesCount,
     updated,
     skipped,
     failed,
