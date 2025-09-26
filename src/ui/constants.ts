@@ -12,14 +12,14 @@
 export const UI_SYMBOLS = {
   // Process indicators
   process: "◆",
-  success: "✓",
-  error: "✗",
+  success: "[done]",
+  error: "[error]",
   warning: "⚠",
   info: "ℹ",
   verbose: "◇",
 
   // Status indicators
-  upToDate: "✓",
+  upToDate: "[up-to-date]",
   ahead: "↑",
   behind: "↓",
   diverged: "↕",

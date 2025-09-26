@@ -5,4 +5,3 @@
 export { TUIDestination } from "./destination.js";
 export { TUISpinnerHandle } from "./spinner-handle.js";
 export { TUITaskHandle } from "./task-handle.js";
-export type { ClackSpinnerInstance } from "./types.js";

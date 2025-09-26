@@ -38,7 +38,7 @@ export function handleExecutionError(options: {
     }
   }
 
-  outro("✗ Failed");
+  outro("Failed");
 
   const totalDuration = Date.now() - startTime;
 

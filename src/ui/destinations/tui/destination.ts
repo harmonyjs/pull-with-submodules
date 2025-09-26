@@ -1,14 +1,14 @@
 /**
- * @fileoverview TUI destination that provides beautiful terminal output using @clack/prompts.
+ * @fileoverview TUI destination that provides terminal output using @clack/prompts logging.
  *
  * This class enforces the "One Active Element" and "Auto-stop on Write" rules:
- * - Only one spinner or tasks can be active at any time
+ * - Only one operation (spinner or tasks) can be active at any time
  * - Any write() call stops active UI elements
- * - Buffers log messages during spinner/tasks operations
- * - Flushes buffer when UI elements stop
+ * - Buffers log messages during operations
+ * - Flushes buffer when operations complete
  */
 
-import { log, spinner, tasks, note } from "@clack/prompts";
+import { log, note } from "@clack/prompts";
 import pc from "picocolors";
 import type { LogLevel, Task } from "#ui/types";
 import { symbols } from "#ui/colors";
@@ -21,20 +21,20 @@ import { TUISpinnerHandle } from "./spinner-handle.js";
 import { TUITaskHandle } from "./task-handle.js";
 
 /**
- * TUI destination that provides beautiful terminal output using @clack/prompts.
+ * TUI destination that provides terminal output using @clack/prompts logging.
  *
  * This class enforces the "One Active Element" and "Auto-stop on Write" rules:
- * - Only one spinner or tasks can be active at any time
+ * - Only one operation (spinner or tasks) can be active at any time
  * - Any write() call stops active UI elements to prevent conflicts
- * - Buffers log messages during spinner/tasks operations
- * - Flushes buffer when UI elements stop
+ * - Buffers log messages during operations
+ * - Flushes buffer when operations complete
  *
- * This is the ONLY place in the codebase that should import @clack/prompts.
+ * Uses simple log messages instead of animated UI elements for better reliability.
  *
  * @example
  * ```typescript
  * const destination = new TUIDestination();
- * const spinner = destination.spinner("Loading...");
+ * const spinner = destination.startSpinner("Loading...");
  * spinner.success("Completed!");
  * ```
  */
@@ -68,48 +68,18 @@ export class TUIDestination extends BaseLogDestination {
   }
 
   protected createSpinner(message: string): SpinnerHandle {
-    const spinnerInstance = spinner();
-    const handle = new TUISpinnerHandle(spinnerInstance, this, message);
+    const handle = new TUISpinnerHandle(this, message);
 
     this.activeSpinnerHandle = handle;
-    spinnerInstance.start(message);
 
     return handle;
   }
 
   protected createTasks(taskList: Task[]): TaskHandle {
-    // Convert internal Task format to @clack/prompts format
-    const clackTasks = taskList.map((task) => ({
-      title: task.title,
-      task: async (): Promise<string> => {
-        let message: string | undefined;
-        const messageCallback = (msg: string): void => {
-          message = msg;
-        };
+    // Execute tasks sequentially with simple logging
+    const tasksPromise = this.executeTasks(taskList);
 
-        const result = await task.task(messageCallback);
-
-        // Return the last message or the result if it's a string
-        if (message !== undefined && message !== "") return message;
-        if (typeof result === "string") return result;
-        return "";
-      },
-    }));
-
-    // Execute tasks and create handle
-    const tasksPromise = tasks(clackTasks)
-      .then(() => {
-        this.onTasksStopped();
-      })
-      .catch((error: unknown) => {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        this.writeOutput("error", `Tasks failed: ${errorMessage}`);
-        this.onTasksStopped();
-        throw error; // Re-throw so handle can track the error
-      });
-
-    const handle = new TUITaskHandle(this, tasksPromise);
+    const handle = new TUITaskHandle(this, tasksPromise, taskList.length);
     this.activeTasksHandle = handle;
 
     return handle;
@@ -178,5 +148,62 @@ export class TUIDestination extends BaseLogDestination {
     this.activeTasksHandle = null;
     this.activeElement = "none";
     this.flushBuffer();
+  }
+
+  /**
+   * Public method for handles to write output.
+   * Delegates to protected writeOutput method.
+   */
+  writeLog(level: LogLevel, message: string): void {
+    this.writeOutput(level, message);
+  }
+
+  /**
+   * Execute tasks sequentially with progress logging.
+   */
+  private async executeTasks(taskList: Task[]): Promise<void> {
+    const handle = this.activeTasksHandle as TUITaskHandle;
+
+    for (const task of taskList) {
+      try {
+        let lastMessage: string | undefined;
+        const messageCallback = (msg: string): void => {
+          lastMessage = msg;
+          // Show progress updates
+          this.writeLog("info", `  ${msg}`);
+        };
+
+        const result = await task.task(messageCallback);
+
+        // Determine success message
+        let successMessage = task.title;
+        if (lastMessage !== undefined && lastMessage !== "") {
+          successMessage = lastMessage;
+        } else if (typeof result === "string" && result !== "") {
+          successMessage = result;
+        }
+
+        // Notify handle of successful completion
+        if (
+          handle !== null &&
+          typeof handle.notifyTaskCompleted === "function"
+        ) {
+          handle.notifyTaskCompleted(successMessage);
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
+        // Notify handle of failure
+        if (handle !== null && typeof handle.notifyTaskFailed === "function") {
+          handle.notifyTaskFailed(task.title, errorMessage);
+        }
+
+        throw error; // Re-throw to fail the entire operation
+      }
+    }
+
+    // Tasks completed successfully
+    this.onTasksStopped();
   }
 }

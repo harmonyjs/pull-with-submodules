@@ -1,55 +1,70 @@
 /**
- * @fileoverview TUI-specific spinner implementation with simplified lifecycle management.
+ * @fileoverview TUI-specific spinner implementation using simple log messages.
  */
 
 import type { SpinnerHandle } from "#ui/destinations/base";
 import type { TUIDestination } from "./destination.js";
-import type { ClackSpinnerInstance } from "./types.js";
 
 /**
- * TUI-specific spinner implementation with simplified lifecycle management.
+ * TUI-specific spinner implementation using simple log messages instead of animated spinners.
+ *
+ * This implementation shows:
+ * - Start: "{message}..."
+ * - Success: "{message}"
+ * - Error: "{message}"
+ * - Updates: "  {message}" (indented)
  */
 export class TUISpinnerHandle implements SpinnerHandle {
   private isStopped = false;
   private isInterrupted = false;
 
   constructor(
-    private readonly spinnerInstance: ClackSpinnerInstance,
     private readonly destination: TUIDestination,
     private readonly initialMessage: string,
-  ) {}
+  ) {
+    // Show initial message immediately
+    this.destination.writeLog("info", `${this.initialMessage}...`);
+  }
 
   success(message?: string): void {
-    this.stop(message ?? `${this.initialMessage} completed`, 0);
+    if (!this.isInterrupted && !this.isStopped) {
+      const finalMessage = message ?? `${this.initialMessage} completed`;
+      this.destination.writeLog("info", finalMessage);
+      this.markStopped();
+    }
   }
 
   error(message?: string): void {
-    if (!this.isInterrupted) {
-      this.stop(message ?? `${this.initialMessage} failed`, 1);
+    if (!this.isInterrupted && !this.isStopped) {
+      const errorMessage = message ?? `${this.initialMessage} failed`;
+      this.destination.writeLog("error", errorMessage);
+      this.markStopped();
     }
   }
 
   interrupt(): void {
     this.isInterrupted = true;
-    this.stop("", 0);
+    this.markStopped();
   }
 
   update(message: string): void {
-    if (this.destination.isActiveSpinner(this) && !this.isStopped) {
-      this.spinnerInstance.message(message);
+    if (
+      this.destination.isActiveSpinner(this) &&
+      !this.isStopped &&
+      !this.isInterrupted
+    ) {
+      // Show update as indented message
+      this.destination.writeLog("info", `  ${message}`);
     }
   }
 
   /**
-   * Internal method to stop spinner.
+   * Mark spinner as stopped and notify destination.
    */
-  private stop(message: string, exitCode: number): void {
-    if (!this.destination.isActiveSpinner(this) || this.isStopped) {
-      return; // Already stopped or not active
+  private markStopped(): void {
+    if (!this.isStopped) {
+      this.isStopped = true;
+      this.destination.onSpinnerStopped();
     }
-
-    this.isStopped = true;
-    this.spinnerInstance.stop(message, exitCode);
-    this.destination.onSpinnerStopped();
   }
 }

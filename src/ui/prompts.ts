@@ -15,7 +15,6 @@
 
 import * as clack from "@clack/prompts";
 import { backgrounds } from "./colors.js";
-import { isInteractiveEnvironment } from "./tty.js";
 
 /**
  * Standard application introduction message.
@@ -75,11 +74,11 @@ export async function confirm(
 }
 
 /**
- * Displays a spinner with the given message while executing an async operation.
- * Automatically falls back to simple logging in non-interactive environments.
+ * Executes an async operation with simple log messages instead of animated spinners.
+ * Provides consistent output regardless of environment.
  *
  * @param message Loading message to display.
- * @param operation Async operation to execute while showing spinner.
+ * @param operation Async operation to execute while showing progress.
  * @returns Promise resolving to the operation's result.
  * @example
  * const result = await spinner("Fetching remote changes", async () => {
@@ -90,36 +89,15 @@ export async function spinner<T>(
   message: string,
   operation: () => Promise<T>,
 ): Promise<T> {
-  if (!isInteractiveEnvironment()) {
-    // Non-interactive environment: use simple logging
-    clack.log.info(`${message}...`);
-    try {
-      const result = await operation();
-      clack.log.info(`${message} completed`);
-      return result;
-    } catch (error) {
-      clack.log.error(`${message} failed`);
-      throw error;
-    }
-  }
-
-  // Interactive environment: use spinner
-  const s = clack.spinner();
+  // Always use simple logging instead of animated spinners
+  clack.log.info(`${message}...`);
   try {
-    s.start(message);
     const result = await operation();
-    s.stop("Done");
+    clack.log.info(`${message} completed`);
     return result;
   } catch (error) {
-    s.stop("Failed");
+    clack.log.error(`${message} failed`);
     throw error;
-  } finally {
-    // Ensure spinner is always stopped to prevent hanging UI
-    try {
-      s.stop();
-    } catch {
-      // Ignore errors when stopping spinner (may already be stopped)
-    }
   }
 }
 
