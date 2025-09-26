@@ -95,7 +95,7 @@ test("selectCommitSmart", async (t) => {
     );
 
     await subTest.test(
-      "prefers remote when histories have diverged",
+      "prefers local when histories have diverged",
       async () => {
         const options = createDefaultOptions({ cwd: "/tmp/test-repo" });
 
@@ -129,6 +129,54 @@ test("selectCommitSmart", async (t) => {
         assert.equal(result?.sha, "remote456");
         assert.equal(result?.source, "remote");
         assert.ok(result?.reason.includes("ancestry check failed"));
+      },
+    );
+
+    await subTest.test(
+      "prefers remote when local is behind",
+      async () => {
+        const mockChecker = createMockAncestryChecker([
+          { ancestor: "remote456", descendant: "local123", result: false },
+          { ancestor: "local123", descendant: "remote456", result: true },
+        ]);
+
+        const options = createDefaultOptions({ ancestryChecker: mockChecker });
+
+        const result = await selectCommitSmart(
+          "local123",
+          "remote456",
+          options,
+        );
+
+        assert.deepEqual(result, {
+          sha: "remote456",
+          source: "remote",
+          reason: "local is behind remote",
+        });
+      },
+    );
+
+    await subTest.test(
+      "prefers local when both have unique commits",
+      async () => {
+        const mockChecker = createMockAncestryChecker([
+          { ancestor: "remote456", descendant: "local123", result: false },
+          { ancestor: "local123", descendant: "remote456", result: false },
+        ]);
+
+        const options = createDefaultOptions({ ancestryChecker: mockChecker });
+
+        const result = await selectCommitSmart(
+          "local123",
+          "remote456",
+          options,
+        );
+
+        assert.deepEqual(result, {
+          sha: "local123",
+          source: "local",
+          reason: "local has unpushed changes",
+        });
       },
     );
   });

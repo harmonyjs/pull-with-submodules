@@ -19,6 +19,7 @@ export {
   pullWithRebase,
   fetchRemotes,
   getCommitSha,
+  getRemoteRef,
   type PullResult,
 } from "./operations.js";
 

@@ -45,24 +45,39 @@ async function handleBothAvailable(
   ancestryChecker: AncestryChecker,
 ): Promise<CommitSelection> {
   try {
-    const ancestryResult = await ancestryChecker.isAncestor(
+    const remoteIsAncestorOfLocal = await ancestryChecker.isAncestor(
       remoteSha,
       localSha,
     );
 
-    if (ancestryResult.isAncestor) {
+    if (remoteIsAncestorOfLocal.isAncestor) {
       return {
         sha: localSha,
         source: "local",
         reason: "local contains all remote changes",
       };
-    } else {
+    }
+
+    // When histories diverged, check if local is behind remote
+    const localIsAncestorOfRemote = await ancestryChecker.isAncestor(
+      localSha,
+      remoteSha,
+    );
+
+    if (localIsAncestorOfRemote.isAncestor) {
       return {
         sha: remoteSha,
         source: "remote",
-        reason: "remote has diverged from local",
+        reason: "local is behind remote",
       };
     }
+
+    // Both have unique commits - prefer local (active development)
+    return {
+      sha: localSha,
+      source: "local",
+      reason: "local has unpushed changes",
+    };
   } catch (error) {
     return {
       sha: remoteSha,
@@ -98,11 +113,25 @@ function handleSingleSource(
 /**
  * Smart commit selection strategy that chooses between local and remote commits.
  *
- * Selection logic:
- * 1. If `forceRemote` is true, always prefer remote when available
- * 2. If both local and remote exist, check ancestry
- * 3. If only one source is available, use it
- * 4. If neither is available, return null (skip update)
+ * ## Selection Logic:
+ * 1. **Force Remote**: If `forceRemote` flag is true, always prefer remote when available
+ * 2. **Ancestry Check**: When both local and remote exist, perform git ancestry analysis:
+ *    - If remote is ancestor of local → use **local** (local contains all remote changes)
+ *    - If local is ancestor of remote → use **remote** (local is behind remote)
+ *    - If both have unique commits → use **local** (prefer active development)
+ * 3. **Single Source**: If only one source available, use it
+ * 4. **No Sources**: If neither available, return null (skip update)
+ *
+ * ## Design Decision: Local Priority on Diverged Histories
+ *
+ * When histories have diverged (both local and remote have unique commits), we prefer
+ * the local sibling repository. This reflects the development workflow where:
+ * - Local siblings contain active development work
+ * - Unpushed commits represent current progress
+ * - Developers expect their local changes to take precedence
+ *
+ * This decision prioritizes developer productivity over safety, assuming local changes
+ * are intentional and represent the desired state for submodule updates.
  */
 export async function selectCommitSmart(
   localSha: string | null,

@@ -83,8 +83,15 @@ The tool intelligently selects the best source for each submodule update:
 
 1. **Checks Remote** — Fetches latest from `origin/<branch>`
 2. **Checks Local** — Looks for sibling repository at `../<repo-name>`
-3. **Compares** — If local contains all remote commits, uses local
-4. **Decides** — Falls back to remote if histories diverged
+3. **Compares** — Analyzes git ancestry between local and remote
+4. **Decides** — Prefers local if histories diverged (active development priority)
+
+**Priority Logic:**
+- 🟢 **Local ahead of remote** → Use local (contains all remote changes)
+- 🟡 **Local behind remote** → Use remote (need to catch up)
+- 🔵 **Histories diverged** → Use local (prioritize unpushed work)
+
+This approach prioritizes your active development work over published versions, ensuring your local changes take precedence when both repositories have unique commits.
 
 ### Project Structure Assumptions
 

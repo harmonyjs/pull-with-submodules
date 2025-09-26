@@ -5,7 +5,7 @@
  * based on remote and local repository state.
  */
 
-import { getCommitSha } from "#lib/git/operations";
+import { getCommitSha, getRemoteRef } from "#lib/git/operations";
 import { selectCommitSmart } from "#core/submodules/strategies";
 import {
   findSiblingRepository,
@@ -41,8 +41,7 @@ export class SubmoduleCommitSelector {
     plan: SubmoduleUpdatePlan,
     absolutePath: string,
   ): Promise<CommitSelection | null> {
-    const remoteBranch = `origin/${plan.branch.branch}`;
-    const remoteSha = await getCommitSha(remoteBranch, { cwd: absolutePath });
+    const remoteSha = await this.getRemoteSha(plan, absolutePath);
 
     const sibling = await this.findSiblingIfAvailable(plan, absolutePath);
     const selection = await this.selectCommitWithSibling(
@@ -53,6 +52,43 @@ export class SubmoduleCommitSelector {
 
     this.logSelectionResult(selection, plan.submodule.name);
     return selection;
+  }
+
+  /**
+   * Gets remote SHA for the specified branch, using ls-remote in dry-run mode
+   * to avoid relying on potentially stale local tracking branches.
+   */
+  private async getRemoteSha(
+    plan: SubmoduleUpdatePlan,
+    absolutePath: string,
+  ): Promise<string | null> {
+    const branchName = plan.branch.branch;
+
+    if (this.context.dryRun && plan.submodule.url !== undefined && plan.submodule.url !== "") {
+      this.logger.verbose(
+        `Resolving ${branchName} from ${plan.submodule.url} (dry-run mode)`,
+      );
+
+      // In dry-run mode, query the actual remote URL directly to bypass stale local refs
+      const remoteSha = await getRemoteRef(plan.submodule.url, branchName, {
+        cwd: absolutePath,
+        logger: this.logger,
+      });
+
+      if (remoteSha) {
+        this.logger.verbose(`Resolved ${branchName} to ${remoteSha}`);
+        return remoteSha;
+      }
+
+      // Fall back to local tracking branch if ls-remote fails
+      this.logger.verbose(
+        `ls-remote failed for ${branchName}, falling back to local tracking branch`,
+      );
+    }
+
+    // Normal mode or fallback: use local tracking branch
+    const remoteBranch = `origin/${branchName}`;
+    return getCommitSha(remoteBranch, { cwd: absolutePath });
   }
 
   /**

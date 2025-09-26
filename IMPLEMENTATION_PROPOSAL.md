@@ -379,8 +379,9 @@ For each submodule:
    ```typescript
    if (forceRemote) return remoteSha;
    if (both exist) {
-     if (isAncestor(remoteSha, localSha)) return localSha;
-     else return remoteSha;  // Safer choice
+     if (isAncestor(remoteSha, localSha)) return localSha;  // Local ahead
+     if (isAncestor(localSha, remoteSha)) return remoteSha;  // Local behind
+     else return localSha;  // Prefer local (active development)
    }
    return available SHA or skip;
    ```
@@ -414,8 +415,12 @@ export function selectCommitSmart(
     if (isAncestor(remoteSha, localSha)) {
       return { sha: localSha, source: 'local', reason: 'contains remote' };
     }
-    // Diverged or remote ahead - use remote (safer)
-    return { sha: remoteSha, source: 'remote', reason: 'diverged histories' };
+    // Local is behind - use remote
+    if (isAncestor(localSha, remoteSha)) {
+      return { sha: remoteSha, source: 'remote', reason: 'local behind remote' };
+    }
+    // Diverged histories - prefer local (active development)
+    return { sha: localSha, source: 'local', reason: 'unpushed changes' };
   }
   
   // Use what's available
