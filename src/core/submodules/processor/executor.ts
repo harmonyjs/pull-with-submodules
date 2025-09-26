@@ -119,10 +119,10 @@ export class SubmoduleUpdateExecutor {
       selection.localPath !== undefined &&
       selection.localPath !== ""
     ) {
-      this.logger.verbose(
-        `Re-preparing submodule with local selection to fetch unpushed commits`,
-      );
-      await this.prepareSubmodule(plan, absolutePath, selection);
+      await this.prepareSubmodule(plan, absolutePath, {
+        selection,
+        skipSyncAndFetch: true,
+      });
     }
 
     if (this.isUpdateNeeded(plan, selection)) {
@@ -152,17 +152,23 @@ export class SubmoduleUpdateExecutor {
   private async prepareSubmodule(
     plan: SubmoduleUpdatePlan,
     absolutePath: string,
-    selection?: CommitSelection | null,
+    options: {
+      selection?: CommitSelection | null;
+      skipSyncAndFetch?: boolean;
+    } = {},
   ): Promise<void> {
-    if (plan.needsInit) {
-      await performSubmoduleInit(absolutePath, this.context, this.logger);
+    const { selection, skipSyncAndFetch = false } = options;
+    if (!skipSyncAndFetch) {
+      if (plan.needsInit) {
+        await performSubmoduleInit(absolutePath, this.context, this.logger);
+      }
+      await performSubmoduleSync(absolutePath, this.context, this.logger);
+      await fetchRemotes({
+        cwd: absolutePath,
+        dryRun: this.context.dryRun,
+        logger: this.logger,
+      });
     }
-    await performSubmoduleSync(absolutePath, this.context, this.logger);
-    await fetchRemotes({
-      cwd: absolutePath,
-      dryRun: this.context.dryRun,
-      logger: this.logger,
-    });
 
     // If we have a local selection with unpushed changes, fetch from local sibling
     // This is crucial for making unpushed commits available before the update attempt

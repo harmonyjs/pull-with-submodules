@@ -84,9 +84,6 @@ export async function pullWithRebase(
         callbacks,
       );
 
-      config.logger?.verbose(
-        `Pull completed: 0 changes, ahead: ${status.ahead}, behind: ${status.behind}`,
-      );
       return repositoryStatus;
     }
 
@@ -100,9 +97,6 @@ export async function pullWithRebase(
     };
 
     callbacks.onSuccess?.(
-      `Pull completed: ${pullResult.summary.changes} changes`,
-    );
-    config.logger?.verbose(
       `Pull completed: ${pullResult.summary.changes} changes`,
     );
 
@@ -133,12 +127,9 @@ export async function pullWithRebase(
  * await fetchRemotes({ cwd: '/path/to/repo' });
  * ```
  */
-// eslint-disable-next-line complexity -- Complexity increased after inlining micro-functions to eliminate parameter drilling
 export async function fetchRemotes(
   config: GitOperationConfig = {},
 ): Promise<void> {
-  config.logger?.verbose(`fetch in ${config.cwd ?? process.cwd()}`);
-
   if (config.dryRun === true) {
     config.logger?.verbose("Fetch remotes (dry-run)");
     return;
@@ -152,7 +143,6 @@ export async function fetchRemotes(
     callbacks.onProgress?.("Fetching from all remotes...");
     await git.fetch();
     callbacks.onSuccess?.("Fetch completed");
-    config.logger?.verbose("Fetch completed");
   } catch (error) {
     // Handle fetch errors
     const errorMessage = error instanceof Error ? error.message : String(error);

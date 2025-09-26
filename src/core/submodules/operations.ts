@@ -51,7 +51,6 @@ export async function performSubmoduleSync(
     );
 
     await git.subModule(["sync", relativePath]);
-    logger.verbose(`Submodule sync completed for ${submodulePath}`);
   } catch (error) {
     throw new GitOperationError(
       `Failed to sync submodule at ${submodulePath}`,
@@ -101,8 +100,6 @@ export async function performSubmoduleInit(
 
     await git.subModule(["init", relativePath]);
     await git.subModule(["update", relativePath]);
-
-    logger.verbose(`Submodule initialization completed for ${submodulePath}`);
   } catch (error) {
     throw new GitOperationError(
       `Failed to initialize submodule at ${submodulePath}`,

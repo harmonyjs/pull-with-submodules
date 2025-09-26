@@ -31,7 +31,7 @@ export function logPlanDetails(
   plan: SubmoduleUpdatePlan,
   logger: Logger,
 ): void {
-  logger.verbose(`Update plan prepared for ${plan.submodule.name}:`, {
+  logger.debug(`Update plan prepared for ${plan.submodule.name}:`, {
     branch: plan.branch.branch,
     source: plan.branch.source,
     needsInit: plan.needsInit,

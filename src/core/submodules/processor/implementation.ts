@@ -76,10 +76,6 @@ export class SubmoduleProcessorImpl implements SubmoduleProcessor {
         baseDir: repoPath,
       });
 
-      this.logger.verbose(
-        `Parsed ${entries.length} submodule(s) from .gitmodules`,
-      );
-
       return entries.map((entry) => normalizeSubmoduleEntry(entry));
     } catch (error) {
       throw new GitOperationError(
