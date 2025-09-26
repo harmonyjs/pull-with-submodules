@@ -64,7 +64,11 @@ export class SubmoduleCommitSelector {
   ): Promise<string | null> {
     const branchName = plan.branch.branch;
 
-    if (this.context.dryRun && plan.submodule.url !== undefined && plan.submodule.url !== "") {
+    if (
+      this.context.dryRun &&
+      plan.submodule.url !== undefined &&
+      plan.submodule.url !== ""
+    ) {
       this.logger.verbose(
         `Resolving ${branchName} from ${plan.submodule.url} (dry-run mode)`,
       );
@@ -159,10 +163,27 @@ export class SubmoduleCommitSelector {
     absolutePath: string,
   ): Promise<CommitSelection | null> {
     const siblingCommitSha = sibling?.commitSha ?? null;
-    return await selectCommitSmart(siblingCommitSha, remoteSha, {
+    const selection = await selectCommitSmart(siblingCommitSha, remoteSha, {
       forceRemote: this.context.forceRemote,
       cwd: absolutePath,
     });
+
+    // Add local path to selection when commit comes from local sibling
+    // This is needed for fetching unpushed commits from the local repository
+    if (
+      selection &&
+      selection.source === "local" &&
+      sibling &&
+      sibling.isValid &&
+      sibling.path !== ""
+    ) {
+      return {
+        ...selection,
+        localPath: sibling.path,
+      };
+    }
+
+    return selection;
   }
 
   /**

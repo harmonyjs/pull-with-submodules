@@ -132,37 +132,34 @@ test("selectCommitSmart", async (t) => {
       },
     );
 
-    await subTest.test(
-      "prefers remote when local is behind",
-      async () => {
-        const mockChecker = createMockAncestryChecker([
-          { ancestor: "remote456", descendant: "local123", result: false },
-          { ancestor: "local123", descendant: "remote456", result: true },
-        ]);
+    await subTest.test("prefers remote when local is behind", async () => {
+      const mockChecker = createMockAncestryChecker(
+        new Map([
+          ["remote456->local123", false],
+          ["local123->remote456", true],
+        ]),
+      );
 
-        const options = createDefaultOptions({ ancestryChecker: mockChecker });
+      const options = createDefaultOptions({ ancestryChecker: mockChecker });
 
-        const result = await selectCommitSmart(
-          "local123",
-          "remote456",
-          options,
-        );
+      const result = await selectCommitSmart("local123", "remote456", options);
 
-        assert.deepEqual(result, {
-          sha: "remote456",
-          source: "remote",
-          reason: "local is behind remote",
-        });
-      },
-    );
+      assert.deepEqual(result, {
+        sha: "remote456",
+        source: "remote",
+        reason: "local is behind remote",
+      });
+    });
 
     await subTest.test(
       "prefers local when both have unique commits",
       async () => {
-        const mockChecker = createMockAncestryChecker([
-          { ancestor: "remote456", descendant: "local123", result: false },
-          { ancestor: "local123", descendant: "remote456", result: false },
-        ]);
+        const mockChecker = createMockAncestryChecker(
+          new Map([
+            ["remote456->local123", false],
+            ["local123->remote456", false],
+          ]),
+        );
 
         const options = createDefaultOptions({ ancestryChecker: mockChecker });
 

@@ -54,6 +54,13 @@ export interface CommitSelection {
   readonly source: CommitSource;
   /** Human-readable rationale (used in verbose logs & summary tables). */
   readonly reason: string;
+  /**
+   * Optional absolute path to local sibling repository when source is 'local'.
+   * Used to fetch unpushed commits from local development repositories.
+   * Only set when the selected commit comes from a local sibling that has
+   * unpushed changes not available in the submodule's remote.
+   */
+  readonly localPath?: string;
 }
 
 /** Processing outcome classification for a submodule. */

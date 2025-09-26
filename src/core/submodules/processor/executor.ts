@@ -18,6 +18,7 @@ import {
   performSubmoduleUpdate,
   type SubmoduleUpdateParams,
 } from "#core/submodules/operations";
+import { fetchFromLocalSibling } from "./local-fetch.js";
 import type {
   ExecutionContext,
   UpdateResult,
@@ -70,7 +71,10 @@ export class SubmoduleUpdateExecutor {
     try {
       const { absolutePath } = this.getPathInfo(plan.submodule, this.context);
 
+      // First, perform initial preparation (sync and fetch remotes)
       await this.prepareSubmodule(plan, absolutePath);
+
+      // Select the target commit based on current state
       const selection = await selectTargetCommit(plan, absolutePath);
 
       if (!selection) {
@@ -82,22 +86,12 @@ export class SubmoduleUpdateExecutor {
         });
       }
 
-      if (this.isUpdateNeeded(plan, selection)) {
-        await this.applySubmoduleUpdate(plan, selection, absolutePath);
-        return createUpdatedResult({
-          submodule: plan.submodule,
-          selection,
-          startTime,
-          context: this.context,
-        });
-      } else {
-        return createUpToDateResult({
-          submodule: plan.submodule,
-          selection,
-          startTime,
-          context: this.context,
-        });
-      }
+      return await this.processSelectedCommit({
+        plan,
+        selection,
+        absolutePath,
+        startTime,
+      });
     } catch (error) {
       return createFailedResult({
         submodule: plan.submodule,
@@ -109,11 +103,56 @@ export class SubmoduleUpdateExecutor {
   }
 
   /**
+   * Processes the selected commit and applies updates if needed.
+   */
+  private async processSelectedCommit(params: {
+    plan: SubmoduleUpdatePlan;
+    selection: CommitSelection;
+    absolutePath: string;
+    startTime: number;
+  }): Promise<UpdateResult> {
+    const { plan, selection, absolutePath, startTime } = params;
+    // If we selected a local commit, prepare the submodule again with the selection
+    // This will fetch from local sibling if needed
+    if (
+      selection.source === "local" &&
+      selection.localPath !== undefined &&
+      selection.localPath !== ""
+    ) {
+      this.logger.verbose(
+        `Re-preparing submodule with local selection to fetch unpushed commits`,
+      );
+      await this.prepareSubmodule(plan, absolutePath, selection);
+    }
+
+    if (this.isUpdateNeeded(plan, selection)) {
+      await this.applySubmoduleUpdate(plan, selection, absolutePath);
+      return createUpdatedResult({
+        submodule: plan.submodule,
+        selection,
+        startTime,
+        context: this.context,
+      });
+    } else {
+      return createUpToDateResult({
+        submodule: plan.submodule,
+        selection,
+        startTime,
+        context: this.context,
+      });
+    }
+  }
+
+  /**
    * Prepares submodule for update by syncing and fetching remotes.
+   *
+   * When the selected commit comes from a local sibling repository with unpushed changes,
+   * this method will also fetch from the local repository to make the target commit available.
    */
   private async prepareSubmodule(
     plan: SubmoduleUpdatePlan,
     absolutePath: string,
+    selection?: CommitSelection | null,
   ): Promise<void> {
     if (plan.needsInit) {
       await performSubmoduleInit(absolutePath, this.context, this.logger);
@@ -124,6 +163,27 @@ export class SubmoduleUpdateExecutor {
       dryRun: this.context.dryRun,
       logger: this.logger,
     });
+
+    // If we have a local selection with unpushed changes, fetch from local sibling
+    // This is crucial for making unpushed commits available before the update attempt
+    if (
+      selection &&
+      selection.source === "local" &&
+      selection.localPath !== undefined &&
+      selection.localPath !== "" &&
+      selection.reason.includes("unpushed")
+    ) {
+      this.logger.verbose(
+        `Detected local selection with unpushed changes, fetching from sibling repository`,
+      );
+      await fetchFromLocalSibling({
+        localPath: selection.localPath,
+        targetSha: selection.sha,
+        submodulePath: absolutePath,
+        context: this.context,
+        logger: this.logger,
+      });
+    }
   }
 
   /**
